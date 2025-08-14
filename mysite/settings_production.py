@@ -16,7 +16,7 @@ from .settings import (
 DEBUG = False
 
 # 安全设置
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False  # Vercel会自动处理HTTPS
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
@@ -31,7 +31,8 @@ ALLOWED_HOSTS = [
     '.vercel.app',
     '.now.sh',
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
+    '*'
 ]
 
 # 静态文件配置
