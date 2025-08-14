@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>思维空间 - 分类管理</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --accent-color: #4cc9f0;
+      --text-color: #2b2d42;
+      --light-text: #8d99ae;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --sidebar-bg: #2b2d42;
+      --sidebar-text: #edf2f4;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --success-color: #4caf50;
+      --warning-color: #ff9800;
+      --danger-color: #f44336;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+    /* 侧边栏样式 */
+    .admin-sidebar {
+      width: 260px;
+      background-color: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      padding: 1.5rem 0;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+    .admin-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 1.5rem;
+      color: white;
+    }
+    .admin-menu {
+      list-style: none;
+    }
+    .menu-category {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0.75rem 1.5rem;
+      color: rgba(255,255,255,0.6);
+    }
+    .menu-item {
+      padding: 0.75rem 1.5rem;
+      transition: all 0.2s;
+    }
+    .menu-item a {
+      color: var(--sidebar-text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      opacity: 0.8;
+    }
+    .menu-item a:hover, .menu-item.active a {
+      opacity: 1;
+    }
+    .menu-item i {
+      width: 24px;
+      margin-right: 0.75rem;
+      text-align: center;
+    }
+    .menu-item.active {
+      background-color: rgba(255,255,255,0.1);
+      border-left: 3px solid var(--accent-color);
+    }
+    /* 主内容区 */
+    .admin-main {
+      flex: 1;
+      padding: 2rem;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .page-title {
+      font-size: 1.75rem;
+      color: var(--secondary-color);
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+    }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 1rem;
+      font-weight: bold;
+    }
+    /* 卡片容器 */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    /* 表格样式 */
+    .table-container {
+      overflow-x: auto;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .table th, .table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .table th {
+      font-weight: 600;
+      color: var(--secondary-color);
+      background-color: rgba(67, 97, 238, 0.05);
+    }
+    .table tr:hover td {
+      background-color: rgba(67, 97, 238, 0.03);
+    }
+    /* 标签样式 */
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .badge-primary {
+      background-color: rgba(67, 97, 238, 0.1);
+      color: var(--primary-color);
+    }
+    .badge-success {
+      background-color: rgba(76, 175, 80, 0.1);
+      color: var(--success-color);
+    }
+    .badge-warning {
+      background-color: rgba(255, 152, 0, 0.1);
+      color: var(--warning-color);
+    }
+    /* 按钮样式 */
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-sm {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.85rem;
+    }
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: #3a56d8;
+    }
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--primary-color);
+      color: var(--primary-color);
+    }
+    .btn-outline:hover {
+      background-color: rgba(67, 97, 238, 0.1);
+    }
+    .btn-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+    .btn-success:hover {
+      background-color: #3d8b40;
+    }
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+    .btn-danger:hover {
+      background-color: #d32f2f;
+    }
+    .btn i {
+      margin-right: 0.5rem;
+    }
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+    /* 表单样式 */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-family: inherit;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    /* 模态框样式 */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+    .modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-dialog {
+      background-color: white;
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+      transform: translateY(-20px);
+      transition: transform 0.3s;
+    }
+    .modal.show .modal-dialog {
+      transform: translateY(0);
+    }
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--light-text);
+    }
+    .modal-body {
+      padding: 1.5rem;
+    }
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+    /* 分页样式 */
+    .pagination-container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+    .pagination-btn, .page-link {
+      padding: 0.5rem 1rem;
+      margin: 0 0.25rem;
+      border-radius: var(--border-radius);
+      border: 1px solid #ddd;
+      background-color: white;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .pagination-btn:hover, .page-link:hover {
+      background-color: #f1f1f1;
+      border-color: #ccc;
+    }
+    .page-link.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    .pagination-btn.disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    /* Toast提示框样式 */
+    .toast-container {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      z-index: 1050;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    .toast {
+      background-color: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      padding: 1rem 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(100%);
+      transition: all 0.4s ease-in-out;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    .toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+    .toast-icon {
+      margin-right: 0.75rem;
+      font-size: 1.2rem;
+    }
+    .toast.success { background-color: var(--success-color); color: white; }
+    .toast.danger { background-color: var(--danger-color); color: white; }
+    /* 响应式设计 */
+    @media (max-width: 992px) {
+      .admin-sidebar {
+        width: 220px;
+      }
+    }
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .admin-sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+      }
+      .admin-main {
+        padding: 1.5rem;
+      }
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 管理侧边栏 -->
+  <aside class="admin-sidebar">
+    <div class="admin-logo">思维空间CMS</div>
+    <ul class="admin-menu">
+        <div class="menu-category">内容管理</div>
+        <li class="menu-item"><a href="{% url 'Pythonfun:article_edit' %}"><i class="fas fa-edit"></i> 文章编辑</a></li>
+        <li class="menu-item active"><a href="{% url 'Pythonfun:category_management' %}"><i class="fas fa-folder"></i> 分类管理</a></li>
+        <li class="menu-item"><a href="{% url 'Pythonfun:course_management' %}"><i class="fas fa-book"></i> 教程管理</a></li>
+        <div class="menu-category">系统管理</div>
+        <li class="menu-item">
+          <a href="#"><i class="fas fa-users"></i> 用户管理</a>
+        </li>
+        <li class="menu-item">
+          <a href="#"><i class="fas fa-cog"></i> 系统设置</a>
+        </li>
+        <div class="menu-category">统计</div>
+        <li class="menu-item">
+          <a href="#"><i class="fas fa-chart-line"></i> 访问统计</a>
+        </li>
+        <li class="menu-item">
+          <a href="#"><i class="fas fa-comments"></i> 评论管理</a>
+        </li>
+      </ul>
+  </aside>
+  <!-- 主内容区 -->
+  <main class="admin-main">
+    <header class="admin-header">
+      <h1 class="page-title">分类管理</h1>
+      <div class="user-profile">
+        <a href="/login/" style="color: var(--text-color); text-decoration: none;">
+          <span>管理员</span>
+          <div class="user-avatar">A</div>
+        </a>
+      </div>
+    </header>
+    <!-- 主分类列表卡片 -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">主分类</h2>
+        <button class="btn btn-primary" id="addCategoryBtn">
+          <i class="fas fa-plus"></i> 添加主分类
+        </button>
+      </div>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>主分类名称</th>
+              <th>别名</th>
+              <th>排序</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="mainCategoryTableBody">
+            <!-- 主分类数据将通过 JS 动态插入 -->
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-container" id="mainCategoryPagination">
+        <!-- 分页控件将通过 JS 动态插入 -->
+      </div>
+    </div>
+    <!-- 子分类管理 -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">子分类管理</h2>
+        <button class="btn btn-primary" id="addSubCategoryBtn">
+          <i class="fas fa-plus"></i> 添加子分类
+        </button>
+      </div>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>所属主分类</th>
+              <th>子分类名称</th>
+              <th>别名</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="subCategoryTableBody">
+            <!-- 子分类数据将通过 JS 动态插入 -->
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination-container" id="subCategoryPagination">
+        <!-- 分页控件将通过 JS 动态插入 -->
+      </div>
+    </div>
+  </main>
+  <!-- 添加/编辑主分类模态框 -->
+  <div class="modal" id="categoryModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">添加主分类</h3>
+        <button class="modal-close" id="closeModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="categoryForm" onsubmit="return false;">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="categoryName" class="form-label">主分类名称</label>
+              <input type="text" id="categoryName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="categorySlug" class="form-label">URL别名</label>
+              <input type="text" id="categorySlug" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="categoryOrder" class="form-label">排序权重</label>
+              <input type="number" id="categoryOrder" class="form-control" value="0">
+            </div>
+            <div class="form-group">
+              <label for="categoryStatus" class="form-label">状态</label>
+              <select id="categoryStatus" class="form-control">
+                <option value="true">已启用</option>
+                <option value="false">未启用</option>
+              </select>
+            </div>
+          </div>
+          <input type="hidden" id="categoryId" value="">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelBtn">取消</button>
+        <button class="btn btn-primary" id="saveCategoryBtn">保存</button>
+      </div>
+    </div>
+  </div>
+  <!-- 添加/编辑子分类模态框 -->
+  <div class="modal" id="subCategoryModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="subModalTitle">添加子分类</h3>
+        <button class="modal-close" id="closeSubModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="subCategoryForm" onsubmit="return false;">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="subCategoryName" class="form-label">子分类名称</label>
+              <input type="text" id="subCategoryName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="subCategorySlug" class="form-label">URL别名</label>
+              <input type="text" id="subCategorySlug" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="parentCategory" class="form-label">所属主分类</label>
+              <select id="parentCategory" class="form-control" required>
+                <!-- 选项将由JS动态生成 -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="subCategoryStatus" class="form-label">状态</label>
+              <select id="subCategoryStatus" class="form-control">
+                <option value="true">已启用</option>
+                <option value="false">未启用</option>
+              </select>
+            </div>
+          </div>
+          <input type="hidden" id="subCategoryId" value="">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="cancelSubBtn">取消</button>
+        <button class="btn btn-primary" id="saveSubCategoryBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 提示容器 -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // ================= API & 全局变量 =================
+    const mainCategoryApiUrl = `/api/main-categories/`;
+    const subCategoryApiUrl = `/api/sub-categories/`;
+    let mainCategoriesCache = []; // 用于子分类下拉列表
+    let currentMainPage = 1;
+    let currentSubPage = 1;
+
+    // CSRF Token for Django
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // ================= Toast提示框 =================
+    function showToast(message, type = 'success') {
+      const toastContainer = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-times-circle';
+      toast.innerHTML = `<i class="fas ${iconClass} toast-icon"></i> ${message}`;
+      
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => { toast.classList.add('show'); }, 100);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => { toast.remove(); }, 500);
+      }, 3000);
+    }
+
+    // ================= 模态框控制 =================
+    const categoryModal = document.getElementById('categoryModal');
+    const subCategoryModal = document.getElementById('subCategoryModal');
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    const addSubCategoryBtn = document.getElementById('addSubCategoryBtn');
+
+    function setupModal(modal, openBtn, closeBtnId, cancelBtnId, formId, titleId) {
+        const closeBtn = document.getElementById(closeBtnId);
+        const cancelBtn = document.getElementById(cancelBtnId);
+        
+        openBtn.addEventListener('click', () => {
+            document.getElementById(formId).reset();
+            document.getElementById(titleId).textContent = openBtn.textContent.trim();
+            if(formId === 'subCategoryForm') updateParentCategoryOptions();
+            modal.classList.add('show');
+        });
+
+        const closeModal = () => modal.classList.remove('show');
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    }
+
+    setupModal(categoryModal, addCategoryBtn, 'closeModal', 'cancelBtn', 'categoryForm', 'modalTitle');
+    setupModal(subCategoryModal, addSubCategoryBtn, 'closeSubModal', 'cancelSubBtn', 'subCategoryForm', 'subModalTitle');
+
+    // ================= 分页渲染 =================
+    function renderPagination(container, currentPage, totalPages, onPageClick) {
+      container.innerHTML = '';
+      if (totalPages <= 1) return;
+
+      const createBtn = (text, page, enabled = true) => {
+          const btn = document.createElement('button');
+          btn.innerHTML = text;
+          btn.classList.add('pagination-btn');
+          if (!enabled) btn.classList.add('disabled');
+          btn.addEventListener('click', () => { if (enabled) onPageClick(page); });
+          return btn;
+      }
+
+      container.appendChild(createBtn('&laquo; 上一页', currentPage - 1, currentPage > 1));
+
+      for (let i = 1; i <= totalPages; i++) {
+        const pageLink = document.createElement('a');
+        pageLink.href = '#';
+        pageLink.textContent = i;
+        pageLink.classList.add('page-link');
+        if (i === currentPage) pageLink.classList.add('active');
+        pageLink.addEventListener('click', (e) => { e.preventDefault(); onPageClick(i); });
+        container.appendChild(pageLink);
+      }
+
+      container.appendChild(createBtn('下一页 &raquo;', currentPage + 1, currentPage < totalPages));
+    }
+
+    // ================= 主分类 CRUD =================
+    async function fetchMainCategories(page = 1) {
+        try {
+            const response = await fetch(`${mainCategoryApiUrl}?page=${page}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            
+            currentMainPage = data.current_page;
+            mainCategoriesCache = data.items; // 更新缓存
+            const tableBody = document.getElementById('mainCategoryTableBody');
+            tableBody.innerHTML = '';
+
+            if(data.items.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">暂无数据</td></tr>`;
+            }
+
+            data.items.forEach(cat => {
+                const statusBadge = cat.is_enabled ? `<span class="badge badge-success">已启用</span>` : `<span class="badge badge-warning">未启用</span>`;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${cat.id}</td>
+                    <td>${cat.name}</td>
+                    <td>${cat.slug}</td>
+                    <td>${cat.order}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-outline btn-sm" onclick="editCategory(${cat.id})"><i class="fas fa-edit"></i> 编辑</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCategory(${cat.id})"><i class="fas fa-trash-alt"></i> 删除</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            renderPagination(document.getElementById('mainCategoryPagination'), data.current_page, data.total_pages, fetchMainCategories);
+        } catch (error) {
+            showToast('加载主分类失败', 'danger');
+            console.error('Fetch error:', error);
+        }
+    }
+
+    document.getElementById('saveCategoryBtn').addEventListener('click', async () => {
+        const id = document.getElementById('categoryId').value;
+        const name = document.getElementById('categoryName').value.trim();
+        const slug = document.getElementById('categorySlug').value.trim();
+        if (!name || !slug) return showToast('分类名称和别名不能为空!', 'danger');
+
+        const url = id ? `${mainCategoryApiUrl}${id}/` : mainCategoryApiUrl;
+        const method = id ? 'PUT' : 'POST';
+
+        const body = JSON.stringify({
+            name: name,
+            slug: slug,
+            order: parseInt(document.getElementById('categoryOrder').value) || 0,
+            is_enabled: document.getElementById('categoryStatus').value === 'true'
+        });
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: body
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+
+            showToast(`主分类已${id ? '更新' : '添加'}`);
+            categoryModal.classList.remove('show');
+            fetchMainCategories(id ? currentMainPage : 1); // 编辑时留着当前页，添加时去第一页
+        } catch (error) {
+            showToast(`操作失败: ${error.message}`, 'danger');
+        }
+    });
+
+    function editCategory(id) {
+        const cat = mainCategoriesCache.find(c => c.id === id);
+        if (!cat) return showToast('找不到分类信息', 'danger');
+
+        document.getElementById('modalTitle').textContent = '编辑主分类';
+        document.getElementById('categoryId').value = cat.id;
+        document.getElementById('categoryName').value = cat.name;
+        document.getElementById('categorySlug').value = cat.slug;
+        document.getElementById('categoryOrder').value = cat.order;
+        document.getElementById('categoryStatus').value = cat.is_enabled.toString();
+        categoryModal.classList.add('show');
+    }
+
+    async function deleteCategory(id) {
+        if (!confirm('确定要删除这个主分类吗？此操作不可撤销。')) return;
+
+        try {
+            const response = await fetch(`${mainCategoryApiUrl}${id}/`, {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': csrftoken }
+            });
+            if (response.status !== 204) throw new Error('删除失败');
+            showToast('主分类已删除');
+            fetchMainCategories(currentMainPage);
+        } catch (error) {
+            showToast(error.message, 'danger');
+        }
+    }
+
+    // ================= 子分类 CRUD =================
+    async function fetchSubCategories(page = 1) {
+        try {
+            const response = await fetch(`${subCategoryApiUrl}?page=${page}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+
+            currentSubPage = data.current_page;
+            const tableBody = document.getElementById('subCategoryTableBody');
+            tableBody.innerHTML = '';
+
+            if(data.items.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">暂无数据</td></tr>`;
+            }
+
+            data.items.forEach(cat => {
+                const statusBadge = cat.is_enabled ? `<span class="badge badge-success">已启用</span>` : `<span class="badge badge-warning">未启用</span>`;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${cat.id}</td>
+                    <td>${cat.parent_name}</td>
+                    <td>${cat.name}</td>
+                    <td>${cat.slug}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-outline btn-sm" onclick="editSubCategory(${cat.id})"><i class="fas fa-edit"></i> 编辑</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteSubCategory(${cat.id})"><i class="fas fa-trash-alt"></i> 删除</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            renderPagination(document.getElementById('subCategoryPagination'), data.current_page, data.total_pages, fetchSubCategories);
+        } catch (error) {
+            showToast('加载子分类失败', 'danger');
+            console.error('Fetch error:', error);
+        }
+    }
+
+    function updateParentCategoryOptions() {
+        const select = document.getElementById('parentCategory');
+        select.innerHTML = '<option value="">请选择主分类</option>';
+        mainCategoriesCache.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.id;
+            option.textContent = cat.name;
+            select.appendChild(option);
+        });
+    }
+
+    document.getElementById('saveSubCategoryBtn').addEventListener('click', async () => {
+        const id = document.getElementById('subCategoryId').value;
+        const name = document.getElementById('subCategoryName').value.trim();
+        const slug = document.getElementById('subCategorySlug').value.trim();
+        const parentId = document.getElementById('parentCategory').value;
+        if (!name || !slug || !parentId) return showToast('所有字段均为必填项!', 'danger');
+
+        const url = id ? `${subCategoryApiUrl}${id}/` : subCategoryApiUrl;
+        const method = id ? 'PUT' : 'POST';
+
+        const body = JSON.stringify({
+            name: name,
+            slug: slug,
+            parent_id: parseInt(parentId),
+            is_enabled: document.getElementById('subCategoryStatus').value === 'true'
+        });
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: body
+            });
+
+            if (!response.ok) throw new Error(await response.text());
+
+            showToast(`子分类已${id ? '更新' : '添加'}`);
+            subCategoryModal.classList.remove('show');
+            fetchSubCategories(id ? currentSubPage : 1);
+        } catch (error) {
+            showToast(`操作失败: ${error.message}`, 'danger');
+        }
+    });
+
+    async function editSubCategory(id) {
+        // We need the full sub-category list to find the one to edit
+        // A better approach would be a dedicated API endpoint GET /api/sub-categories/<id>/
+        const response = await fetch(`${subCategoryApiUrl}?page=${currentSubPage}`);
+        const data = await response.json();
+        const cat = data.items.find(c => c.id === id);
+        if (!cat) return showToast('找不到子分类信息', 'danger');
+
+        await updateParentCategoryOptions();
+        document.getElementById('subModalTitle').textContent = '编辑子分类';
+        document.getElementById('subCategoryId').value = cat.id;
+        document.getElementById('subCategoryName').value = cat.name;
+        document.getElementById('subCategorySlug').value = cat.slug;
+        document.getElementById('parentCategory').value = cat.parent_id;
+        document.getElementById('subCategoryStatus').value = cat.is_enabled.toString();
+        subCategoryModal.classList.add('show');
+    }
+
+    async function deleteSubCategory(id) {
+        if (!confirm('确定要删除这个子分类吗？')) return;
+
+        try {
+            const response = await fetch(`${subCategoryApiUrl}${id}/`, {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': csrftoken }
+            });
+            if (response.status !== 204) throw new Error('删除失败');
+            showToast('子分类已删除');
+            fetchSubCategories(currentSubPage);
+        } catch (error) {
+            showToast(error.message, 'danger');
+        }
+    }
+
+    // ================= 初始加载 =================
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchMainCategories(1);
+      fetchSubCategories(1);
+    });
+  </script>
+</body>
+</html>

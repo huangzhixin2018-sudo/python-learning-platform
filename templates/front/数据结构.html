@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>数据结构</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --text-color: #2b2d42;
+      --light-text: #6b7280;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --border-color: #e5e7eb;
+      --border-radius: 8px;
+      --sidebar-width: 260px;
+    }
+    
+    body {
+      margin: 0;
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    /* 导航栏 */
+    header {
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .logo:hover {
+      color: var(--secondary-color);
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+    
+    .nav-links a {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      position: relative;
+    }
+    
+    .nav-links a:hover {
+      color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    .nav-links a.active {
+      color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.15);
+      font-weight: 600;
+    }
+    
+    .login-btn {
+      padding: 0.5rem 1.25rem;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 6px;
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .login-btn:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .filter-card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .filter-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-color);
+      margin-bottom: 0.8rem;
+      display: block;
+    }
+
+    .filter-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .filter-option {
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--border-radius);
+      background-color: white;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: 1px solid #e0e0e0;
+      user-select: none;
+    }
+
+    .filter-option:hover {
+      background-color: #f3f4f6;
+      border-color: #d0d0d0;
+    }
+
+    .filter-option.active {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .data-structure-section {
+      margin-bottom: 2rem;
+      display: none;
+    }
+
+    .data-structure-section.active {
+      display: block;
+    }
+
+    .data-structure-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .data-structure-content {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      line-height: 1.7;
+    }
+
+    .data-structure-content h3 {
+      color: var(--primary-color);
+      margin-top: 1.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .data-structure-content p {
+      margin-bottom: 1rem;
+    }
+
+    .data-structure-content code {
+      background-color: #f3f4f6;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9em;
+    }
+
+    /* 页脚 */
+    footer {
+      background-color: var(--card-bg);
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--light-text);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .footer-links a {
+      color: var(--light-text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .footer-links a:hover {
+      color: var(--primary-color);
+    }
+  </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="{% url 'Pythonfun:index' %}" class="logo"></a>
+            <div class="nav-links">
+                <a href="{% url 'Pythonfun:index' %}">语法</a>
+                <a href="{% url 'Pythonfun:function_library' %}">函数库</a>
+                <a href="{% url 'Pythonfun:function_query' %}">函数查询</a>
+                <a href="{% url 'Pythonfun:data_structure' %}" class="active">数据结构</a>
+                <a href="{% url 'Pythonfun:statement' %}">语句</a>
+                <a href="{% url 'Pythonfun:project' %}">项目</a>
+            </div>
+            <a href="/login/" class="login-btn">登录</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 数据结构内容 -->
+        <div id="data-structure-content">
+            <!-- 数据结构分类筛选栏 -->
+            <div class="filter-card">
+                <div class="filter-section">
+                    <span class="filter-title">数据结构类型：</span>
+                    <div class="filter-options">
+                        <div class="filter-option active" onclick="filterDataStructure('list')">列表</div>
+                        <div class="filter-option" onclick="filterDataStructure('set')">集合</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 列表内容 -->
+            <div id="list-section" class="data-structure-section active">
+                <h2 class="data-structure-title">列表(List)</h2>
+                <div class="data-structure-content">
+                    <h3>基本概念</h3>
+                    <p>列表是Python中最基本的数据结构之一，它是一个有序的元素集合，可以包含不同类型的元素。</p>
+                    
+                    <h3>创建列表</h3>
+                    <p>使用方括号<code>[]</code>创建列表：</p>
+                    <code>my_list = [1, 2, 3, 'a', 'b', 'c']</code>
+                    
+                    <h3>常用操作</h3>
+                    <p><strong>访问元素：</strong>使用索引<code>my_list[0]</code></p>
+                    <p><strong>修改元素：</strong><code>my_list[0] = 'new value'</code></p>
+                    <p><strong>添加元素：</strong><code>my_list.append('new item')</code></p>
+                    <p><strong>删除元素：</strong><code>del my_list[0]</code>或<code>my_list.remove('a')</code></p>
+                    <p><strong>切片操作：</strong><code>my_list[1:3]</code>获取索引1到2的元素</p>
+                    
+                    <h3>高级用法</h3>
+                    <p><strong>列表推导式：</strong><code>[x*2 for x in range(10)]</code></p>
+                    <p><strong>排序：</strong><code>my_list.sort()</code>或<code>sorted(my_list)</code></p>
+                </div>
+            </div>
+
+            <!-- 集合内容 -->
+            <div id="set-section" class="data-structure-section">
+                <h2 class="data-structure-title">集合(Set)</h2>
+                <div class="data-structure-content">
+                    <h3>基本概念</h3>
+                    <p>集合是一个无序的不重复元素集，常用于成员测试和消除重复元素。</p>
+                    
+                    <h3>创建集合</h3>
+                    <p>使用<code>set()</code>函数或花括号<code>{}</code>创建集合：</p>
+                    <code>my_set = {1, 2, 3, 3, 4}  # 结果为{1, 2, 3, 4}</code>
+                    
+                    <h3>常用操作</h3>
+                    <p><strong>添加元素：</strong><code>my_set.add(5)</code></p>
+                    <p><strong>删除元素：</strong><code>my_set.remove(3)</code></p>
+                    <p><strong>集合运算：</strong>并集<code>|</code>，交集<code>&</code>，差集<code>-</code></p>
+                    <p><strong>成员测试：</strong><code>2 in my_set</code></p>
+                    
+                    <h3>高级用法</h3>
+                    <p><strong>冻结集合：</strong><code>frozenset</code>创建不可变集合</p>
+                    <p><strong>集合推导式：</strong><code>{x for x in 'abracadabra' if x not in 'abc'}</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+      <div class="footer-container">
+        <div class="footer-links">
+          <a href="/privacy">隐私政策</a>
+          <a href="/terms">使用条款</a>
+          <a href="/faq">常见问题</a>
+          <a href="/feedback">意见反馈</a>
+        </div>
+        <p>&copy; 2025 Python学习 - 探索数据科学的无限可能</p>
+      </div>
+    </footer>
+
+    <script>
+        function filterDataStructure(type) {
+            // 移除所有按钮的 active 状态
+            document.querySelectorAll('.filter-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            // 给当前点击的按钮添加 active
+            event.currentTarget.classList.add('active');
+
+            // 隐藏所有内容块
+            document.querySelectorAll('.data-structure-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // 显示对应的内容块
+            const targetSection = document.getElementById(type + '-section');
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+        }
+
+        // 页面加载后默认选中"列表"
+        document.addEventListener('DOMContentLoaded', function () {
+            const listButton = document.querySelector('.filter-option[onclick="filterDataStructure(\'list\')"]');
+            if (listButton) {
+                listButton.click();
+            }
+        });
+    </script>
+</body>
+</html>

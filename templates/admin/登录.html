@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>登录 | 思维空间</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --accent: #3a0ca3;
+      --bg: #f0f2f8;
+      --card-bg: #ffffff;
+      --text-color: #333;
+      --radius: 1.5rem;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background-color: var(--card-bg);
+      padding: 3rem 2.5rem;
+      border-radius: var(--radius);
+      box-shadow: 0 15px 40px rgba(67, 97, 238, 0.1);
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo-icon {
+      font-size: 2.2rem;
+      color: var(--primary);
+      margin-right: 0.5rem;
+    }
+
+    .logo-text {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--accent);
+      font-size: 1.4rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #555;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 0.8rem;
+      font-size: 1rem;
+      transition: border 0.3s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      color: #fff;
+      font-weight: bold;
+      font-size: 1.05rem;
+      border: none;
+      border-radius: 0.9rem;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+
+    .login-btn:hover {
+      opacity: 0.9;
+    }
+
+    .error-message {
+      color: #e63946;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      padding: 0.5rem;
+      background-color: #fee;
+      border-radius: 0.5rem;
+    }
+    
+    .success-message {
+      color: #2ecc71;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      padding: 0.5rem;
+      background-color: #efe;
+      border-radius: 0.5rem;
+    }
+
+    .password-container {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .remember-me input[type="checkbox"] {
+      margin-right: 0.5rem;
+      width: auto;
+    }
+
+    @media (max-width: 480px) {
+      .logo-text {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo">
+      <i class="fas fa-brain logo-icon"></i>
+      <span class="logo-text">思维空间</span>
+    </div>
+    <h2>欢迎回来，请登录</h2>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    <form action="{% url 'Pythonfun:login' %}" method="POST">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="username">用户名</label>
+        <input type="text" id="username" name="username" required />
+      </div>
+      <div class="form-group">
+        <label for="password">密码</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+      <button type="submit" class="login-btn">
+        <i class="fas fa-sign-in-alt" style="margin-right: 6px;"></i> 登录
+      </button>
+    </form>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const toggleIcon = document.getElementById('password-toggle');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+      }
+    }
+
+    // 表单验证
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      
+      if (!username || !password) {
+        e.preventDefault();
+        alert('请填写用户名和密码');
+        return false;
+      }
+      
+      if (username.length < 3) {
+        e.preventDefault();
+        alert('用户名至少需要3个字符');
+        return false;
+      }
+      
+      if (password.length < 6) {
+        e.preventDefault();
+        alert('密码至少需要6个字符');
+        return false;
+      }
+    });
+
+    // 自动聚焦用户名输入框
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('username').focus();
+    });
+  </script>
+</body>
+</html>

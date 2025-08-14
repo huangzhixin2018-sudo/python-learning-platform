@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python语句结构参考手册</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #e8f0fe;
+            --primary-dark: #3a56d4;
+            --text: #2b2d42;
+            --text-light: #5f6368;
+            --border: #e5e7eb;
+            --card-bg: #ffffff;
+            --code-bg: #f8f9fa;
+
+            /* 统一导航栏变量 */
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --text-color: #2b2d42;
+            --light-text: #6b7280;
+            --bg-color: #f8f9fa;
+            --border-color: #e5e7eb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* ========== 统一美观的导航栏 ========== */
+        header {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .logo:hover {
+            color: var(--secondary-color);
+        }
+
+
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-links a.active {
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.15);
+            font-weight: 600;
+        }
+
+        .login-btn {
+            padding: 0.5rem 1.25rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .login-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+        }
+        
+        /* ========== 主内容区 ========== */
+        .main-content {
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* 分类筛选 */
+        .filter-section {
+            margin-bottom: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 70px;
+            z-index: 90;
+        }
+        
+        .filter-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+        
+        .filter-option {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background-color: white;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        
+        .filter-option:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+        }
+        
+        .filter-option.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* 分类标题 */
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+            display: none;
+        }
+        
+        .category-title.active {
+            display: block;
+        }
+        
+        /* 语句卡片 */
+        .statement-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            display: none;
+        }
+        
+        .statement-card.active {
+            display: block;
+        }
+        
+        .statement-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .statement-title i {
+            font-size: 1rem;
+            color: var(--primary);
+        }
+        
+        /* 代码块 */
+        .code-block {
+            background-color: var(--code-bg);
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Roboto Mono', monospace;
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            tab-size: 4;
+        }
+        
+        .code-keyword {
+            color: #d63384;
+            font-weight: bold;
+        }
+        
+        .code-builtin {
+            color: #6f42c1;
+        }
+        
+        .code-string {
+            color: #032f62;
+        }
+        
+        .code-number {
+            color: #005cc5;
+        }
+        
+        .code-comment {
+            color: #6a737d;
+            font-style: italic;
+        }
+        
+        /* 示例部分 */
+        .example-section {
+            margin-top: 1.5rem;
+        }
+        
+        .example-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+        
+        /* 描述文本 */
+        .description {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-top: 70px;
+                padding: 16px;
+            }
+            
+            .filter-options {
+                overflow-x: auto;
+                padding-bottom: 8px;
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .filter-option {
+                flex-shrink: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== 统一美观的导航栏 ========== -->
+    <header>
+        <div class="header-container">
+            <a href="{% url 'Pythonfun:index' %}" class="logo">
+            </a>
+            <div class="nav-links">
+                <a href="{% url 'Pythonfun:index' %}">语法</a>
+                <a href="{% url 'Pythonfun:function_library' %}">函数库</a>
+                <a href="{% url 'Pythonfun:function_query' %}">函数查询</a>
+                <a href="{% url 'Pythonfun:data_structure' %}">数据结构</a>
+                <a href="{% url 'Pythonfun:statement' %}" class="active">语句</a>
+                <a href="{% url 'Pythonfun:project' %}">项目</a>
+            </div>
+            <a href="/login/" class="login-btn">登录</a>
+        </div>
+    </header>
+
+    <!-- ========== 主内容区（完全未改动） ========== -->
+    <div class="main-content">
+        <!-- 分类筛选 -->
+        <div class="filter-section">
+            <div class="filter-title">语句分类</div>
+            <div class="filter-options" id="category-filters">
+                <div class="filter-option active" data-category="all">全部</div>
+                <div class="filter-option" data-category="basic">基础语句</div>
+                <div class="filter-option" data-category="control">控制流</div>
+                <div class="filter-option" data-category="exception">异常处理</div>
+                <div class="filter-option" data-category="function">函数相关</div>
+                <div class="filter-option" data-category="import">导入语句</div>
+            </div>
+        </div>
+        
+        <!-- 基础语句 -->
+        <h1 class="category-title active" id="category-basic">基础语句</h1>
+        
+        <!-- 赋值语句 -->
+        <div class="statement-card active" data-categories="basic">
+            <h2 class="statement-title">
+                <i class="fas fa-equals"></i>
+                赋值语句
+            </h2>
+            <p class="description">用于将值赋给变量，Python支持多种赋值方式。</p>
+            
+            <div class="code-block">
+<span class="code-keyword">x</span> = <span class="code-number">10</span>                <span class="code-comment"># 简单赋值</span>
+<span class="code-keyword">a</span>, <span class="code-keyword">b</span> = <span class="code-number">1</span>, <span class="code-number">2</span>          <span class="code-comment"># 多重赋值</span>
+<span class="code-keyword">x</span> += <span class="code-number">5</span>               <span class="code-comment"># 增强赋值</span>
+<span class="code-keyword">name</span>, <span class="code-keyword">age</span> = <span class="code-string">"Alice"</span>, <span class="code-number">25</span>  <span class="code-comment"># 同时赋值多个变量</span>
+            </div>
+        </div>
+        
+        <!-- 条件语句 -->
+        <div class="statement-card active" data-categories="basic">
+            <h2 class="statement-title">
+                <i class="fas fa-code-branch"></i>
+                条件语句 (if/elif/else)
+            </h2>
+            <p class="description">根据条件执行不同的代码块。</p>
+            
+            <div class="code-block">
+<span class="code-keyword">if</span> <span class="code-keyword">x</span> > <span class="code-number">10</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">"x大于10"</span>)
+<span class="code-keyword">elif</span> <span class="code-keyword">x</span> == <span class="code-number">10</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">"x等于10"</span>)
+<span class="code-keyword">else</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">"x小于10"</span>)
+
+<span class="code-comment"># 单行条件表达式</span>
+<span class="code-keyword">result</span> = <span class="code-string">"大于10"</span> <span class="code-keyword">if</span> <span class="code-keyword">x</span> > <span class="code-number">10</span> <span class="code-keyword">else</span> <span class="code-string">"不大于10"</span>
+            </div>
+        </div>
+        
+        <!-- 循环语句 -->
+        <div class="statement-card active" data-categories="basic">
+            <h2 class="statement-title">
+                <i class="fas fa-redo"></i>
+                循环语句 (for/while)
+            </h2>
+            <p class="description">用于重复执行代码块。</p>
+            
+            <div class="example-section">
+                <h3 class="example-title">for循环</h3>
+                <div class="code-block">
+<span class="code-comment"># 遍历序列</span>
+<span class="code-keyword">for</span> <span class="code-keyword">item</span> <span class="code-keyword">in</span> [<span class="code-number">1</span>, <span class="code-number">2</span>, <span class="code-number">3</span>]:
+    <span class="code-keyword">print</span>(<span class="code-keyword">item</span>)
+
+<span class="code-comment"># 使用range</span>
+<span class="code-keyword">for</span> <span class="code-keyword">i</span> <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">5</span>):    <span class="code-comment"># 0到4</span>
+    <span class="code-keyword">print</span>(<span class="code-keyword">i</span>)
+
+<span class="code-comment"># 遍历字典</span>
+<span class="code-keyword">for</span> <span class="code-keyword">key</span>, <span class="code-keyword">value</span> <span class="code-keyword">in</span> {<span class="code-string">"a"</span>: <span class="code-number">1</span>, <span class="code-string">"b"</span>: <span class="code-number">2</span>}.<span class="code-keyword">items</span>():
+    <span class="code-keyword">print</span>(<span class="code-keyword">key</span>, <span class="code-keyword">value</span>)
+                </div>
+            </div>
+            
+            <div class="example-section">
+                <h3 class="example-title">while循环</h3>
+                <div class="code-block">
+<span class="code-keyword">count</span> = <span class="code-number">0</span>
+<span class="code-keyword">while</span> <span class="code-keyword">count</span> < <span class="code-number">5</span>:
+    <span class="code-keyword">print</span>(<span class="code-keyword">count</span>)
+    <span class="code-keyword">count</span> += <span class="code-number">1</span>
+
+<span class="code-comment"># 无限循环</span>
+<span class="code-keyword">while</span> <span class="code-keyword">True</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">"循环中..."</span>)
+    <span class="code-keyword">break</span>  <span class="code-comment"># 实际应用中应该有退出条件</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 控制流 -->
+        <h1 class="category-title" id="category-control">控制流语句</h1>
+        
+        <!-- break/continue -->
+        <div class="statement-card" data-categories="control">
+            <h2 class="statement-title">
+                <i class="fas fa-fast-forward"></i>
+                break/continue
+            </h2>
+            <p class="description">控制循环的执行流程。</p>
+            
+            <div class="example-section">
+                <h3 class="example-title">break示例</h3>
+                <div class="code-block">
+<span class="code-keyword">for</span> <span class="code-keyword">i</span> <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">10</span>):
+    <span class="code-keyword">if</span> <span class="code-keyword">i</span> == <span class="code-number">5</span>:
+        <span class="code-keyword">break</span>  <span class="code-comment"># 退出整个循环</span>
+    <span class="code-keyword">print</span>(<span class="code-keyword">i</span>)
+                </div>
+            </div>
+            
+            <div class="example-section">
+                <h3 class="example-title">continue示例</h3>
+                <div class="code-block">
+<span class="code-keyword">for</span> <span class="code-keyword">i</span> <span class="code-keyword">in</span> <span class="code-keyword">range</span>(<span class="code-number">5</span>):
+    <span class="code-keyword">if</span> <span class="code-keyword">i</span> == <span class="code-number">2</span>:
+        <span class="code-keyword">continue</span>  <span class="code-comment"># 跳过当前迭代，继续下一次</span>
+    <span class="code-keyword">print</span>(<span class="code-keyword">i</span>)
+                </div>
+            </div>
+        </div>
+        
+        <!-- pass语句 -->
+        <div class="statement-card" data-categories="control">
+            <h2 class="statement-title">
+                <i class="fas fa-minus-circle"></i>
+                pass语句
+            </h2>
+            <p class="description">空操作语句，用于占位。</p>
+            
+            <div class="code-block">
+<span class="code-keyword">if</span> <span class="code-keyword">x</span> < <span class="code-number">0</span>:
+    <span class="code-keyword">pass</span>  <span class="code-comment"># 什么也不做，占位用</span>
+<span class="code-keyword">else</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">"x是正数"</span>)
+
+<span class="code-comment"># 在类或函数定义中作为占位</span>
+<span class="code-keyword">class</span> <span class="code-keyword">MyClass</span>:
+    <span class="code-keyword">pass</span>  <span class="code-comment"># 暂时不实现</span>
+
+<span class="code-keyword">def</span> <span class="code-keyword">my_function</span>():
+    <span class="code-keyword">pass</span>  <span class="code-comment"># 待实现</span>
+            </div>
+        </div>
+        
+        <!-- 异常处理 -->
+        <h1 class="category-title" id="category-exception">异常处理</h1>
+        
+        <!-- try/except -->
+        <div class="statement-card" data-categories="exception">
+            <h2 class="statement-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                try/except/finally
+            </h2>
+            <p class="description">捕获和处理异常。</p>
+            
+            <div class="code-block">
+<span class="code-keyword">try</span>:
+    <span class="code-keyword">result</span> = <span class="code-number">10</span> / <span class="code-number">0</span>
+<span class="code-keyword">except</span> <span class="code-keyword">ZeroDivisionError</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">"不能除以零"</span>)
+<span class="code-keyword">except</span> (<span class="code-keyword">TypeError</span>, <span class="code-keyword">ValueError</span>) <span class="code-keyword">as</span> <span class="code-keyword">e</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">f"类型或值错误: {e}"</span>)
+<span class="code-keyword">except</span> <span class="code-keyword">Exception</span> <span class="code-keyword">as</span> <span class="code-keyword">e</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">f"发生未知错误: {e}"</span>)
+<span class="code-keyword">else</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">"没有发生异常"</span>)
+<span class="code-keyword">finally</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">"无论如何都会执行的清理操作"</span>)
+            </div>
+        </div>
+        
+        <!-- raise语句 -->
+        <div class="statement-card" data-categories="exception">
+            <h2 class="statement-title">
+                <i class="fas fa-hand-paper"></i>
+                raise语句
+            </h2>
+            <p class="description">主动抛出异常。</p>
+            
+            <div class="code-block">
+<span class="code-keyword">if</span> <span class="code-keyword">x</span> < <span class="code-number">0</span>:
+    <span class="code-keyword">raise</span> <span class="code-keyword">ValueError</span>(<span class="code-string">"x不能为负数"</span>)
+
+<span class="code-comment"># 重新抛出当前异常</span>
+<span class="code-keyword">try</span>:
+    <span class="code-keyword">dangerous_operation</span>()
+<span class="code-keyword">except</span> <span class="code-keyword">SomeError</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">"处理部分错误"</span>)
+    <span class="code-keyword">raise</span>  <span class="code-comment"># 重新抛出</span>
+
+<span class="code-comment"># 链式异常</span>
+<span class="code-keyword">try</span>:
+    <span class="code-keyword">open</span>(<span class="code-string">"nonexistent.txt"</span>)
+<span class="code-keyword">except</span> <span class="code-keyword">FileNotFoundError</span> <span class="code-keyword">as</span> <span class="code-keyword">e</span>:
+    <span class="code-keyword">raise</span> <span class="code-keyword">RuntimeError</span>(<span class="code-string">"文件处理失败"</span>) <span class="code-keyword">from</span> <span class="code-keyword">e</span>
+            </div>
+        </div>
+        
+        <!-- 函数相关 -->
+        <h1 class="category-title" id="category-function">函数相关</h1>
+        
+        <!-- def语句 -->
+        <div class="statement-card" data-categories="function">
+            <h2 class="statement-title">
+                <i class="fas fa-function"></i>
+                def语句
+            </h2>
+            <p class="description">定义函数。</p>
+            
+            <div class="code-block">
+<span class="code-comment"># 基本函数定义</span>
+<span class="code-keyword">def</span> <span class="code-keyword">greet</span>(<span class="code-keyword">name</span>):
+    <span class="code-keyword">return</span> <span class="code-string">f"Hello, {name}!"</span>
+
+<span class="code-comment"># 带默认参数的函数</span>
+<span class="code-keyword">def</span> <span class="code-keyword">power</span>(<span class="code-keyword">base</span>, <span class="code-keyword">exponent</span>=<span class="code-number">2</span>):
+    <span class="code-keyword">return</span> <span class="code-keyword">base</span> ** <span class="code-keyword">exponent</span>
+
+<span class="code-comment"># 可变参数</span>
+<span class="code-keyword">def</span> <span class="code-keyword">sum_all</span>(*<span class="code-keyword">args</span>):
+    <span class="code-keyword">return</span> <span class="code-keyword">sum</span>(<span class="code-keyword">args</span>)
+
+<span class="code-comment"># 关键字参数</span>
+<span class="code-keyword">def</span> <span class="code-keyword">person_info</span>(**<span class="code-keyword">kwargs</span>):
+    <span class="code-keyword">for</span> <span class="code-keyword">key</span>, <span class="code-keyword">value</span> <span class="code-keyword">in</span> <span class="code-keyword">kwargs</span>.<span class="code-keyword">items</span>():
+        <span class="code-keyword">print</span>(<span class="code-string">f"{key}: {value}"</span>)
+            </div>
+        </div>
+        
+        <!-- return语句 -->
+        <div class="statement-card" data-categories="function">
+            <h2 class="statement-title">
+                <i class="fas fa-undo"></i>
+                return语句
+            </h2>
+            <p class="description">从函数返回值。</p>
+            
+            <div class="code-block">
+<span class="code-comment"># 返回单个值</span>
+<span class="code-keyword">def</span> <span class="code-keyword">add</span>(<span class="code-keyword">a</span>, <span class="code-keyword">b</span>):
+    <span class="code-keyword">return</span> <span class="code-keyword">a</span> + <span class="code-keyword">b</span>
+
+<span class="code-comment"># 返回多个值(实际上是返回元组)</span>
+<span class="code-keyword">def</span> <span class="code-keyword">min_max</span>(<span class="code-keyword">numbers</span>):
+    <span class="code-keyword">return</span> <span class="code-keyword">min</span>(<span class="code-keyword">numbers</span>), <span class="code-keyword">max</span>(<span class="code-keyword">numbers</span>)
+
+<span class="code-comment"># 提前返回</span>
+<span class="code-keyword">def</span> <span class="code-keyword">is_positive</span>(<span class="code-keyword">num</span>):
+    <span class="code-keyword">if</span> <span class="code-keyword">num</span> <= <span class="code-number">0</span>:
+        <span class="code-keyword">return</span> <span class="code-keyword">False</span>
+    <span class="code-keyword">return</span> <span class="code-keyword">True</span>
+
+<span class="code-comment"># 无返回值(实际返回None)</span>
+<span class="code-keyword">def</span> <span class="code-keyword">print_hello</span>():
+    <span class="code-keyword">print</span>(<span class="code-string">"Hello"</span>)
+            </div>
+        </div>
+        
+        <!-- yield语句 -->
+        <div class="statement-card" data-categories="function">
+            <h2 class="statement-title">
+                <i class="fas fa-stream"></i>
+                yield语句
+            </h2>
+            <p class="description">定义生成器函数。</p>
+            
+            <div class="code-block">
+<span class="code-comment"># 简单的生成器函数</span>
+<span class="code-keyword">def</span> <span class="code-keyword">count_up_to</span>(<span class="code-keyword">n</span>):
+    <span class="code-keyword">i</span> = <span class="code-number">1</span>
+    <span class="code-keyword">while</span> <span class="code-keyword">i</span> <= <span class="code-keyword">n</span>:
+        <span class="code-keyword">yield</span> <span class="code-keyword">i</span>
+        <span class="code-keyword">i</span> += <span class="code-number">1</span>
+
+<span class="code-comment"># 使用生成器</span>
+<span class="code-keyword">for</span> <span class="code-keyword">num</span> <span class="code-keyword">in</span> <span class="code-keyword">count_up_to</span>(<span class="code-number">5</span>):
+    <span class="code-keyword">print</span>(<span class="code-keyword">num</span>)
+
+<span class="code-comment"># yield from语法</span>
+<span class="code-keyword">def</span> <span class="code-keyword">chain</span>(*<span class="code-keyword">iterables</span>):
+    <span class="code-keyword">for</span> <span class="code-keyword">it</span> <span class="code-keyword">in</span> <span class="code-keyword">iterables</span>:
+        <span class="code-keyword">yield from</span> <span class="code-keyword">it</span>
+            </div>
+        </div>
+        
+        <!-- 导入语句 -->
+        <h1 class="category-title" id="category-import">导入语句</h1>
+        
+        <!-- import语句 -->
+        <div class="statement-card" data-categories="import">
+            <h2 class="statement-title">
+                <i class="fas fa-file-import"></i>
+                import语句
+            </h2>
+            <p class="description">导入模块和包。</p>
+            
+            <div class="example-section">
+                <h3 class="example-title">基本导入</h3>
+                <div class="code-block">
+<span class="code-keyword">import</span> math
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> os.path
+                </div>
+            </div>
+            
+            <div class="example-section">
+                <h3 class="example-title">从模块导入特定内容</h3>
+                <div class="code-block">
+<span class="code-keyword">from</span> math <span class="code-keyword">import</span> sqrt, pi
+<span class="code-keyword">from</span> collections <span class="code-keyword">import</span> defaultdict <span class="code-keyword">as</span> ddict
+<span class="code-keyword">from</span> pathlib <span class="code-keyword">import</span> Path
+                </div>
+            </div>
+            
+            <div class="example-section">
+                <h3 class="example-title">导入所有内容(不推荐)</h3>
+                <div class="code-block">
+<span class="code-keyword">from</span> math <span class="code-keyword">import</span> *  <span class="code-comment"># 导入math模块所有内容</span>
+                </div>
+            </div>
+            
+            <div class="example-section">
+                <h3 class="example-title">相对导入(在包内使用)</h3>
+                <div class="code-block">
+<span class="code-keyword">from</span> . <span class="code-keyword">import</span> module1  <span class="code-comment"># 从当前包导入</span>
+<span class="code-keyword">from</span> ..subpackage <span class="code-keyword">import</span> module2  <span class="code-comment"># 从上级包的子包导入</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取所有分类筛选按钮
+            const filterButtons = document.querySelectorAll('.filter-option');
+            
+            // 为每个筛选按钮添加点击事件
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // 移除所有按钮的active类
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    // 给当前点击的按钮添加active类
+                    this.classList.add('active');
+                    
+                    // 获取选中的分类
+                    const selectedCategory = this.dataset.category;
+                    
+                    // 处理所有语句卡片
+                    document.querySelectorAll('.statement-card').forEach(card => {
+                        if (selectedCategory === 'all') {
+                            card.classList.add('active');
+                        } else {
+                            const cardCategories = card.dataset.categories.split(' ');
+                            if (cardCategories.includes(selectedCategory)) {
+                                card.classList.add('active');
+                            } else {
+                                card.classList.remove('active');
+                            }
+                        }
+                    });
+                    
+                    // 处理分类标题
+                    document.querySelectorAll('.category-title').forEach(title => {
+                        if (selectedCategory === 'all' || title.id === `category-${selectedCategory}`) {
+                            title.classList.add('active');
+                        } else {
+                            title.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

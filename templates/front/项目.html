@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>项目</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --text-color: #2b2d42;
+      --light-text: #6b7280;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --border-color: #e5e7eb;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', 'Inter', 'Helvetica Neue', sans-serif;
+      background-color: #f8f9fa;
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ========== 统一导航栏样式 ========== */
+    header {
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .logo:hover {
+      color: var(--secondary-color);
+    }
+
+
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      position: relative;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .nav-links a.active {
+      color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.15);
+      font-weight: 600;
+    }
+
+    .login-btn {
+      padding: 0.5rem 1.25rem;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 6px;
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .login-btn:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+    }
+
+    /* ========== 页脚样式 ========== */
+    footer {
+      background-color: var(--card-bg);
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--light-text);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .footer-links a {
+      color: var(--light-text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary-color);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- ========== 统一美观的导航栏 ========== -->
+  <header>
+    <div class="header-container">
+              <a href="{% url 'Pythonfun:index' %}" class="logo">
+        </a>
+                  <div class="nav-links">
+                <a href="{% url 'Pythonfun:index' %}">语法</a>
+                <a href="{% url 'Pythonfun:function_library' %}">函数库</a>
+                <a href="{% url 'Pythonfun:function_query' %}">函数查询</a>
+                <a href="{% url 'Pythonfun:data_structure' %}">数据结构</a>
+                <a href="{% url 'Pythonfun:statement' %}">语句</a>
+                <a href="{% url 'Pythonfun:project' %}" class="active">项目</a>
+            </div>
+      <a href="/login/" class="login-btn">登录</a>
+    </div>
+  </header>
+
+  <!-- ========== 页面内容（完全未改动） ========== -->
+  <main class="max-w-7xl mx-auto px-6 py-12">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">Python项目实战</h1>
+      <p class="text-xl text-gray-600">通过实际项目提升Python编程技能</p>
+    </div>
+
+    <!-- 项目分类 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+      
+      <!-- 初级项目 -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <span class="text-green-600 text-xl">🌱</span>
+          </div>
+          <h3 class="text-xl font-semibold ml-4">初级项目</h3>
+        </div>
+        <ul class="space-y-3">
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">计算器程序</a>
+          </li>
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">猜数字游戏</a>
+          </li>
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">文件批量重命名</a>
+          </li>
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">简单爬虫</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 中级项目 -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <span class="text-yellow-600 text-xl">🚀</span>
+          </div>
+          <h3 class="text-xl font-semibold ml-4">中级项目</h3>
+        </div>
+        <ul class="space-y-3">
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">Web爬虫系统</a>
+          </li>
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">数据分析仪表板</a>
+          </li>
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">自动化测试框架</a>
+          </li>
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">API开发</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 高级项目 -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center mb-4">
+          <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+            <span class="text-red-600 text-xl">🔥</span>
+          </div>
+          <h3 class="text-xl font-semibold ml-4">高级项目</h3>
+        </div>
+        <ul class="space-y-3">
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">机器学习模型</a>
+          </li>
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">深度学习应用</a>
+          </li>
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">分布式系统</a>
+          </li>
+          <li class="flex items-center">
+            <span class="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+            <a href="#" class="text-blue-600 hover:underline">区块链应用</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 特色项目展示 -->
+    <div class="bg-white rounded-lg shadow-md p-8 mb-12">
+      <h2 class="text-2xl font-bold mb-6">特色项目推荐</h2>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- 项目1 -->
+        <div class="border border-gray-200 rounded-lg p-6">
+          <div class="flex items-center mb-4">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <span class="text-blue-600">📊</span>
+            </div>
+            <h3 class="text-lg font-semibold ml-3">数据分析平台</h3>
+          </div>
+          <p class="text-gray-600 mb-4">使用Pandas、NumPy和Matplotlib构建的数据分析平台，支持多种数据格式导入和可视化分析。</p>
+          <div class="flex items-center justify-between">
+            <div class="flex space-x-2">
+              <span class="px-2 py-1 bg-blue-100 text-blue-600 text-sm rounded">Pandas</span>
+              <span class="px-2 py-1 bg-green-100 text-green-600 text-sm rounded">Matplotlib</span>
+              <span class="px-2 py-1 bg-purple-100 text-purple-600 text-sm rounded">Flask</span>
+            </div>
+            <a href="#" class="text-blue-600 hover:underline">查看详情 →</a>
+          </div>
+        </div>
+
+        <!-- 项目2 -->
+        <div class="border border-gray-200 rounded-lg p-6">
+          <div class="flex items-center mb-4">
+            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <span class="text-green-600">🤖</span>
+            </div>
+            <h3 class="text-lg font-semibold ml-3">智能聊天机器人</h3>
+          </div>
+          <p class="text-gray-600 mb-4">基于自然语言处理的聊天机器人，支持多轮对话和智能回复，可用于客服和娱乐场景。</p>
+          <div class="flex items-center justify-between">
+            <div class="flex space-x-2">
+              <span class="px-2 py-1 bg-red-100 text-red-600 text-sm rounded">NLP</span>
+              <span class="px-2 py-1 bg-yellow-100 text-yellow-600 text-sm rounded">TensorFlow</span>
+              <span class="px-2 py-1 bg-blue-100 text-blue-600 text-sm rounded">FastAPI</span>
+            </div>
+            <a href="#" class="text-blue-600 hover:underline">查看详情 →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 学习路径 -->
+    <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-8 text-white">
+      <h2 class="text-2xl font-bold mb-4">项目学习路径</h2>
+      <p class="text-blue-100 mb-6">按照难度递进，循序渐进地掌握Python项目开发技能</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="text-center">
+          <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span class="text-xl">1</span>
+          </div>
+          <h3 class="font-semibold">基础语法</h3>
+          <p class="text-sm text-blue-100">掌握Python核心概念</p>
+        </div>
+        <div class="text-center">
+          <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span class="text-xl">2</span>
+          </div>
+          <h3 class="font-semibold">小项目实践</h3>
+          <p class="text-sm text-blue-100">从简单项目开始</p>
+        </div>
+        <div class="text-center">
+          <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span class="text-xl">3</span>
+          </div>
+          <h3 class="font-semibold">框架学习</h3>
+          <p class="text-sm text-blue-100">掌握常用框架</p>
+        </div>
+        <div class="text-center">
+          <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
+            <span class="text-xl">4</span>
+          </div>
+          <h3 class="font-semibold">复杂项目</h3>
+          <p class="text-sm text-blue-100">开发企业级应用</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== 页脚 ========== -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="/privacy">隐私政策</a>
+        <a href="/terms">使用条款</a>
+        <a href="/faq">常见问题</a>
+        <a href="/feedback">意见反馈</a>
+      </div>
+              <p>&copy; 2025 Python学习 - 探索数据科学的无限可能</p>
+    </div>
+  </footer>
+
+</body>
+</html>

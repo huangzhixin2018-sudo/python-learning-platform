@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容编辑器 </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Monaco Editor (VS Code编辑器) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <!-- TinyMCE富文本编辑器 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.7.0/tinymce.min.js"></script>
+    <!-- SweetAlert2 弹窗库 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #4cc9f0;
+            --text-color: #2b2d42;
+            --light-text: #8d99ae;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --sidebar-bg: #2b2d42;
+            --sidebar-text: #edf2f4;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --transition: all 0.3s ease;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Noto Sans SC', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+        /* 侧边栏样式 */
+        .admin-sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 1.5rem 0;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .admin-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+        .admin-menu {
+            list-style: none;
+        }
+        .menu-category {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .menu-item {
+            padding: 0.75rem 1.5rem;
+            transition: all 0.2s;
+        }
+        .menu-item a {
+            color: var(--sidebar-text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            opacity: 0.8;
+        }
+        .menu-item a:hover, .menu-item.active a {
+            opacity: 1;
+        }
+        .menu-item i {
+            width: 24px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+        .menu-item.active {
+            background-color: rgba(255,255,255,0.1);
+            border-left: 3px solid var(--accent-color);
+        }
+        /* 主内容区 */
+        .admin-main {
+            flex: 1;
+            padding: 2rem;
+        }
+        /* 顶部导航栏 */
+        .top-navbar {
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+        .back-btn:hover {
+            background: var(--bg-color);
+        }
+        .page-title {
+            font-size: 1.75rem;
+            color: var(--secondary-color);
+        }
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #3a56d4;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+        .btn-outline:hover {
+            background: var(--bg-color);
+        }
+        /* 主编辑区域 */
+        .editor-container {
+            display: flex;
+            height: calc(100vh - 120px);
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+        /* 左侧工具栏 */
+        .editor-sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        .sidebar-section {
+            margin-bottom: 2rem;
+        }
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        .tag-input-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            min-height: 2.5rem;
+            align-items: center;
+        }
+        .tag {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .tag-remove {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+        .tag-input {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+            padding: 0.25rem;
+        }
+        /* 内容类型选择器 */
+        .content-type-tabs {
+            display: flex;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            padding: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        .content-type-tab {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            cursor: pointer;
+            border-radius: calc(var(--border-radius) - 2px);
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+        .content-type-tab.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        /* 主编辑区域 */
+        .main-editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        .editor-tabs {
+            display: flex;
+            background: var(--bg-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1rem;
+        }
+        .editor-tab {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        .editor-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: white;
+        }
+        .editor-tab:hover:not(.active) {
+            color: var(--primary-color);
+            background: rgba(67, 97, 238, 0.05);
+        }
+        .editor-content {
+            flex: 1;
+            position: relative;
+        }
+        .editor-pane {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+        }
+        .editor-pane.active {
+            display: block;
+        }
+        /* 富文本编辑器 */
+        .rich-text-editor {
+            height: 100%;
+        }
+        /* 代码编辑器 */
+        .code-editor-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .code-editor-toolbar {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .code-language-select {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: white;
+        }
+        .code-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .code-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+        .code-btn:hover {
+            background: var(--bg-color);
+        }
+        .monaco-editor-container {
+            flex: 1;
+            min-height: 400px;
+        }
+        /* 预览区域 */
+        .preview-container {
+            padding: 2rem;
+            background: white;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .preview-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        /* ChatGPT风格的代码块 */
+        .chat-style-codeblock {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            padding: 1rem;
+            position: relative;
+            margin: 1rem 0;
+            font-family: 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            overflow: auto;
+        }
+        .chat-style-codeblock pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #333;
+        }
+        .chat-style-codeblock .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            color: #666;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 5px;
+            transition: background 0.2s ease;
+        }
+        .chat-style-codeblock .copy-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #000;
+        }
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .editor-sidebar {
+                width: 250px;
+            }
+        }
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            .admin-main {
+                padding: 1.5rem;
+            }
+            .editor-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .editor-sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                max-height: 300px;
+            }
+            .nav-actions {
+                gap: 0.5rem;
+            }
+            .btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 管理侧边栏 (采用思维空间CMS风格) -->
+    <aside class="admin-sidebar">
+        <div class="admin-logo">思维空间CMS</div>
+        <ul class="admin-menu">
+            <div class="menu-category">内容管理</div>
+            <li class="menu-item active"><a href="{% url 'Pythonfun:article_edit' %}"><i class="fas fa-edit"></i> 文章编辑</a></li>
+            <li class="menu-item"><a href="{% url 'Pythonfun:category_management' %}"><i class="fas fa-folder"></i> 分类管理</a></li>
+            <li class="menu-item"><a href="{% url 'Pythonfun:course_management' %}"><i class="fas fa-book"></i> 教程管理</a></li>
+            <div class="menu-category">系统管理</div>
+            <li class="menu-item">
+                <a href="#"><i class="fas fa-users"></i> 用户管理</a>
+            </li>
+            <li class="menu-item">
+                <a href="#"><i class="fas fa-cog"></i> 系统设置</a>
+            </li>
+            <div class="menu-category">统计</div>
+            <li class="menu-item">
+                <a href="#"><i class="fas fa-chart-line"></i> 访问统计</a>
+            </li>
+            <li class="menu-item">
+                <a href="#"><i class="fas fa-comments"></i> 评论管理</a>
+            </li>
+        </ul>
+    </aside>
+    <!-- 主内容区 -->
+    <main class="admin-main">
+        <!-- 顶部导航栏 -->
+        <nav class="top-navbar">
+            <div class="nav-left">
+                <button class="back-btn" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="page-title">内容编辑器</h1>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-secondary" onclick="previewContent()">
+                    <i class="fas fa-eye"></i>
+                    预览
+                </button>
+                <button class="btn btn-primary" onclick="saveToList()">
+                    <i class="fas fa-list-alt"></i>
+                    保存到列表
+                </button>
+            </div>
+        </nav>
+        <!-- 主编辑区域 -->
+        <div class="editor-container">
+            <!-- 左侧工具栏 -->
+            <div class="editor-sidebar">
+                <!-- 基本信息 -->
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">基本信息</h3>
+                    <div class="form-group">
+                        <label class="form-label">标题</label>
+                        <input type="text" class="form-control" id="title" name="title" value="">
+                        <textarea class="form-control" id="description" name="description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">副标题</label>
+                        <input type="text" class="form-control" id="article-subtitle" placeholder="可选的副标题">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">摘要</label>
+                        <textarea class="form-control" id="article-summary" rows="3" placeholder="文章摘要，用于搜索和展示"></textarea>
+                    </div>
+                </div>
+                <!-- 分类和标签 -->
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">分类和标签</h3>
+                    <div class="form-group">
+                        <label class="form-label">主分类</label>
+                        <select class="form-control form-select" id="primary-category">
+                            <option value="">选择主分类</option>
+                            <option value="basic">基础语法</option>
+                            <option value="data-structure">数据结构</option>
+                            <option value="advanced">高级特性</option>
+                            <option value="projects">项目实战</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">子分类</label>
+                        <select class="form-control form-select" id="sub-category">
+                            <option value="">选择子分类</option>
+                            <option value="variables">变量与数据类型</option>
+                            <option value="functions">函数</option>
+                            <option value="classes">类与对象</option>
+                            <option value="modules">模块与包</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">标签</label>
+                        <div class="tag-input-container" id="tag-container">
+                            <input type="text" class="tag-input" placeholder="添加标签，按回车确认" id="tag-input">
+                        </div>
+                    </div>
+                </div>
+                <!-- 内容类型 -->
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">内容类型</h3>
+                    <div class="content-type-tabs">
+                        <button class="content-type-tab active" data-type="tutorial">教程</button>
+                        <button class="content-type-tab" data-type="structure">结构</button>
+                        <button class="content-type-tab" data-type="story">故事</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">预计阅读时间（分钟）</label>
+                        <input type="number" class="form-control" id="read-time" min="1" max="120" value="5">
+                    </div>
+                </div>
+            </div>
+            <!-- 主编辑区域 -->
+            <div class="main-editor">
+                <!-- 编辑器标签页 -->
+                <div class="editor-tabs">
+                    <button class="editor-tab active" data-tab="rich-text">
+                        <i class="fas fa-edit"></i>
+                        富文本编辑
+                    </button>
+                    <button class="editor-tab" data-tab="code">
+                        <i class="fas fa-code"></i>
+                        代码编辑
+                    </button>
+                    <button class="editor-tab" data-tab="preview">
+                        <i class="fas fa-eye"></i>
+                        预览
+                    </button>
+                </div>
+                <!-- 编辑器内容区域 -->
+                <div class="editor-content">
+                    <!-- 富文本编辑器 -->
+                    <div class="editor-pane active" id="rich-text-pane">
+                        <textarea id="rich-text-editor" class="rich-text-editor"></textarea>
+                    </div>
+                    <!-- 代码编辑器 -->
+                    <div class="editor-pane" id="code-pane">
+                        <div class="code-editor-container">
+                            <div class="code-editor-toolbar">
+                                <div>
+                                    <label>语言：</label>
+                                    <select class="code-language-select" id="code-language">
+                                        <option value="python">Python</option>
+                                        <option value="javascript">JavaScript</option>
+                                        <option value="html">HTML</option>
+                                        <option value="css">CSS</option>
+                                        <option value="sql">SQL</option>
+                                        <option value="json">JSON</option>
+                                    </select>
+                                </div>
+                                <div class="code-actions">
+                                    <button class="code-btn" onclick="formatCode()">
+                                        <i class="fas fa-magic"></i>
+                                        格式化
+                                    </button>
+                                    <button class="code-btn" onclick="runCode()">
+                                        <i class="fas fa-play"></i>
+                                        运行
+                                    </button>
+                                    <button class="code-btn" onclick="insertCodeBlock()">
+                                        <i class="fas fa-plus"></i>
+                                        插入代码块
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="monaco-editor-container" id="monaco-editor"></div>
+                        </div>
+                    </div>
+                    <!-- 预览面板 -->
+                    <div class="editor-pane" id="preview-pane">
+                        <div class="preview-container">
+                            <div class="preview-content" id="preview-content">
+                                <h1>文章预览</h1>
+                                <p>在这里可以预览您编辑的内容...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        // 全局变量
+        let monacoEditor = null;
+        let tinymceEditor = null;
+        const tags = [];
+        let currentArticleId = null; // 当前编辑的文章ID
+        let isEditMode = false; // 是否是编辑模式
+        
+        // 配置常量 - 集中管理，避免硬编码
+        const EDITOR_CONFIG = {
+            DEFAULT_READ_TIME: 5,
+            DEFAULT_CODE_LANGUAGE: 'python',
+            DEFAULT_CODE_CONTENT: '# 在这里输入您的代码\nprint("Hello, World!")',
+            DEFAULT_PREVIEW_TITLE: '文章标题',
+            DEFAULT_PREVIEW_SUBTITLE: '副标题',
+            DEFAULT_PREVIEW_SUMMARY: '文章摘要',
+            EDITOR_INIT_TIMEOUT: 15000, // 15秒超时
+            RETRY_INTERVAL: 500, // 重试间隔
+            MAX_RETRY_ATTEMPTS: 30 // 最大重试次数
+        };
+        
+        // 编辑器状态管理
+        const EditorState = {
+            TINYMCE: 'tinymce',
+            MONACO: 'monaco',
+            FALLBACK_RICH_TEXT: 'fallback_rich_text',
+            FALLBACK_CODE: 'fallback_code'
+        };
+        
+        let currentEditorStates = {
+            richText: null,
+            code: null
+        };
+        
+        // 编辑器就绪状态检查
+        function isEditorReady(editorType) {
+            if (editorType === 'richText') {
+                return tinymceEditor && currentEditorStates.richText === EditorState.TINYMCE;
+            } else if (editorType === 'code') {
+                return monacoEditor && currentEditorStates.code === EditorState.MONACO;
+            }
+            return false;
+        }
+        
+        // 统一的编辑器状态检查
+        function checkEditorStatus() {
+            return {
+                richTextReady: isEditorReady('richText'),
+                codeReady: isEditorReady('code'),
+                allReady: isEditorReady('richText') && isEditorReady('code')
+            };
+        }
+        
+        // 获取CSRF令牌
+        function getCsrfToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        // 初始化编辑器
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded - 开始初始化编辑器');
+            
+            // 添加错误处理确保编辑器初始化
+            try {
+                initTinyMCE();
+                console.log('TinyMCE初始化完成');
+            } catch (error) {
+                console.error('TinyMCE初始化失败:', error);
+                createFallbackRichTextEditor();
+            }
+            
+            try {
+                initMonacoEditor();
+                console.log('Monaco编辑器初始化完成');
+            } catch (error) {
+                console.error('Monaco编辑器初始化失败:', error);
+                createFallbackCodeEditor();
+            }
+            
+            initEventListeners();
+            
+            // 延迟检查文章ID，确保所有资源加载完成
+            setTimeout(() => {
+                checkForArticleId();
+            }, 1000);
+        });
+        
+        // 检查URL中是否有文章ID参数
+        function checkForArticleId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id');
+            const typeParam = urlParams.get('type');
+            
+            console.log('检查URL参数:', { id: articleId, type: typeParam });
+            
+            if (articleId) {
+                currentArticleId = articleId;
+                isEditMode = true;
+                
+                // 记录调试信息
+                console.log('检测到编辑模式:', {
+                    articleId: articleId,
+                    type: typeParam,
+                    url: window.location.href,
+                    editorStatus: checkEditorStatus()
+                });
+                
+                // 等待编辑器初始化完成后再加载文章数据
+                const checkAndLoad = () => {
+                    const status = checkEditorStatus();
+                    console.log('检查编辑器状态:', {
+                        ...status,
+                        attempts: checkAndLoad.attempts || 0
+                    });
+                    
+                    checkAndLoad.attempts = (checkAndLoad.attempts || 0) + 1;
+                    
+                    if (status.allReady) {
+                        console.log('编辑器已就绪，开始加载文章数据');
+                        loadArticle(articleId);
+                    } else if (checkAndLoad.attempts > EDITOR_CONFIG.MAX_RETRY_ATTEMPTS) {
+                        // 使用配置的超时设置
+                        console.error('编辑器初始化超时');
+                        Swal.fire({
+                            title: '编辑器加载超时',
+                            text: `编辑器初始化超时（${EDITOR_CONFIG.EDITOR_INIT_TIMEOUT/1000}秒），请刷新页面重试`,
+                            icon: 'warning',
+                            confirmButtonText: '刷新页面'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        setTimeout(checkAndLoad, EDITOR_CONFIG.RETRY_INTERVAL);
+                    }
+                };
+                
+                // 立即开始检查
+                checkAndLoad();
+            } else {
+                console.log('未检测到文章ID，新建文章模式');
+                // 新建文章模式，确保分类数据加载
+                loadCategories();
+            }
+        }
+        
+        // 从API加载文章数据
+        function loadArticle(articleId) {
+            // 判断是否是教程，优先使用URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+            const isCourse = typeParam === 'course';
+            const apiUrl = isCourse ? `/api/courses/${articleId}/` : `/api/articles/${articleId}/`;
+
+            console.log('正在加载文章，ID:', articleId, '类型:', isCourse ? '教程' : '文章', 'API:', apiUrl, 'type参数:', typeParam);
+            console.log('当前URL:', window.location.href);
+            console.log('URL参数:', window.location.search);
+
+            fetch(apiUrl)
+                .then(response => {
+                    console.log('API响应状态:', response.status);
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            throw new Error(`文章不存在 (ID: ${articleId})`);
+                        } else if (response.status === 403) {
+                            throw new Error('没有权限访问此文章');
+                        } else if (response.status === 500) {
+                            throw new Error('服务器内部错误，请稍后重试');
+                        } else {
+                            throw new Error(`加载失败，状态码: ${response.status}`);
+                        }
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('文章数据加载成功:', data);
+                    
+                    // 验证数据完整性
+                    if (!data || !data.title) {
+                        console.warn('文章数据可能不完整:', data);
+                    }
+                    
+                    // 填充表单字段
+                    document.getElementById('title').value = data.title || '';
+                    document.getElementById('description').value = data.description || '';
+                    document.getElementById('article-subtitle').value = data.subtitle || '';
+                    document.getElementById('article-summary').value = data.summary || '';
+                    document.getElementById('read-time').value = data.read_time_minutes || EDITOR_CONFIG.DEFAULT_READ_TIME;
+                    
+                    // 设置内容类型 - 如果是教程模式，强制设置为TUTORIAL
+                    document.querySelectorAll('.content-type-tab').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    
+                    if (isCourse) {
+                        // 教程模式，强制设置为TUTORIAL
+                        document.querySelector('[data-type="tutorial"]').classList.add('active');
+                        // 同时隐藏内容类型选择，因为教程只能是TUTORIAL
+                        document.querySelector('.content-type-tabs').style.display = 'none';
+                    } else {
+                        // 普通文章模式，根据实际内容类型设置
+                        document.querySelector('.content-type-tabs').style.display = 'flex';
+                        if (data.content_type) {
+                            const contentTypeMap = {
+                                'STORY': 'story',
+                                'STRUCTURE': 'structure',
+                                'TUTORIAL': 'tutorial'
+                            };
+                            const tabId = contentTypeMap[data.content_type] || 'tutorial';
+                            document.querySelector(`[data-type="${tabId}"]`).classList.add('active');
+                        } else {
+                            document.querySelector('[data-type="tutorial"]').classList.add('active');
+                        }
+                    }
+                    
+                    // 设置分类 - 确保分类数据正确加载
+                    if (data.category_id) {
+                        loadCategories(data.category_id);
+                    } else {
+                        loadCategories();
+                    }
+                    
+                    // 设置标签
+                    if (data.tags && data.tags.length > 0) {
+                        tags.length = 0; // 清空现有标签
+                        data.tags.forEach(tag => {
+                            // 处理标签数据格式（兼容对象数组和字符串数组）
+                            if (typeof tag === 'object' && tag.name) {
+                                tags.push(tag.name);
+                            } else if (typeof tag === 'string') {
+                                tags.push(tag);
+                            }
+                        });
+                        renderTags();
+                    }
+                    
+                    // 设置富文本内容 - 改进内容设置逻辑
+                    if (isEditorReady('richText')) {
+                        const contentHtml = data.content_html || '';
+                        console.log('设置富文本编辑器内容:', contentHtml);
+                        tinymceEditor.setContent(contentHtml);
+                    } else {
+                        console.warn('富文本编辑器未就绪，无法设置内容');
+                        // 如果编辑器未就绪，延迟设置内容
+                        setTimeout(() => {
+                            if (isEditorReady('richText')) {
+                                const contentHtml = data.content_html || '';
+                                console.log('延迟设置富文本编辑器内容:', contentHtml);
+                                tinymceEditor.setContent(contentHtml);
+                            }
+                        }, 1000);
+                    }
+                    
+                    // 设置代码内容 - 改进内容设置逻辑
+                    if (isEditorReady('code')) {
+                        const contentCode = data.content_code || '';
+                        console.log('设置代码编辑器内容:', contentCode);
+                        monacoEditor.setValue(contentCode);
+                        
+                        // 设置代码语言
+                        if (data.code_language) {
+                            document.getElementById('code-language').value = data.code_language;
+                            try {
+                                monaco.editor.setModelLanguage(monacoEditor.getModel(), data.code_language);
+                            } catch (error) {
+                                console.warn('设置代码语言失败:', error);
+                            }
+                        } else {
+                            // 如果没有指定语言，使用默认语言
+                            document.getElementById('code-language').value = EDITOR_CONFIG.DEFAULT_CODE_LANGUAGE;
+                        }
+                    } else {
+                        console.warn('代码编辑器未就绪，无法设置内容');
+                        // 如果编辑器未就绪，延迟设置内容
+                        setTimeout(() => {
+                            if (isEditorReady('code')) {
+                                const contentCode = data.content_code || '';
+                                console.log('延迟设置代码编辑器内容:', contentCode);
+                                monacoEditor.setValue(contentCode);
+                                
+                                if (data.code_language) {
+                                    document.getElementById('code-language').value = data.code_language;
+                                    try {
+                                        monaco.editor.setModelLanguage(monacoEditor.getModel(), data.code_language);
+                                    } catch (error) {
+                                        console.warn('设置代码语言失败:', error);
+                                    }
+                                } else {
+                                    // 如果没有指定语言，使用默认语言
+                                    document.getElementById('code-language').value = EDITOR_CONFIG.DEFAULT_CODE_LANGUAGE;
+                                }
+                            }
+                        }, 1000);
+                    }
+                    
+                    // 更新预览
+                    setTimeout(() => {
+                        updatePreview();
+                    }, 500);
+                })
+                .catch(error => {
+                    console.error('加载文章失败:', error);
+                    console.error('错误详情:', {
+                        articleId: articleId,
+                        isCourse: isCourse,
+                        apiUrl: apiUrl,
+                        error: error.message,
+                        stack: error.stack
+                    });
+                    
+                    // 使用SweetAlert2显示更友好的错误提示
+                    let errorMessage = error.message;
+                    let errorDetails = '';
+                    
+                    if (error.message.includes('404')) {
+                        errorDetails = '可能原因：<br>1. ' + (isCourse ? '教程' : '文章') + 'ID不正确<br>2. ' + (isCourse ? '教程' : '文章') + '已被删除<br>3. 网络连接问题';
+                    } else if (error.message.includes('权限')) {
+                        errorDetails = '请确认您有权限编辑此' + (isCourse ? '教程' : '文章');
+                    } else if (error.message.includes('fetch')) {
+                        errorDetails = '网络连接错误，请检查：<br>1. 服务器是否正常运行<br>2. 网络连接是否稳定<br>3. 浏览器控制台查看详细错误';
+                    } else {
+                        errorDetails = '未知错误，请稍后重试或联系技术支持';
+                    }
+                    
+                    Swal.fire({
+                        title: `加载${isCourse ? '教程' : '文章'}失败`,
+                        html: `
+                            <div style="text-align: left;">
+                                <p><strong>错误信息：</strong> ${errorMessage}</p>
+                                <p><strong>调试信息：</strong></p>
+                                <ul style="text-align: left; margin-left: 20px;">
+                                    <li>文章ID: ${articleId}</li>
+                                    <li>内容类型: ${isCourse ? '教程' : '文章'}</li>
+                                    <li>API地址: ${apiUrl}</li>
+                                </ul>
+                                <p><strong>${errorDetails}</strong></p>
+                            </div>
+                        `,
+                        icon: 'error',
+                        confirmButtonText: '返回列表',
+                        cancelButtonText: '重试',
+                        showCancelButton: true,
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.history.back();
+                        } else if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
+                            // 重试加载
+                            loadArticle(articleId);
+                        }
+                    });
+                    
+                    // 提供返回按钮
+                    const container = document.querySelector('.main-editor');
+                    if (container) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 2rem;">
+                                <h3 style="color: #e74c3c; margin-bottom: 1rem;">文章加载失败</h3>
+                                <p style="color: #666; margin-bottom: 1rem;">${error.message}</p>
+                                <p style="color: #999; font-size: 0.9rem; margin-bottom: 2rem;">
+                                    文章ID: ${articleId} | 类型: ${isCourse ? '教程' : '文章'}
+                                </p>
+                                <div style="display: flex; gap: 1rem; justify-content: center;">
+                                    <button onclick="window.history.back()" style="padding: 0.5rem 1rem; background: #6c757d; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                                        返回列表
+                                    </button>
+                                    <button onclick="loadArticle(${articleId})" style="padding: 0.5rem 1rem; background: #4361ee; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                                        重试
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+        }
+        
+        // 加载分类数据
+        function loadCategories(selectedCategoryId = null) {
+            // 加载主分类
+            fetch('/api/main-categories/')
+                .then(response => response.json())
+                .then(data => {
+                    const mainCategorySelect = document.getElementById('primary-category');
+                    mainCategorySelect.innerHTML = '<option value="">选择主分类</option>';
+                    
+                    // 清空子分类
+                    loadSubCategories();
+                    
+                    // 如果没有主分类数据
+                    if (!data.items || data.items.length === 0) {
+                        const option = document.createElement('option');
+                        option.value = "";
+                        option.textContent = "暂无主分类数据";
+                        option.disabled = true;
+                        mainCategorySelect.appendChild(option);
+                        return;
+                    }
+                    
+                    data.items.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        mainCategorySelect.appendChild(option);
+                    });
+                    
+                    // 如果有选定的分类，需要先找到对应的主分类
+                    if (selectedCategoryId) {
+                        console.log('正在设置分类，子分类ID:', selectedCategoryId);
+                        // 先加载所有子分类，找到对应的主分类
+                        fetch('/api/sub-categories/')
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('获取子分类失败');
+                                }
+                                return response.json();
+                            })
+                            .then(subData => {
+                                console.log('获取到的子分类数据:', subData);
+                                if (subData.items && subData.items.length > 0) {
+                                    const targetSub = subData.items.find(sub => sub.id == selectedCategoryId);
+                                    if (targetSub) {
+                                        console.log('找到对应子分类:', targetSub);
+                                        // 设置主分类
+                                        mainCategorySelect.value = targetSub.parent_id;
+                                        // 加载对应的子分类
+                                        loadSubCategories(targetSub.parent_id, selectedCategoryId);
+                                    } else {
+                                        console.warn('未找到子分类ID:', selectedCategoryId);
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('加载子分类数据失败:', error);
+                            });
+                    }
+                })
+                .catch(error => {
+                    console.error('加载主分类失败:', error);
+                    const mainCategorySelect = document.getElementById('primary-category');
+                    mainCategorySelect.innerHTML = '<option value="">加载失败</option>';
+                    loadSubCategories(); // 确保子分类也被清空
+                });
+        }
+        
+        // 加载子分类数据
+        function loadSubCategories(mainCategoryId = null, selectedSubCategoryId = null) {
+            const subCategorySelect = document.getElementById('sub-category');
+            
+            // 如果没有主分类ID，清空子分类并返回
+            if (!mainCategoryId) {
+                subCategorySelect.innerHTML = '<option value="">选择子分类</option>';
+                return;
+            }
+            
+            let url = `/api/sub-categories/?main_category_id=${mainCategoryId}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    subCategorySelect.innerHTML = '<option value="">选择子分类</option>';
+                    
+                    // 如果没有子分类数据，显示提示
+                    if (!data.items || data.items.length === 0) {
+                        const option = document.createElement('option');
+                        option.value = "";
+                        option.textContent = "该主分类下暂无子分类";
+                        option.disabled = true;
+                        subCategorySelect.appendChild(option);
+                        return;
+                    }
+                    
+                    data.items.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        subCategorySelect.appendChild(option);
+                        
+                        // 如果这是我们要选择的子分类
+                        if (selectedSubCategoryId && category.id == selectedSubCategoryId) {
+                            option.selected = true;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('加载子分类失败:', error);
+                    subCategorySelect.innerHTML = '<option value="">加载失败</option>';
+                });
+        }
+        // 初始化TinyMCE富文本编辑器
+        function initTinyMCE() {
+            console.log('开始初始化TinyMCE...');
+            
+            // 检查tinymce是否已加载
+            if (typeof tinymce === 'undefined') {
+                console.error('TinyMCE库未加载');
+                createFallbackRichTextEditor();
+                return;
+            }
+            
+            // 等待DOM完全加载后再初始化
+            setTimeout(() => {
+                try {
+                    tinymce.init({
+                        selector: '#rich-text-editor',
+                        height: '100%',
+                        menubar: false,
+                        language: 'zh_CN',
+                        language_url: 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.7.0/langs/zh_CN.js',
+                        plugins: [
+                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                        ],
+                        toolbar: 'undo redo | blocks | ' + 
+                            'bold italic forecolor | alignleft aligncenter ' + 
+                            'alignright alignjustify | bullist numlist outdent indent | ' + 
+                            'removeformat | code | help',
+                        content_style: 'body { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size:14px; line-height:1.6; }',
+                        setup: function(editor) {
+                            tinymceEditor = editor;
+                            currentEditorStates.richText = EditorState.TINYMCE;
+                            console.log('TinyMCE编辑器初始化成功');
+                            editor.on('change', function() {
+                                updatePreview();
+                            });
+                        },
+                        init_instance_callback: function(editor) {
+                            console.log('TinyMCE编辑器完全加载完成');
+                            // 如果是在编辑模式下，设置内容
+                            if (isEditMode && currentArticleId) {
+                                // 内容会在loadArticle中设置
+                                console.log('TinyMCE编辑器就绪，等待加载文章内容');
+                            }
+                        }
+                    }).catch(function(error) {
+                        console.error('TinyMCE初始化失败:', error);
+                        createFallbackRichTextEditor();
+                    });
+                } catch (error) {
+                    console.error('TinyMCE初始化失败:', error);
+                    createFallbackRichTextEditor();
+                }
+            }, 100);
+        }
+        
+        // 创建回退富文本编辑器
+        function createFallbackRichTextEditor() {
+            console.log('创建回退富文本编辑器');
+            const editorDiv = document.getElementById('rich-text-editor');
+            if (editorDiv) {
+                editorDiv.innerHTML = '<textarea id="fallback-rich-text-editor" style="width:100%;height:400px;border:1px solid #ccc;padding:10px;font-family:sans-serif;resize:vertical;"></textarea>';
+                const fallbackEditor = document.getElementById('fallback-rich-text-editor');
+                fallbackEditor.placeholder = '在这里输入文章内容...';
+                
+                tinymceEditor = {
+                    getContent: () => fallbackEditor.value,
+                    setContent: (content) => {
+                        fallbackEditor.value = content || '';
+                        console.log('回退编辑器设置内容:', content);
+                    },
+                    on: (event, callback) => {
+                        if (event === 'change') {
+                            fallbackEditor.addEventListener('input', callback);
+                        }
+                    }
+                };
+                
+                // 设置编辑器状态
+                currentEditorStates.richText = EditorState.FALLBACK_RICH_TEXT;
+                
+                // 监听内容变化
+                fallbackEditor.addEventListener('input', updatePreview);
+                console.log('回退富文本编辑器创建完成');
+            }
+        }
+        
+        // 初始化Monaco代码编辑器
+        function initMonacoEditor() {
+            console.log('开始初始化Monaco编辑器...');
+            
+            // 检查require是否可用
+            if (typeof require === 'undefined') {
+                console.error('Monaco Editor库未加载');
+                createFallbackCodeEditor();
+                return;
+            }
+            
+            try {
+                require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+                require(['vs/editor/editor.main'], function() {
+                    try {
+                        monacoEditor = monaco.editor.create(document.getElementById('monaco-editor'), {
+                            value: '', // 移除默认代码内容
+                            language: EDITOR_CONFIG.DEFAULT_CODE_LANGUAGE,
+                            theme: 'vs',
+                            fontSize: 14,
+                            minimap: { enabled: false },
+                            scrollBeyondLastLine: false,
+                            automaticLayout: true
+                        });
+                        console.log('Monaco编辑器初始化成功');
+                        currentEditorStates.code = EditorState.MONACO;
+                        // 监听内容变化
+                        monacoEditor.onDidChangeModelContent(function() {
+                            updatePreview();
+                        });
+                    } catch (error) {
+                        console.error('Monaco编辑器创建失败:', error);
+                        createFallbackCodeEditor();
+                    }
+                }, function(error) {
+                    console.error('Monaco Editor加载失败:', error);
+                    createFallbackCodeEditor();
+                });
+            } catch (error) {
+                console.error('Monaco编辑器初始化失败:', error);
+                createFallbackCodeEditor();
+            }
+        }
+        
+        // 创建回退代码编辑器
+        function createFallbackCodeEditor() {
+            console.log('创建回退代码编辑器');
+            const editorDiv = document.getElementById('monaco-editor');
+            if (editorDiv) {
+                editorDiv.innerHTML = '<textarea id="fallback-code-editor" style="width:100%;height:400px;border:1px solid #ccc;padding:10px;font-family:monospace;resize:vertical;"></textarea>';
+                const fallbackEditor = document.getElementById('fallback-code-editor');
+                fallbackEditor.placeholder = '在这里输入代码...';
+                
+                monacoEditor = {
+                    getValue: () => fallbackEditor.value,
+                    setValue: (value) => {
+                        fallbackEditor.value = value || '';
+                        console.log('回退代码编辑器设置内容:', value);
+                    },
+                    onDidChangeModelContent: (callback) => {
+                        fallbackEditor.addEventListener('input', callback);
+                    }
+                };
+                
+                // 设置编辑器状态
+                currentEditorStates.code = EditorState.FALLBACK_CODE;
+                
+                // 监听内容变化
+                fallbackEditor.addEventListener('input', updatePreview);
+                console.log('回退代码编辑器创建完成');
+            }
+        }
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 编辑器标签页切换
+            document.querySelectorAll('.editor-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    switchEditorTab(this.dataset.tab);
+                });
+            });
+            // 内容类型标签页
+            document.querySelectorAll('.content-type-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.content-type-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            // 标签输入
+            const tagInput = document.getElementById('tag-input');
+            tagInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && this.value.trim()) {
+                    e.preventDefault();
+                    addTag(this.value.trim());
+                    this.value = '';
+                }
+            });
+            // 代码语言切换
+            document.getElementById('code-language').addEventListener('change', function() {
+                if (monacoEditor) {
+                    monaco.editor.setModelLanguage(monacoEditor.getModel(), this.value);
+                }
+            });
+            // 表单字段变化时更新预览
+            ['title', 'description', 'article-subtitle', 'article-summary'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updatePreview);
+            });
+            
+            // 主分类变化时加载对应的子分类
+            document.getElementById('primary-category').addEventListener('change', function() {
+                const mainCategoryId = this.value;
+                if (mainCategoryId) {
+                    loadSubCategories(mainCategoryId);
+                } else {
+                    // 清空子分类选择框
+                    const subCategorySelect = document.getElementById('sub-category');
+                    subCategorySelect.innerHTML = '<option value="">选择子分类</option>';
+                }
+            });
+            
+            // 初始加载分类数据
+            loadCategories();
+        }
+        // 切换编辑器标签页
+        function switchEditorTab(tabName) {
+            // 更新标签页状态
+            document.querySelectorAll('.editor-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            // 显示对应面板
+            document.querySelectorAll('.editor-pane').forEach(pane => pane.classList.remove('active'));
+            document.getElementById(`${tabName}-pane`).classList.add('active');
+            // 如果切换到Monaco编辑器，重新布局
+            if (tabName === 'code' && monacoEditor) {
+                setTimeout(() => monacoEditor.layout(), 100);
+            }
+            // 如果切换到预览，更新预览内容
+            if (tabName === 'preview') {
+                updatePreview();
+            }
+        }
+        // 添加标签
+        function addTag(tagText) {
+            if (!tags.includes(tagText)) {
+                tags.push(tagText);
+                renderTags();
+            }
+        }
+        // 移除标签
+        function removeTag(tagText) {
+            const index = tags.indexOf(tagText);
+            if (index > -1) {
+                tags.splice(index, 1);
+                renderTags();
+            }
+        }
+        // 渲染标签
+        function renderTags() {
+            const container = document.getElementById('tag-container');
+            const input = document.getElementById('tag-input');
+            // 清除现有标签
+            container.querySelectorAll('.tag').forEach(tag => tag.remove());
+            // 添加新标签
+            tags.forEach(tagText => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'tag';
+                tagElement.innerHTML = `
+                    ${tagText}
+                    <button class="tag-remove" onclick="removeTag('${tagText}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                container.insertBefore(tagElement, input);
+            });
+        }
+        // 更新预览
+        function updatePreview() {
+            try {
+                const title = document.getElementById('title').value || EDITOR_CONFIG.DEFAULT_PREVIEW_TITLE;
+                const subtitle = document.getElementById('article-subtitle').value;
+                const summary = document.getElementById('article-summary').value;
+                
+                let richTextContent = '';
+                if (isEditorReady('richText')) {
+                    try {
+                        richTextContent = tinymceEditor.getContent() || '';
+                        console.log('获取富文本内容:', richTextContent);
+                    } catch (error) {
+                        console.warn('获取富文本内容失败:', error);
+                        richTextContent = '';
+                    }
+                }
+                
+                let codeContent = '';
+                if (isEditorReady('code')) {
+                    try {
+                        const code = monacoEditor.getValue() || '';
+                        const language = document.getElementById('code-language').value;
+                        console.log('获取代码内容:', code);
+                        
+                        if (code.trim()) {
+                            codeContent = `
+                                <div class="chat-style-codeblock">
+                                    <button class="copy-btn" onclick="copyCode(this)">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <pre><code class="language-${language}">${escapeHtml(code)}</code></pre>
+                                </div>
+                            `;
+                        }
+                    } catch (error) {
+                        console.warn('获取代码内容失败:', error);
+                        codeContent = '';
+                    }
+                }
+                
+                const previewContent = `
+                    <h1>${escapeHtml(title)}</h1>
+                    ${subtitle ? `<h2 style="color: #8d99ae; font-weight: 400; margin-bottom: 1rem;">${escapeHtml(subtitle)}</h2>` : ''}
+                    ${summary ? `<div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; font-style: italic;">${escapeHtml(summary)}</div>` : ''}
+                    ${richTextContent}
+                    ${codeContent}
+                `;
+                
+                const previewElement = document.getElementById('preview-content');
+                if (previewElement) {
+                    previewElement.innerHTML = previewContent;
+                    console.log('预览更新完成');
+                } else {
+                    console.warn('预览元素未找到');
+                }
+            } catch (error) {
+                console.error('更新预览失败:', error);
+            }
+        }
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        // 复制代码
+        function copyCode(button) {
+            try {
+                const codeBlock = button.closest('.chat-style-codeblock');
+                if (!codeBlock) {
+                    console.warn('代码块元素未找到');
+                    return;
+                }
+                
+                const codeElement = codeBlock.querySelector('code');
+                if (!codeElement) {
+                    console.warn('代码元素未找到');
+                    return;
+                }
+                
+                const code = codeElement.textContent || '';
+                if (!code.trim()) {
+                    Swal.fire('提示', '没有可复制的代码内容', 'warning');
+                    return;
+                }
+                
+                // 尝试使用现代API复制
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        showCopySuccess(button);
+                    }).catch(error => {
+                        console.warn('现代复制API失败，使用回退方法:', error);
+                        fallbackCopyTextToClipboard(code, button);
+                    });
+                } else {
+                    // 回退到传统方法
+                    fallbackCopyTextToClipboard(code, button);
+                }
+            } catch (error) {
+                console.error('复制代码失败:', error);
+                Swal.fire('错误', '复制代码失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 回退复制方法
+        function fallbackCopyTextToClipboard(text, button) {
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    showCopySuccess(button);
+                } else {
+                    throw new Error('复制命令执行失败');
+                }
+            } catch (error) {
+                console.error('回退复制方法失败:', error);
+                Swal.fire('错误', '复制失败，请手动选择代码复制', 'error');
+            }
+        }
+        
+        // 显示复制成功提示
+        function showCopySuccess(button) {
+            const originalIcon = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            button.style.color = '#10b981';
+            
+            setTimeout(() => {
+                button.innerHTML = originalIcon;
+                button.style.color = '';
+            }, 2000);
+            
+            // 可选：显示成功提示
+            Swal.fire({
+                title: '复制成功！',
+                text: '代码已复制到剪贴板',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        }
+        // 工具栏功能
+        function previewContent() {
+            switchEditorTab('preview');
+        }
+        
+        function saveToList() {
+            if (confirm('确定要保存这篇文章吗？')) {
+                saveArticle();
+            }
+        }
+        
+        // 保存文章到后端
+        function saveArticle() {
+            // 收集表单数据
+            const title = document.getElementById('title').value;
+            const subtitle = document.getElementById('article-subtitle').value;
+            const summary = document.getElementById('article-summary').value;
+            const categoryId = document.getElementById('sub-category').value;
+            const readTimeMinutes = document.getElementById('read-time').value || EDITOR_CONFIG.DEFAULT_READ_TIME;
+            
+            // 获取内容类型 - 根据编辑模式决定
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+            let contentType = 'TUTORIAL'; // 默认为教程
+            
+            // 如果是教程编辑模式，强制为TUTORIAL
+            if (typeParam === 'course' || (isEditMode && window.location.href.includes('type=course'))) {
+                contentType = 'TUTORIAL';
+            } else {
+                // 普通文章模式，根据选择的内容类型
+                document.querySelectorAll('.content-type-tab').forEach(tab => {
+                    if (tab.classList.contains('active')) {
+                        const typeMap = {
+                            'tutorial': 'TUTORIAL',
+                            'story': 'STORY',
+                            'structure': 'STRUCTURE'
+                        };
+                        contentType = typeMap[tab.dataset.type] || 'TUTORIAL';
+                    }
+                });
+            }
+            
+            // 获取富文本内容
+            const contentHtml = isEditorReady('richText') ? tinymceEditor.getContent() : '';
+            
+            // 获取代码内容
+            const contentCode = isEditorReady('code') ? monacoEditor.getValue() : '';
+            const codeLanguage = document.getElementById('code-language').value;
+            
+            // 构建请求数据
+            const articleData = {
+                title: title,
+                subtitle: subtitle,
+                summary: summary,
+                content_type: contentType,
+                read_time_minutes: parseInt(readTimeMinutes),
+                category_id: categoryId || null,
+                content_html: contentHtml,
+                content_code: contentCode,
+                code_language: codeLanguage,
+                tags: tags
+            };
+            
+            // 确定请求URL和方法
+            let url = contentType === 'TUTORIAL' ? '/api/courses/' : '/api/articles/';
+            let method = 'POST';
+            
+            if (isEditMode && currentArticleId) {
+                url = `${url}${currentArticleId}/`;
+                method = 'PUT';
+            }
+            
+            // 发送请求
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken() // 获取CSRF令牌
+                },
+                body: JSON.stringify(articleData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // 如果是新建文章，更新URL和状态
+                    if (!isEditMode && data.id) {
+                        currentArticleId = data.id;
+                        isEditMode = true;
+                        // 更新URL，但不刷新页面，保持type参数
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const typeParam = urlParams.get('type');
+                        const newUrl = typeParam ? `?id=${data.id}&type=${typeParam}` : `?id=${data.id}`;
+                        window.history.pushState({}, '', newUrl);
+                    }
+                    
+                    Swal.fire({
+                        title: '保存成功！',
+                        text: data.message || '文章已成功保存',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    // 可以选择跳转到列表页
+                    // window.location.href = '/manage/course-management/';
+                } else {
+                    Swal.fire({
+                        title: '保存失败',
+                        text: data.message || '未知错误',
+                        icon: 'error',
+                        confirmButtonText: '确定'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('保存文章失败:', error);
+                Swal.fire({
+                    title: '保存失败',
+                    text: error.message || '网络错误或服务器异常',
+                    icon: 'error',
+                    confirmButtonText: '确定'
+                });
+            });
+        }
+        
+        // 获取CSRF令牌
+        function getCsrfToken() {
+            const cookieValue = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='))
+                ?.split('=')[1];
+            return cookieValue || '';
+        }
+        function formatCode() {
+            try {
+                if (isEditorReady('code')) {
+                    const action = monacoEditor.getAction('editor.action.formatDocument');
+                    if (action) {
+                        action.run();
+                        console.log('代码格式化完成');
+                    } else {
+                        console.warn('格式化操作不可用');
+                        Swal.fire('提示', '代码格式化功能不可用', 'warning');
+                    }
+                } else {
+                    console.warn('代码编辑器未就绪');
+                    Swal.fire('提示', '代码编辑器未就绪，请稍后重试', 'warning');
+                }
+            } catch (error) {
+                console.error('代码格式化失败:', error);
+                Swal.fire('错误', '代码格式化失败: ' + error.message, 'error');
+            }
+        }
+        
+        function runCode() {
+            try {
+                if (isEditorReady('code')) {
+                    const code = monacoEditor.getValue() || '';
+                    if (code.trim()) {
+                        Swal.fire({
+                            title: '代码运行',
+                            html: `
+                                <div style="text-align: left;">
+                                    <p><strong>代码内容：</strong></p>
+                                    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem;">${escapeHtml(code)}</pre>
+                                    <p style="margin-top: 1rem; color: #666;">代码运行功能需要后端支持，目前仅作预览。</p>
+                                </div>
+                            `,
+                            icon: 'info',
+                            confirmButtonText: '确定'
+                        });
+                    } else {
+                        Swal.fire('提示', '请先输入代码内容', 'warning');
+                    }
+                } else {
+                    console.warn('代码编辑器未就绪');
+                    Swal.fire('提示', '代码编辑器未就绪，请稍后重试', 'warning');
+                }
+            } catch (error) {
+                console.error('代码运行失败:', error);
+                Swal.fire('错误', '代码运行失败: ' + error.message, 'error');
+            }
+        }
+        function insertCodeBlock() {
+            try {
+                if (isEditorReady('richText')) {
+                    let code = '';
+                    let language = EDITOR_CONFIG.DEFAULT_CODE_LANGUAGE;
+                    
+                    // 尝试从Monaco编辑器获取代码
+                    if (isEditorReady('code')) {
+                        try {
+                            code = monacoEditor.getValue() || '';
+                            language = document.getElementById('code-language').value || EDITOR_CONFIG.DEFAULT_CODE_LANGUAGE;
+                        } catch (error) {
+                            console.warn('从Monaco编辑器获取代码失败:', error);
+                        }
+                    }
+                    
+                    // 如果没有代码内容，使用默认提示
+                    if (!code.trim()) {
+                        code = EDITOR_CONFIG.DEFAULT_CODE_CONTENT;
+                    }
+                    
+                    const codeBlock = `
+                        <div class="chat-style-codeblock">
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <pre><code class="language-${language}">${escapeHtml(code)}</code></pre>
+                        </div>
+                    `;
+                    
+                    tinymceEditor.insertContent(codeBlock);
+                    console.log('代码块插入成功');
+                } else {
+                    console.warn('富文本编辑器未就绪');
+                    Swal.fire('提示', '富文本编辑器未就绪，请稍后重试', 'warning');
+                }
+            } catch (error) {
+                console.error('插入代码块失败:', error);
+                Swal.fire('错误', '插入代码块失败: ' + error.message, 'error');
+            }
+        }
+    </script>
+    <script src="/static/js/debug_sync.js"></script>
+</body>
+</html>

@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数库</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --text-color: #2b2d42;
+            --light-text: #6b7280;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --border-radius: 8px;
+            --sidebar-width: 260px;
+
+            /* 原库结构浏览器的变量保留 */
+            --module-color: #6c757d;
+            --class-color: #007bff;
+            --function-color: #6610f2;
+            --method-color: #d63384;
+            --attribute-color: #20c997;
+            --semantic-color: #495057;
+            --row-hover: #f8f9fa;
+            --active-module: #e7f1ff;
+            --input-structure: #fd7e14;
+            --output-structure: #28a745;
+            --operation-type: #6f42c1;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', 'Inter', 'Helvetica Neue', sans-serif;
+            background-color: #f8f9fa;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ========== 统一导航栏样式 ========== */
+        header {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .logo:hover {
+            color: var(--secondary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-links a.active {
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.15);
+            font-weight: 600;
+        }
+
+        .login-btn {
+            padding: 0.5rem 1.25rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .login-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+        }
+
+        /* ========== 原有内容样式（未改动） ========== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .content-area {
+            padding: 20px;
+        }
+
+        /* ========== 原有内容样式（未改动） ========== */
+        h1 {
+            margin: 0 0 15px 0;
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        select, input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        select:hover, input:hover {
+            border-color: var(--primary-color);
+        }
+
+        /* 思维导图交互优化 */
+        .structure-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .structure-table:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .structure-table th {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .structure-table th:hover {
+            background-color: #e9ecef;
+        }
+
+        .structure-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+            transition: all 0.2s ease;
+        }
+
+        .structure-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .structure-table tr {
+            transition: all 0.2s ease;
+        }
+
+        .structure-table tr:hover {
+            background-color: var(--row-hover);
+            transform: translateX(2px);
+        }
+
+        /* 类型标签的交互效果 */
+        .type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .type-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .type-function {
+            background-color: #e9ecef;
+            color: var(--function-color);
+        }
+
+        .type-function:hover {
+            background-color: #d1ecf1;
+        }
+
+        .type-method {
+            background-color: #e9ecef;
+            color: var(--method-color);
+        }
+
+        .type-method:hover {
+            background-color: #f8d7da;
+        }
+
+        .type-attribute {
+            background-color: #e9ecef;
+            color: var(--attribute-color);
+        }
+
+        .type-attribute:hover {
+            background-color: #d4edda;
+        }
+
+        /* 名称元素的交互效果 */
+        .function-name, .method-name, .attribute-name {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .function-name:hover, .method-name:hover, .attribute-name:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        /* 操作类型和语义描述的交互效果 */
+        .operation-type {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            color: var(--operation-type);
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+
+        .operation-type:hover {
+            color: var(--secondary-color);
+        }
+
+        .semantic-desc {
+            color: var(--semantic-color);
+            font-size: 14px;
+            margin-top: 5px;
+            line-height: 1.5;
+            transition: color 0.2s ease;
+        }
+
+        .semantic-desc:hover {
+            color: var(--text-color);
+        }
+
+        /* 输入输出结构的交互效果 */
+        .input-structure, .output-structure {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            color: var(--input-structure);
+            font-size: 14px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .input-structure:hover, .output-structure:hover {
+            color: var(--secondary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .output-structure {
+            color: var(--output-structure);
+        }
+
+        /* 搜索高亮的交互效果 */
+        .search-highlight {
+            background-color: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+        }
+
+        .search-highlight:hover {
+            background-color: #ffeaa7;
+            transform: scale(1.02);
+        }
+
+        /* 模块名和类名样式 */
+        .module-name {
+            font-weight: 600;
+            color: var(--module-color);
+            transition: color 0.2s ease;
+        }
+
+        .module-name:hover {
+            color: var(--primary-color);
+        }
+
+        .class-name {
+            font-weight: 600;
+            color: var(--class-color);
+            transition: color 0.2s ease;
+        }
+
+        .class-name:hover {
+            color: var(--secondary-color);
+        }
+
+        /* 空消息的样式优化 */
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+            transition: color 0.2s ease;
+        }
+
+        .empty-message:hover {
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== 替换后的导航栏 ========== -->
+    <header>
+        <div class="header-container">
+            <a href="{% url 'Pythonfun:index' %}" class="logo"></a>
+            <div class="nav-links">
+                <a href="{% url 'Pythonfun:index' %}">语法</a>
+                <a href="{% url 'Pythonfun:function_library' %}" class="active">函数库</a>
+                <a href="{% url 'Pythonfun:function_query' %}">函数查询</a>
+                <a href="{% url 'Pythonfun:data_structure' %}">数据结构</a>
+                <a href="{% url 'Pythonfun:statement' %}">语句</a>
+                <a href="{% url 'Pythonfun:project' %}">项目</a>
+            </div>
+            <a href="/login/" class="login-btn">登录</a>
+        </div>
+    </header>
+
+    <!-- ========== 原有内容区域（完全未改动） ========== -->
+    <div class="container">
+        <div class="content-area">
+            <h1>Python 库结构浏览器</h1>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="library-selector">选择库</label>
+                    <select id="library-selector">
+                        <option value="builtin">Python 内置库</option>
+                        <option value="pandas">Pandas 库</option>
+                        <option value="numpy">NumPy 库</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="module-selector">选择模块</label>
+                    <select id="module-selector">
+                        <option value="">-- 请先选择库 --</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="class-selector">选择类</label>
+                    <select id="class-selector">
+                        <option value="">-- 全部类 --</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="type-selector">选择类型</label>
+                    <select id="type-selector">
+                        <option value="">全部类型</option>
+                        <option value="function">函数</option>
+                        <option value="method">方法</option>
+                        <option value="attribute">属性</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="operation-selector">操作类型</label>
+                    <select id="operation-selector">
+                        <option value="">全部操作</option>
+                        <option value="构造">构造</option>
+                        <option value="复制">复制</option>
+                        <option value="访问">访问</option>
+                        <option value="查询">查询</option>
+                        <option value="设置">设置</option>
+                        <option value="插入">插入</option>
+                        <option value="删除">删除</option>
+                        <option value="计算">计算</option>
+                        <option value="转换">转换</option>
+                        <option value="聚合">聚合</option>
+                        <option value="排序">排序</option>
+                        <option value="重组">重组</option>
+                        <option value="判断">判断</option>
+                        <option value="输入">输入</option>
+                        <option value="输出">输出</option>
+                        <option value="迭代">迭代</option>
+                        <option value="选择">选择</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="search-box">搜索</label>
+                    <input type="text" id="search-box" placeholder="搜索名称或描述...">
+                </div>
+            </div>
+            <table class="structure-table">
+                <thead>
+                    <tr>
+                        <th width="8%">模块</th>
+                        <th width="12%">类名</th>
+                        <th width="8%">类型</th>
+                        <th width="8%">操作类型</th>
+                        <th width="12%">名称</th>
+                        <th width="20%">语义</th>
+                        <th width="16%">输入数据结构</th>
+                        <th width="16%">输出数据结构</th>
+                    </tr>
+                </thead>
+                <tbody id="content-table">
+                    <tr>
+                        <td colspan="8" class="empty-message">请选择一个库和模块</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========== 动态数据加载脚本 ========== -->
+    <script>
+                let libraries = {};
+        
+        // 从API加载数据
+        async function loadLibraryData() {
+            try {
+                const response = await fetch('/api/function-library/');
+                if (response.ok) {
+                    libraries = await response.json();
+                    console.log('数据加载成功:', libraries);
+                    init();
+                } else {
+                    console.error('加载数据失败:', response.status);
+                    // 如果API失败，使用默认数据
+                    initWithDefaultData();
+                }
+            } catch (error) {
+                console.error('加载数据出错:', error);
+                // 如果API失败，使用默认数据
+                initWithDefaultData();
+            }
+        }
+        
+        // 使用默认静态数据
+        function initWithDefaultData() {
+            libraries = {
+                    {
+                        name: "os",
+                        description: "操作系统接口",
+                        items: [
+                            {
+                                type: "class",
+                                name: "os.PathLike",
+                                semantic: "抽象基类，表示文件系统路径的对象",
+                                methods: [
+                                    { 
+                                        name: "__fspath__()", 
+                                        semantic: "返回文件系统路径的字符串表示",
+                                        operation: "转换",
+                                        input: "PathLike对象",
+                                        output: "字符串路径"
+                                    },
+                                    { 
+                                        name: "join(path)", 
+                                        semantic: "拼接路径组件",
+                                        operation: "重组",
+                                        input: "多个路径组件",
+                                        output: "合并后的路径"
+                                    },
+                                    { 
+                                        name: "exists()", 
+                                        semantic: "检查路径是否存在",
+                                        operation: "判断",
+                                        input: "路径字符串",
+                                        output: "布尔值"
+                                    },
+                                    { 
+                                        name: "isdir()", 
+                                        semantic: "检查路径是否为目录",
+                                        operation: "判断",
+                                        input: "路径字符串",
+                                        output: "布尔值"
+                                    },
+                                    { 
+                                        name: "abspath()", 
+                                        semantic: "返回绝对路径",
+                                        operation: "转换",
+                                        input: "相对路径",
+                                        output: "绝对路径"
+                                    }
+                                ],
+                                attributes: [
+                                    { 
+                                        name: "sep", 
+                                        semantic: "操作系统路径分隔符",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "字符串"
+                                    },
+                                    { 
+                                        name: "pathsep", 
+                                        semantic: "路径分隔符",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "字符串"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "function",
+                                name: "os.listdir(path)",
+                                semantic: "返回指定路径下的文件和目录列表",
+                                operation: "查询",
+                                input: "目录路径",
+                                output: "文件名列表"
+                            },
+                            {
+                                type: "function",
+                                name: "os.mkdir(path)",
+                                semantic: "创建目录",
+                                operation: "构造",
+                                input: "目录路径",
+                                output: "无"
+                            },
+                            {
+                                type: "function",
+                                name: "os.rename(src, dst)",
+                                semantic: "重命名文件或目录",
+                                operation: "设置",
+                                input: "原路径和新路径",
+                                output: "无"
+                            },
+                            {
+                                type: "function",
+                                name: "os.remove(path)",
+                                semantic: "删除文件",
+                                operation: "删除",
+                                input: "文件路径",
+                                output: "无"
+                            }
+                        ]
+                    },
+                    {
+                        name: "sys",
+                        description: "系统相关参数和函数",
+                        items: [
+                            {
+                                type: "class",
+                                name: "sys.flags",
+                                semantic: "解释器命令行标志",
+                                attributes: [
+                                    { 
+                                        name: "debug", 
+                                        semantic: "是否在调试模式下运行",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "整型标志"
+                                    },
+                                    { 
+                                        name: "inspect", 
+                                        semantic: "是否在交互模式下运行",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "整型标志"
+                                    },
+                                    { 
+                                        name: "optimize", 
+                                        semantic: "优化级别",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "整型标志"
+                                    },
+                                    { 
+                                        name: "verbose", 
+                                        semantic: "详细输出标志",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "整型标志"
+                                    },
+                                    { 
+                                        name: "bytes_warning", 
+                                        semantic: "字节警告标志",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "整型标志"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "function",
+                                name: "sys.exit([status])",
+                                semantic: "退出Python解释器",
+                                operation: "输出",
+                                input: "状态码(可选)",
+                                output: "无"
+                            },
+                            {
+                                type: "function",
+                                name: "sys.getsizeof(object)",
+                                semantic: "返回对象占用的内存大小",
+                                operation: "计算",
+                                input: "Python对象",
+                                output: "字节大小"
+                            },
+                            {
+                                type: "function",
+                                name: "sys.getdefaultencoding()",
+                                semantic: "返回默认字符串编码名称",
+                                operation: "查询",
+                                input: "无",
+                                output: "编码名称字符串"
+                            },
+                            {
+                                type: "function",
+                                name: "sys.exc_info()",
+                                semantic: "获取当前异常信息",
+                                operation: "查询",
+                                input: "无",
+                                output: "异常信息元组"
+                            }
+                        ]
+                    },
+                    {
+                        name: "datetime",
+                        description: "基本日期和时间类型",
+                        items: [
+                            {
+                                type: "class",
+                                name: "datetime.datetime",
+                                semantic: "日期和时间对象",
+                                methods: [
+                                    { 
+                                        name: "now([tz])", 
+                                        semantic: "返回当前本地日期和时间",
+                                        operation: "构造",
+                                        input: "时区信息(可选)",
+                                        output: "datetime对象"
+                                    },
+                                    { 
+                                        name: "utcnow()", 
+                                        semantic: "返回当前UTC日期和时间",
+                                        operation: "构造",
+                                        input: "无",
+                                        output: "datetime对象"
+                                    },
+                                    { 
+                                        name: "strftime(format)", 
+                                        semantic: "返回格式化的日期字符串",
+                                        operation: "转换",
+                                        input: "格式字符串",
+                                        output: "格式化字符串"
+                                    },
+                                    { 
+                                        name: "replace([year, month, day])", 
+                                        semantic: "替换指定的日期时间字段",
+                                        operation: "重组",
+                                        input: "新日期时间字段",
+                                        output: "新datetime对象"
+                                    },
+                                    { 
+                                        name: "timestamp()", 
+                                        semantic: "返回POSIX时间戳",
+                                        operation: "转换",
+                                        input: "无",
+                                        output: "浮点数时间戳"
+                                    }
+                                ],
+                                attributes: [
+                                    { 
+                                        name: "year", 
+                                        semantic: "年份",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "整型年份"
+                                    },
+                                    { 
+                                        name: "month", 
+                                        semantic: "月份",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "整型月份"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "class",
+                                name: "datetime.timedelta",
+                                semantic: "时间间隔对象",
+                                methods: [
+                                    { 
+                                        name: "total_seconds()", 
+                                        semantic: "返回总秒数",
+                                        operation: "转换",
+                                        input: "无",
+                                        output: "浮点数秒数"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "function",
+                                name: "datetime.date.today()",
+                                semantic: "返回当前本地日期",
+                                operation: "构造",
+                                input: "无",
+                                output: "date对象"
+                            },
+                            {
+                                type: "function",
+                                name: "datetime.time.fromisoformat(time_string)",
+                                semantic: "从字符串创建时间对象",
+                                operation: "转换",
+                                input: "时间字符串",
+                                output: "time对象"
+                            },
+                            {
+                                type: "function",
+                                name: "datetime.datetime.combine(date, time)",
+                                semantic: "组合日期和时间对象",
+                                operation: "重组",
+                                input: "date对象和time对象",
+                                output: "datetime对象"
+                            }
+                        ]
+                    }
+                ]
+            },
+            pandas: {
+                name: "Pandas 库",
+                modules: [
+                    {
+                        name: "pandas",
+                        description: "主要数据结构",
+                        items: [
+                            {
+                                type: "class",
+                                name: "pandas.DataFrame",
+                                semantic: "二维标签数据结构，类似电子表格",
+                                methods: [
+                                    { 
+                                        name: "head([n])", 
+                                        semantic: "返回前n行数据",
+                                        operation: "查询",
+                                        input: "DataFrame",
+                                        output: "DataFrame子集"
+                                    },
+                                    { 
+                                        name: "describe()", 
+                                        semantic: "生成描述性统计信息",
+                                        operation: "计算",
+                                        input: "DataFrame",
+                                        output: "统计信息DataFrame"
+                                    },
+                                    { 
+                                        name: "groupby()", 
+                                        semantic: "分组数据",
+                                        operation: "重组",
+                                        input: "DataFrame",
+                                        output: "GroupBy对象"
+                                    },
+                                    { 
+                                        name: "merge()", 
+                                        semantic: "合并DataFrame",
+                                        operation: "重组",
+                                        input: "两个DataFrame",
+                                        output: "合并后的DataFrame"
+                                    },
+                                    { 
+                                        name: "apply(func)", 
+                                        semantic: "对数据应用函数",
+                                        operation: "计算",
+                                        input: "DataFrame和函数",
+                                        output: "转换后的DataFrame"
+                                    }
+                                ],
+                                attributes: [
+                                    { 
+                                        name: "columns", 
+                                        semantic: "列标签",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "Index对象"
+                                    },
+                                    { 
+                                        name: "index", 
+                                        semantic: "行标签",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "Index对象"
+                                    },
+                                    { 
+                                        name: "shape", 
+                                        semantic: "DataFrame的维度",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "形状元组"
+                                    },
+                                    { 
+                                        name: "dtypes", 
+                                        semantic: "每列的数据类型",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "数据类型Series"
+                                    },
+                                    { 
+                                        name: "empty", 
+                                        semantic: "是否为空DataFrame",
+                                        operation: "判断",
+                                        input: "",
+                                        output: "布尔值"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "class",
+                                name: "pandas.Series",
+                                semantic: "一维标签数组",
+                                methods: [
+                                    { 
+                                        name: "value_counts()", 
+                                        semantic: "返回值的频率计数",
+                                        operation: "计算",
+                                        input: "Series",
+                                        output: "频率统计Series"
+                                    },
+                                    { 
+                                        name: "apply(func)", 
+                                        semantic: "对Series应用函数",
+                                        operation: "计算",
+                                        input: "Series和函数",
+                                        output: "转换后的Series"
+                                    },
+                                    { 
+                                        name: "unique()", 
+                                        semantic: "返回唯一值数组",
+                                        operation: "查询",
+                                        input: "Series",
+                                        output: "唯一值数组"
+                                    },
+                                    { 
+                                        name: "isna()", 
+                                        semantic: "检测缺失值",
+                                        operation: "判断",
+                                        input: "Series",
+                                        output: "布尔Series"
+                                    },
+                                    { 
+                                        name: "fillna(value)", 
+                                        semantic: "填充缺失值",
+                                        operation: "设置",
+                                        input: "Series和填充值",
+                                        output: "填充后的Series"
+                                    }
+                                ],
+                                attributes: [
+                                    { 
+                                        name: "index", 
+                                        semantic: "Series的索引",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "Index对象"
+                                    },
+                                    { 
+                                        name: "dtype", 
+                                        semantic: "Series的数据类型",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "dtype对象"
+                                    },
+                                    { 
+                                        name: "name", 
+                                        semantic: "Series的名称",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "字符串或None"
+                                    },
+                                    { 
+                                        name: "empty", 
+                                        semantic: "是否为空Series",
+                                        operation: "判断",
+                                        input: "",
+                                        output: "布尔值"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.read_csv(filepath_or_buffer)",
+                                semantic: "从CSV文件读取数据",
+                                operation: "输入",
+                                input: "文件路径或缓冲区",
+                                output: "DataFrame"
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.concat(objs)",
+                                semantic: "沿轴连接多个对象",
+                                operation: "重组",
+                                input: "DataFrame或Series列表",
+                                output: "合并后的DataFrame或Series"
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.get_dummies(data)",
+                                semantic: "将分类变量转换为虚拟/指标变量",
+                                operation: "转换",
+                                input: "分类数据",
+                                output: "虚拟变量DataFrame"
+                            }
+                        ]
+                    },
+                    {
+                        name: "pandas.io",
+                        description: "输入/输出工具",
+                        items: [
+                            {
+                                type: "function",
+                                name: "pandas.read_excel(io)",
+                                semantic: "从Excel文件读取数据",
+                                operation: "输入",
+                                input: "Excel文件路径或对象",
+                                output: "DataFrame或字典"
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.read_json(path_or_buf)",
+                                semantic: "从JSON文件读取数据",
+                                operation: "输入",
+                                input: "JSON文件路径或对象",
+                                output: "DataFrame或Series"
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.read_sql(sql, con)",
+                                semantic: "从SQL数据库读取数据",
+                                operation: "输入",
+                                input: "SQL查询和连接",
+                                output: "DataFrame"
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.to_csv(path_or_buf)",
+                                semantic: "将DataFrame写入CSV文件",
+                                operation: "输出",
+                                input: "DataFrame和文件路径",
+                                output: "无或CSV字符串"
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.to_excel(excel_writer)",
+                                semantic: "将DataFrame写入Excel文件",
+                                operation: "输出",
+                                input: "DataFrame和Excel写入器",
+                                output: "无"
+                            }
+                        ]
+                    },
+                    {
+                        name: "pandas.plotting",
+                        description: "绘图功能",
+                        items: [
+                            {
+                                type: "class",
+                                name: "pandas.DataFrame.plot",
+                                semantic: "DataFrame绘图接口",
+                                methods: [
+                                    { 
+                                        name: "line()", 
+                                        semantic: "绘制折线图",
+                                        operation: "输出",
+                                        input: "DataFrame",
+                                        output: "matplotlib图形对象"
+                                    },
+                                    { 
+                                        name: "bar()", 
+                                        semantic: "绘制条形图",
+                                        operation: "输出",
+                                        input: "DataFrame",
+                                        output: "matplotlib图形对象"
+                                    },
+                                    { 
+                                        name: "hist()", 
+                                        semantic: "绘制直方图",
+                                        operation: "输出",
+                                        input: "DataFrame",
+                                        output: "matplotlib图形对象"
+                                    },
+                                    { 
+                                        name: "box()", 
+                                        semantic: "绘制箱线图",
+                                        operation: "输出",
+                                        input: "DataFrame",
+                                        output: "matplotlib图形对象"
+                                    },
+                                    { 
+                                        name: "scatter(x, y)", 
+                                        semantic: "绘制散点图",
+                                        operation: "输出",
+                                        input: "DataFrame和x,y列名",
+                                        output: "matplotlib图形对象"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.plotting.scatter_matrix(frame)",
+                                semantic: "绘制散点矩阵图",
+                                operation: "输出",
+                                input: "DataFrame",
+                                output: "matplotlib图形数组"
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.plotting.autocorrelation_plot(series)",
+                                semantic: "绘制自相关图",
+                                operation: "输出",
+                                input: "Series",
+                                output: "matplotlib图形对象"
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.plotting.lag_plot(series)",
+                                semantic: "绘制滞后图",
+                                operation: "输出",
+                                input: "Series",
+                                output: "matplotlib图形对象"
+                            },
+                            {
+                                type: "function",
+                                name: "pandas.plotting.parallel_coordinates(frame)",
+                                semantic: "绘制平行坐标图",
+                                operation: "输出",
+                                input: "DataFrame和分类列",
+                                output: "matplotlib图形对象"
+                            }
+                        ]
+                    }
+                ]
+            },
+            numpy: {
+                name: "NumPy 库",
+                modules: [
+                    {
+                        name: "numpy",
+                        description: "核心数组功能",
+                        items: [
+                            {
+                                type: "class",
+                                name: "numpy.ndarray",
+                                semantic: "多维数组对象",
+                                methods: [
+                                    { 
+                                        name: "reshape(shape)", 
+                                        semantic: "改变数组形状",
+                                        operation: "重组",
+                                        input: "数组和新形状",
+                                        output: "新形状数组"
+                                    },
+                                    { 
+                                        name: "flatten()", 
+                                        semantic: "返回扁平化数组",
+                                        operation: "重组",
+                                        input: "数组",
+                                        output: "一维数组"
+                                    },
+                                    { 
+                                        name: "astype(dtype)", 
+                                        semantic: "转换数组数据类型",
+                                        operation: "转换",
+                                        input: "数组和目标类型",
+                                        output: "新类型数组"
+                                    },
+                                    { 
+                                        name: "sum([axis])", 
+                                        semantic: "沿轴求和",
+                                        operation: "计算",
+                                        input: "数组和轴(可选)",
+                                        output: "和值或数组"
+                                    },
+                                    { 
+                                        name: "mean([axis])", 
+                                        semantic: "沿轴计算平均值",
+                                        operation: "计算",
+                                        input: "数组和轴(可选)",
+                                        output: "平均值或数组"
+                                    }
+                                ],
+                                attributes: [
+                                    { 
+                                        name: "shape", 
+                                        semantic: "数组维度",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "形状元组"
+                                    },
+                                    { 
+                                        name: "dtype", 
+                                        semantic: "数组元素类型",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "dtype对象"
+                                    },
+                                    { 
+                                        name: "size", 
+                                        semantic: "数组元素总数",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "整型"
+                                    },
+                                    { 
+                                        name: "ndim", 
+                                        semantic: "数组维数",
+                                        operation: "访问",
+                                        input: "",
+                                        output: "整型"
+                                    },
+                                    { 
+                                        name: "T", 
+                                        semantic: "数组转置",
+                                        operation: "重组",
+                                        input: "",
+                                        output: "转置数组"
+                                    }
+                                ]
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.array(object)",
+                                semantic: "创建数组",
+                                operation: "构造",
+                                input: "序列对象",
+                                output: "ndarray"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.zeros(shape)",
+                                semantic: "创建全零数组",
+                                operation: "构造",
+                                input: "形状元组",
+                                output: "全零数组"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.ones(shape)",
+                                semantic: "创建全一数组",
+                                operation: "构造",
+                                input: "形状元组",
+                                output: "全一数组"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.arange([start,] stop[, step])",
+                                semantic: "返回均匀间隔的值",
+                                operation: "构造",
+                                input: "起始、结束和步长",
+                                output: "均匀间隔数组"
+                            }
+                        ]
+                    },
+                    {
+                        name: "numpy.random",
+                        description: "随机数生成",
+                        items: [
+                            {
+                                type: "function",
+                                name: "numpy.random.rand(d0, d1, ..., dn)",
+                                semantic: "生成均匀分布随机数",
+                                operation: "构造",
+                                input: "形状参数",
+                                output: "均匀分布数组"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.random.randn(d0, d1, ..., dn)",
+                                semantic: "生成标准正态分布随机数",
+                                operation: "构造",
+                                input: "形状参数",
+                                output: "正态分布数组"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.random.randint(low[, high, size])",
+                                semantic: "生成随机整数",
+                                operation: "构造",
+                                input: "范围和形状",
+                                output: "随机整数或数组"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.random.seed([seed])",
+                                semantic: "设置随机种子",
+                                operation: "设置",
+                                input: "种子值",
+                                output: "无"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.random.shuffle(x)",
+                                semantic: "打乱序列顺序",
+                                operation: "重组",
+                                input: "数组或列表",
+                                output: "无(原地修改)"
+                            }
+                        ]
+                    },
+                    {
+                        name: "numpy.linalg",
+                        description: "线性代数",
+                        items: [
+                            {
+                                type: "function",
+                                name: "numpy.linalg.inv(a)",
+                                semantic: "计算矩阵的逆",
+                                operation: "计算",
+                                input: "方阵",
+                                output: "逆矩阵"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.linalg.det(a)",
+                                semantic: "计算矩阵行列式",
+                                operation: "计算",
+                                input: "方阵",
+                                output: "行列式值"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.linalg.eig(a)",
+                                semantic: "计算特征值和特征向量",
+                                operation: "计算",
+                                input: "方阵",
+                                output: "特征值和特征向量元组"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.linalg.solve(a, b)",
+                                semantic: "解线性方程组",
+                                operation: "计算",
+                                input: "系数矩阵和常数向量",
+                                output: "解向量"
+                            },
+                            {
+                                type: "function",
+                                name: "numpy.linalg.norm(x)",
+                                semantic: "计算矩阵或向量范数",
+                                operation: "计算",
+                                input: "数组和范数类型",
+                                output: "范数值"
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        let currentLibrary = null;
+        let currentModule = null;
+        let currentClass = null;
+        let currentType = null;
+        let currentOperation = null;
+        let currentSearch = "";
+
+        const librarySelector = document.getElementById('library-selector');
+        const moduleSelector = document.getElementById('module-selector');
+        const classSelector = document.getElementById('class-selector');
+        const typeSelector = document.getElementById('type-selector');
+        const operationSelector = document.getElementById('operation-selector');
+        const searchBox = document.getElementById('search-box');
+        const contentTable = document.getElementById('content-table');
+
+        function init() {
+            librarySelector.addEventListener('change', function() {
+                currentLibrary = this.value;
+                currentModule = null;
+                currentClass = null;
+                currentType = null;
+                currentOperation = null;
+                currentSearch = "";
+                searchBox.value = "";
+                loadLibrary(currentLibrary);
+            });
+
+            moduleSelector.addEventListener('change', function() {
+                currentModule = this.value;
+                currentClass = null;
+                currentSearch = "";
+                searchBox.value = "";
+                loadClasses();
+                renderTable();
+            });
+
+            classSelector.addEventListener('change', function() {
+                currentClass = this.value;
+                renderTable();
+            });
+
+            typeSelector.addEventListener('change', function() {
+                currentType = this.value;
+                renderTable();
+            });
+
+            operationSelector.addEventListener('change', function() {
+                currentOperation = this.value;
+                renderTable();
+            });
+
+            searchBox.addEventListener('input', function() {
+                currentSearch = this.value.toLowerCase();
+                renderTable();
+            });
+
+            if (librarySelector.value) {
+                currentLibrary = librarySelector.value;
+                loadLibrary(currentLibrary);
+            }
+        }
+
+        function loadLibrary(libraryId) {
+            const library = libraries[libraryId];
+            generateModuleOptions(library.modules);
+            classSelector.innerHTML = '<option value="">-- 全部类 --</option>';
+            typeSelector.value = "";
+            operationSelector.value = "";
+            if (library.modules.length > 0) {
+                moduleSelector.value = library.modules[0].name;
+                currentModule = library.modules[0].name;
+                loadClasses();
+                renderTable();
+            } else {
+                contentTable.innerHTML = '<tr><td colspan="8" class="empty-message">该库没有可用模块</td></tr>';
+            }
+        }
+
+        function loadClasses() {
+            if (!currentLibrary || !currentModule) return;
+            const library = libraries[currentLibrary];
+            const module = library.modules.find(m => m.name === currentModule);
+            if (!module) return;
+            classSelector.innerHTML = '<option value="">-- 全部类 --</option>';
+            const classes = module.items.filter(item => item.type === 'class');
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.name;
+                option.textContent = cls.name;
+                classSelector.appendChild(option);
+            });
+        }
+
+        function generateModuleOptions(modules) {
+            moduleSelector.innerHTML = "";
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "-- 选择模块 --";
+            moduleSelector.appendChild(defaultOption);
+            modules.forEach(module => {
+                const option = document.createElement('option');
+                option.value = module.name;
+                option.textContent = `${module.name} - ${module.description}`;
+                moduleSelector.appendChild(option);
+            });
+        }
+
+        function renderTable() {
+            if (!currentLibrary || !currentModule) {
+                contentTable.innerHTML = '<tr><td colspan="8" class="empty-message">请选择一个库和模块</td></tr>';
+                return;
+            }
+            const library = libraries[currentLibrary];
+            const module = library.modules.find(m => m.name === currentModule);
+            if (!module) {
+                contentTable.innerHTML = '<tr><td colspan="8" class="empty-message">请选择一个模块</td></tr>';
+                return;
+            }
+            let tableContent = "";
+            let hasResults = false;
+            module.items.forEach(item => {
+                if (item.type === 'class') {
+                    if (currentClass && currentClass !== item.name) return;
+                    if (item.methods) {
+                        item.methods.forEach(method => {
+                            if ((!currentType || currentType === 'method') && 
+                                (!currentOperation || currentOperation === method.operation) &&
+                                matchesSearch(method.name, method.semantic)) {
+                                hasResults = true;
+                                tableContent += renderTableRow(
+                                    module.name,
+                                    item.name,
+                                    'method',
+                                    method.operation,
+                                    method.name,
+                                    method.semantic,
+                                    method.input,
+                                    method.output
+                                );
+                            }
+                        });
+                    }
+                    if (item.attributes) {
+                        item.attributes.forEach(attr => {
+                            if ((!currentType || currentType === 'attribute') && 
+                                (!currentOperation || currentOperation === attr.operation) &&
+                                matchesSearch(attr.name, attr.semantic)) {
+                                hasResults = true;
+                                tableContent += renderTableRow(
+                                    module.name,
+                                    item.name,
+                                    'attribute',
+                                    attr.operation,
+                                    attr.name,
+                                    attr.semantic,
+                                    attr.input,
+                                    attr.output
+                                );
+                            }
+                        });
+                    }
+                }
+                if (item.type === 'function') {
+                    if ((!currentType || currentType === 'function') && 
+                        (!currentClass || currentClass === '') && 
+                        (!currentOperation || currentOperation === item.operation) &&
+                        matchesSearch(item.name, item.semantic)) {
+                        hasResults = true;
+                        tableContent += renderTableRow(
+                            module.name,
+                            '-',
+                            'function',
+                            item.operation,
+                            item.name,
+                            item.semantic,
+                            item.input,
+                            item.output
+                        );
+                    }
+                }
+            });
+            if (!hasResults) {
+                tableContent = '<tr><td colspan="8" class="empty-message">没有找到匹配的结果</td></tr>';
+            }
+            contentTable.innerHTML = tableContent;
+        }
+
+        function renderTableRow(moduleName, className, type, operation, name, semantic, input, output) {
+            let typeBadge = '';
+            let nameElement = '';
+            switch(type) {
+                case 'function':
+                    typeBadge = `<span class="type-badge type-function">函数</span>`;
+                    nameElement = `<span class="function-name">${highlightSearch(name)}</span>`;
+                    break;
+                case 'method':
+                    typeBadge = `<span class="type-badge type-method">方法</span>`;
+                    nameElement = `<span class="method-name">${highlightSearch(name)}</span>`;
+                    break;
+                case 'attribute':
+                    typeBadge = `<span class="type-badge type-attribute">属性</span>`;
+                    nameElement = `<span class="attribute-name">${highlightSearch(name)}</span>`;
+                    break;
+            }
+            return `
+                <tr>
+                    <td class="module-name">${moduleName}</td>
+                    <td>${className === '-' ? '-' : `<span class="class-name">${className}</span>`}</td>
+                    <td>${typeBadge}</td>
+                    <td class="operation-type">${operation}</td>
+                    <td>${nameElement}</td>
+                    <td class="semantic-desc">${highlightSearch(semantic)}</td>
+                    <td class="input-structure">${highlightSearch(input)}</td>
+                    <td class="output-structure">${highlightSearch(output)}</td>
+                </tr>
+            `;
+        }
+
+        function matchesSearch(name, semantic) {
+            if (!currentSearch) return true;
+            return name.toLowerCase().includes(currentSearch) || 
+                   semantic.toLowerCase().includes(currentSearch);
+        }
+
+        function highlightSearch(text) {
+            if (!currentSearch || !text) return text;
+            const regex = new RegExp(currentSearch, 'gi');
+            return text.replace(regex, match => `<span class="search-highlight">${match}</span>`);
+        }
+
+        // 思维导图交互增强功能
+        function enhanceTableInteractivity() {
+            // 为表格行添加点击高亮效果
+            contentTable.addEventListener('click', function(e) {
+                const row = e.target.closest('tr');
+                if (row && !row.classList.contains('empty-message')) {
+                    // 移除其他行的高亮
+                    document.querySelectorAll('.structure-table tr').forEach(tr => {
+                        tr.classList.remove('highlighted-row');
+                    });
+                    // 添加当前行高亮
+                    row.classList.add('highlighted-row');
+                    
+                    // 平滑滚动到该行
+                    row.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }
+            });
+
+            // 为类型标签添加点击筛选功能
+            contentTable.addEventListener('click', function(e) {
+                if (e.target.classList.contains('type-badge')) {
+                    const type = e.target.textContent.trim();
+                    let typeValue = '';
+                    switch(type) {
+                        case '函数': typeValue = 'function'; break;
+                        case '方法': typeValue = 'method'; break;
+                        case '属性': typeValue = 'attribute'; break;
+                    }
+                    if (typeValue) {
+                        typeSelector.value = typeValue;
+                        currentType = typeValue;
+                        renderTable();
+                        
+                        // 添加视觉反馈
+                        e.target.style.transform = 'scale(1.1)';
+                        setTimeout(() => {
+                            e.target.style.transform = 'scale(1.05)';
+                        }, 200);
+                    }
+                }
+            });
+
+            // 为操作类型添加点击筛选功能
+            contentTable.addEventListener('click', function(e) {
+                if (e.target.classList.contains('operation-type')) {
+                    const operation = e.target.textContent.trim();
+                    operationSelector.value = operation;
+                    currentOperation = operation;
+                    renderTable();
+                    
+                    // 添加视觉反馈
+                    e.target.style.color = '#3a0ca3';
+                    setTimeout(() => {
+                        e.target.style.color = '';
+                    }, 500);
+                }
+            });
+        }
+
+        // 添加高亮行的样式
+        const style = document.createElement('style');
+        style.textContent = `
+            .highlighted-row {
+                background-color: rgba(67, 97, 238, 0.1) !important;
+                border-left: 4px solid #4361ee;
+                transform: translateX(4px);
+            }
+            
+            .highlighted-row td {
+                font-weight: 500;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 页面加载时从API获取数据
+        loadLibraryData();
+        
+        // 初始化交互增强功能
+        setTimeout(enhanceTableInteractivity, 100);
+    </script>
+</body>
+</html>
