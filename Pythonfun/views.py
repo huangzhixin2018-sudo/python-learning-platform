@@ -1014,34 +1014,117 @@ def export_functions_api(request):
     """导出函数数据API"""
     try:
         from django.http import HttpResponse
-        import csv
+        import openpyxl
+        from openpyxl.styles import Font, Alignment, PatternFill
+        from openpyxl.utils import get_column_letter
+        import io
         
-        response = HttpResponse(content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = 'attachment; filename="functions_export.csv"'
+        # 获取查询参数
+        format_type = request.GET.get('format', 'xlsx')  # 默认xlsx格式
         
-        # 添加BOM以支持中文
-        response.write('\ufeff')
+        if format_type == 'csv':
+            # CSV格式导出
+            import csv
+            response = HttpResponse(content_type='text/csv; charset=utf-8')
+            response['Content-Disposition'] = 'attachment; filename="函数数据库表.csv"'
+            response.write('\ufeff')  # 添加BOM以支持中文
+            
+            writer = csv.writer(response)
+            writer.writerow(['库名称', '模块名称', '函数名称', '函数中文名称', '描述', '操作类型', '语法', '参数', '返回值', '示例'])
+            
+            functions = Function.objects.select_related('module', 'module__library', 'operation_type')
+            
+            for function in functions:
+                writer.writerow([
+                    function.module.library.library_name_cn,
+                    function.module.module_name,
+                    function.function_name,
+                    function.function_name_cn or '',
+                    function.description_cn or function.description or '',
+                    function.operation_type.operation_name_cn if function.operation_type else '',
+                    function.syntax or '',
+                    function.parameters_text or '',
+                    function.return_value_cn or function.return_value or '',
+                    function.example_cn or function.example or ''
+                ])
+            
+            return response
         
-        writer = csv.writer(response)
-        writer.writerow(['库名称', '模块名称', '函数名称', '函数中文名称', '描述', '操作类型', '语法', '参数', '返回值', '示例'])
-        
-        functions = Function.objects.select_related('module', 'module__library', 'operation_type')
-        
-        for function in functions:
-            writer.writerow([
-                function.module.library.library_name_cn,
-                function.module.module_name,
-                function.function_name,
-                function.function_name_cn or '',
-                function.description_cn or function.description or '',
-                function.operation_type.operation_name_cn if function.operation_type else '',
-                function.syntax or '',
-                function.parameters_text or '',
-                function.return_value_cn or function.return_value or '',
-                function.example_cn or function.example or ''
-            ])
-        
-        return response
+        else:
+            # XLSX格式导出
+            # 创建工作簿和工作表
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "函数数据库表"
+            
+            # 定义表头
+            headers = [
+                '库名称', '模块名称', '函数名称', '函数中文名称', '描述', 
+                '操作类型', '语法', '参数', '返回值', '示例'
+            ]
+            
+            # 设置表头样式
+            header_font = Font(bold=True, color="FFFFFF")
+            header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+            header_alignment = Alignment(horizontal="center", vertical="center")
+            
+            # 写入表头
+            for col, header in enumerate(headers, 1):
+                cell = ws.cell(row=1, column=col, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = header_alignment
+            
+            # 获取数据
+            functions = Function.objects.select_related('module', 'module__library', 'operation_type')
+            
+            # 写入数据
+            for row, function in enumerate(functions, 2):
+                ws.cell(row=row, column=1, value=function.module.library.library_name_cn)
+                ws.cell(row=row, column=2, value=function.module.module_name)
+                ws.cell(row=row, column=3, value=function.function_name)
+                ws.cell(row=row, column=4, value=function.function_name_cn or '')
+                ws.cell(row=row, column=5, value=function.description_cn or function.description or '')
+                ws.cell(row=row, column=6, value=function.operation_type.operation_name_cn if function.operation_type else '')
+                ws.cell(row=row, column=7, value=function.syntax or '')
+                ws.cell(row=row, column=8, value=function.parameters_text or '')
+                ws.cell(row=row, column=9, value=function.return_value_cn or function.return_value or '')
+                ws.cell(row=row, column=10, value=function.example_cn or function.example or '')
+            
+            # 自动调整列宽
+            for col in range(1, len(headers) + 1):
+                column_letter = get_column_letter(col)
+                max_length = 0
+                column = ws[column_letter]
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = min(max_length + 2, 50)  # 最大宽度50
+                ws.column_dimensions[column_letter].width = adjusted_width
+            
+            # 设置数据行样式
+            data_alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+            for row in range(2, ws.max_row + 1):
+                for col in range(1, len(headers) + 1):
+                    cell = ws.cell(row=row, column=col)
+                    cell.alignment = data_alignment
+            
+            # 保存到内存
+            output = io.BytesIO()
+            wb.save(output)
+            output.seek(0)
+            
+            # 创建响应
+            response = HttpResponse(
+                output.getvalue(),
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+            response['Content-Disposition'] = 'attachment; filename="函数数据库表.xlsx"'
+            
+            return response
         
     except Exception as e:
         return JsonResponse({
