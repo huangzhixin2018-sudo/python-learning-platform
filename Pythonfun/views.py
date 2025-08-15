@@ -82,39 +82,13 @@ def index_view(request):
 def category_view(request, slug):
     """子分类文章显示视图 - 根据内容类型显示到不同页面"""
     try:
-        # 从URL参数或请求中获取内容类型
-        content_type = request.GET.get('type', 'grammar')  # 默认为语法
-        
-        # 映射内容类型到模型字段
+        content_type = request.GET.get('type', 'grammar')
         content_type_map = {
             'grammar': Article.ContentType.GRAMMAR,
             'data-structure': Article.ContentType.DATA_STRUCTURE,
             'ai-programming': Article.ContentType.AI_PROGRAMMING
         }
-        
         model_content_type = content_type_map.get(content_type, Article.ContentType.GRAMMAR)
-        
-        # 获取分类树
-        main_categories = MainCategory.objects.filter(is_enabled=True).order_by('order')
-        category_tree = []
-        for main_category in main_categories:
-            sub_categories = SubCategory.objects.filter(
-                parent=main_category,
-                is_enabled=True
-            ).order_by('id')
-            sub_categories_with_count = []
-            for sub in sub_categories:
-                article_count = Article.objects.filter(
-                    category=sub,
-                    content_type=model_content_type,
-                    is_published=True
-                ).count()
-                sub.article_count = article_count
-                sub_categories_with_count.append(sub)
-            category_tree.append({
-                'main_category': main_category,
-                'sub_categories': sub_categories_with_count
-            })
         
         # 获取当前分类
         try:
@@ -138,6 +112,31 @@ def category_view(request, slug):
                 content_type=model_content_type,
                 is_published=False
             ).order_by('created_at').first()
+        
+        # 只有当有文章时才构建分类树
+        category_tree = []
+        if current_article:
+            # 获取所有主分类
+            main_categories = MainCategory.objects.filter(is_enabled=True).order_by('id')
+            
+            for main_category in main_categories:
+                sub_categories = SubCategory.objects.filter(
+                    parent=main_category,
+                    is_enabled=True
+                ).order_by('id')
+                sub_categories_with_count = []
+                for sub in sub_categories:
+                    article_count = Article.objects.filter(
+                        category=sub,
+                        content_type=model_content_type,
+                        is_published=True
+                    ).count()
+                    sub.article_count = article_count
+                    sub_categories_with_count.append(sub)
+                category_tree.append({
+                    'main_category': main_category,
+                    'sub_categories': sub_categories_with_count
+                })
         
         # 根据内容类型选择模板
         template_map = {

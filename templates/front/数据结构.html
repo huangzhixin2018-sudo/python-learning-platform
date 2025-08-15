@@ -283,12 +283,11 @@
     <!-- 左侧边栏：分类树 -->
     <aside class="sidebar">
       <h2>数据结构教程</h2>
-      {% if category_tree %}
+      {% if category_tree and current_article %}
         <ul class="article-list">
           {% for main_category in category_tree %}
-            <div class="menu-category">{{ main_category.main_category.name }}</div>
             {% for sub_category in main_category.sub_categories %}
-              {% if sub_category.slug %}
+              {% if sub_category.slug and sub_category.article_count > 0 %}
                 <li><a href="{% url 'Pythonfun:category' sub_category.slug %}?type=data-structure" 
                        title="文章数量: {{ sub_category.article_count }}"
                        {% if current_category and current_category.id == sub_category.id %}class="active"{% endif %}>
@@ -296,13 +295,11 @@
                 </a></li>
               {% endif %}
             {% endfor %}
-          {% empty %}
-            <div class="menu-category">暂无分类</div>
           {% endfor %}
         </ul>
       {% else %}
         <ul class="article-list">
-          <li><a href="#" data-post="post1" class="active">暂无数据结构教程</a></li>
+          <li><a href="#" class="active">暂无数据结构教程</a></li>
         </ul>
       {% endif %}
     </aside>
