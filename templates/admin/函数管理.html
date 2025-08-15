@@ -180,10 +180,11 @@
       flex-wrap: wrap;
     }
     
-    .upload-controls .btn {
-      flex: 1;
-      min-width: 140px;
-    }
+            .upload-controls .btn {
+          margin: 0 5px;
+          min-width: 120px;
+          height: 40px;
+        }
     .file-input {
       display: none;
     }
@@ -582,21 +583,32 @@
         }, 5000);
       }
 
-      // 处理文件上传
-      fileInput.addEventListener('change', function () {
-        const file = fileInput.files[0];
-        if (!file) return;
+              // 处理文件上传
+        fileInput.addEventListener('change', function () {
+          const file = fileInput.files[0];
+          if (!file) return;
 
-        const validTypes = [
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'application/vnd.ms-excel'
-        ];
-        if (!validTypes.includes(file.type)) {
-          showAlert('error', '仅支持 .xlsx 或 .xls 文件！');
-          return;
-        }
+          const validTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+            'text/csv'
+          ];
+          const validExtensions = ['.xlsx', '.xls', '.csv'];
+          const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+          
+          if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
+            showAlert('error', '仅支持 .xlsx、.xls 或 .csv 文件！');
+            return;
+          }
 
-        // 显示加载状态
+          // 检查文件大小 (50MB)
+          const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+          if (file.size > maxSize) {
+            showAlert('error', `文件大小超过限制。最大允许：50MB，当前文件：${(file.size / (1024*1024)).toFixed(2)}MB`);
+            return;
+          }
+
+          // 显示加载状态
         loading.style.display = 'block';
         progressBar.style.display = 'block';
         progressFill.style.width = '0%';
@@ -618,12 +630,27 @@
 
         xhr.onload = function () {
           loading.style.display = 'none';
+          progressBar.style.display = 'none';
           if (xhr.status === 200) {
             try {
               const res = JSON.parse(xhr.responseText);
               if (res.success) {
                 progressFill.style.width = '100%';
-                showAlert('success', res.message || '上传成功！');
+                
+                let message = res.message || '上传成功！';
+                
+                // 如果有警告信息，添加到消息中
+                if (res.warnings && res.warnings.length > 0) {
+                  message += '\n\n警告信息：';
+                  res.warnings.forEach((warning, index) => {
+                    message += `\n${index + 1}. ${warning}`;
+                  });
+                  if (res.total_errors > res.warnings.length) {
+                    message += `\n... 还有 ${res.total_errors - res.warnings.length} 个错误未显示`;
+                  }
+                }
+                
+                showAlert('success', message);
                 
                 // 显示已上传文件名
                 uploadedFilename.textContent = file.name;

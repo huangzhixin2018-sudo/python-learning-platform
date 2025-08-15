@@ -1,4 +1,5 @@
 import json
+import os
 from django.core.paginator import Paginator, EmptyPage
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
@@ -873,24 +874,392 @@ def upload_functions_api(request):
         uploaded_file = request.FILES['file']
         
         # 检查文件类型
-        if not uploaded_file.name.endswith(('.xlsx', '.xls')):
+        allowed_extensions = ['.xlsx', '.xls', '.csv']
+        file_extension = os.path.splitext(uploaded_file.name)[1].lower()
+        if file_extension not in allowed_extensions:
             return JsonResponse({
                 'success': False,
-                'message': '仅支持Excel文件格式'
+                'message': f'不支持的文件格式。支持格式：{", ".join(allowed_extensions)}'
             }, status=400)
         
-        # 这里可以添加Excel文件处理逻辑
-        # 暂时返回成功响应
-        return JsonResponse({
-            'success': True,
-            'message': f'文件 {uploaded_file.name} 上传成功，正在处理中...'
-        })
+        # 检查文件大小 (50MB = 50 * 1024 * 1024 bytes)
+        max_size = 50 * 1024 * 1024
+        if uploaded_file.size > max_size:
+            return JsonResponse({
+                'success': False,
+                'message': f'文件大小超过限制。最大允许：50MB，当前文件：{uploaded_file.size / (1024*1024):.2f}MB'
+            }, status=400)
+        
+        # 定义模板字段映射
+        template_fields = {
+            'Library': [
+                'library_name', 'library_name_cn', 'description', 'version', 
+                'category', 'is_builtin', 'is_standard'
+            ],
+            'Module': [
+                'library_name', 'module_name', 'description', 'is_builtin'
+            ],
+            'Function': [
+                'library_name', 'module_name', 'function_name', 'function_name_cn',
+                'description', 'description_cn', 'operation_type', 'syntax',
+                'parameters_text', 'return_value', 'return_value_cn', 'example',
+                'example_cn', 'availability', 'version_added'
+            ],
+            'Parameter': [
+                'library_name', 'module_name', 'function_name', 'parameter_name',
+                'parameter_name_cn', 'data_type', 'is_required', 'default_value',
+                'description', 'description_cn'
+            ],
+            'OperationType': [
+                'operation_name', 'operation_name_cn', 'description'
+            ],
+            # 支持现有的工作表名称
+            '库信息': [
+                'library_name', 'library_name_cn', 'description', 'version', 
+                'category', 'is_builtin', 'is_standard'
+            ],
+            '模块信息': [
+                'library_name', 'module_name', 'description', 'is_builtin'
+            ],
+            '函数信息': [
+                'library_name', 'module_name', 'function_name', 'function_name_cn',
+                'description', 'description_cn', 'operation_type', 'syntax',
+                'parameters_text', 'return_value', 'return_value_cn', 'example',
+                'example_cn', 'availability', 'version_added'
+            ],
+            '参数信息': [
+                'library_name', 'module_name', 'function_name', 'parameter_name',
+                'parameter_name_cn', 'data_type', 'is_required', 'default_value',
+                'description', 'description_cn'
+            ],
+            '操作类型': [
+                'operation_name', 'operation_name_cn', 'description'
+            ]
+        }
+        
+        # 处理文件
+        import pandas as pd
+        import io
+        
+        # 读取Excel文件
+        if file_extension in ['.xlsx', '.xls']:
+            excel_file = pd.ExcelFile(uploaded_file)
+            sheet_names = excel_file.sheet_names
+        else:
+            # CSV文件处理
+            content = uploaded_file.read().decode('utf-8')
+            uploaded_file.seek(0)  # 重置文件指针
+            df = pd.read_csv(io.StringIO(content))
+            sheet_names = ['CSV_Data']
+            excel_file = None
+        
+        processed_data = {}
+        errors = []
+        success_count = 0
+        
+        # 处理每个工作表
+        for sheet_name in sheet_names:
+            try:
+                # 读取工作表数据
+                if file_extension in ['.xlsx', '.xls']:
+                    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+                else:
+                    # CSV已经读取过了
+                    pass
+                
+                # 跳过空行和说明行
+                df = df.dropna(how='all')
+                df = df[~df.iloc[:, 0].astype(str).str.contains('说明', na=False)]
+                
+                if df.empty:
+                    continue
+                
+                # 获取表头
+                headers = df.columns.tolist()
+                
+                # 验证字段是否匹配模板
+                expected_fields = None
+                for template_sheet, template_field_list in template_fields.items():
+                    if sheet_name == template_sheet:
+                        expected_fields = template_field_list
+                        break
+                
+                if expected_fields is None:
+                    errors.append(f"工作表 '{sheet_name}' 不在模板中，跳过处理")
+                    continue
+                
+                # 检查字段数量
+                if len(headers) != len(expected_fields):
+                    errors.append(f"工作表 '{sheet_name}' 字段数量不匹配。期望：{len(expected_fields)}，实际：{len(headers)}")
+                    continue
+                
+                # 检查字段名称（允许中文表头）
+                header_mapping = {}
+                for i, header in enumerate(headers):
+                    # 尝试匹配字段名
+                    if i < len(expected_fields):
+                        header_mapping[expected_fields[i]] = header
+                
+                # 处理数据
+                for index, row in df.iterrows():
+                    try:
+                        if sheet_name in ['Library', '库信息']:
+                            success_count += process_library_row(row, header_mapping)
+                        elif sheet_name in ['Module', '模块信息']:
+                            success_count += process_module_row(row, header_mapping)
+                        elif sheet_name in ['Function', '函数信息']:
+                            success_count += process_function_row(row, header_mapping)
+                        elif sheet_name in ['Parameter', '参数信息']:
+                            success_count += process_parameter_row(row, header_mapping)
+                        elif sheet_name in ['OperationType', '操作类型']:
+                            success_count += process_operation_type_row(row, header_mapping)
+                    except Exception as row_error:
+                        errors.append(f"处理第 {index + 2} 行数据时出错：{str(row_error)}")
+                
+            except Exception as sheet_error:
+                errors.append(f"处理工作表 '{sheet_name}' 时出错：{str(sheet_error)}")
+        
+        # 返回处理结果
+        if errors:
+            return JsonResponse({
+                'success': True,
+                'message': f'文件处理完成。成功导入 {success_count} 条记录。',
+                'warnings': errors[:10],  # 只返回前10个错误
+                'total_errors': len(errors)
+            })
+        else:
+            return JsonResponse({
+                'success': True,
+                'message': f'文件处理完成。成功导入 {success_count} 条记录。'
+            })
         
     except Exception as e:
         return JsonResponse({
             'success': False,
             'message': f'上传失败: {str(e)}'
         }, status=500)
+
+def process_library_row(row, header_mapping):
+    """处理库数据行"""
+    try:
+        library_name = str(row[header_mapping['library_name']]).strip()
+        if not library_name or library_name == 'nan':
+            return 0
+        
+        # 检查是否已存在
+        library, created = Library.objects.get_or_create(
+            library_name=library_name,
+            defaults={
+                'library_name_cn': str(row[header_mapping['library_name_cn']]).strip() if 'library_name_cn' in header_mapping else library_name,
+                'description': str(row[header_mapping['description']]).strip() if 'description' in header_mapping else '',
+                'version': str(row[header_mapping['version']]).strip() if 'version' in header_mapping else '',
+                'category': str(row[header_mapping['category']]).strip() if 'category' in header_mapping else '',
+                'is_builtin': parse_boolean(row[header_mapping['is_builtin']]) if 'is_builtin' in header_mapping else False,
+                'is_standard': parse_boolean(row[header_mapping['is_standard']]) if 'is_standard' in header_mapping else False,
+            }
+        )
+        
+        if not created:
+            # 更新现有记录
+            library.library_name_cn = str(row[header_mapping['library_name_cn']]).strip() if 'library_name_cn' in header_mapping else library_name
+            library.description = str(row[header_mapping['description']]).strip() if 'description' in header_mapping else ''
+            library.version = str(row[header_mapping['version']]).strip() if 'version' in header_mapping else ''
+            library.category = str(row[header_mapping['category']]).strip() if 'category' in header_mapping else ''
+            library.is_builtin = parse_boolean(row[header_mapping['is_builtin']]) if 'is_builtin' in header_mapping else False
+            library.is_standard = parse_boolean(row[header_mapping['is_standard']]) if 'is_standard' in header_mapping else False
+            library.save()
+        
+        return 1
+    except Exception as e:
+        raise Exception(f"处理库数据失败: {str(e)}")
+
+def process_module_row(row, header_mapping):
+    """处理模块数据行"""
+    try:
+        library_name = str(row[header_mapping['library_name']]).strip()
+        module_name = str(row[header_mapping['module_name']]).strip()
+        
+        if not library_name or not module_name or library_name == 'nan' or module_name == 'nan':
+            return 0
+        
+        # 获取库
+        try:
+            library = Library.objects.get(library_name=library_name)
+        except Library.DoesNotExist:
+            raise Exception(f"库 '{library_name}' 不存在")
+        
+        # 检查是否已存在
+        module, created = Module.objects.get_or_create(
+            library=library,
+            module_name=module_name,
+            defaults={
+                'description': str(row[header_mapping['description']]).strip() if 'description' in header_mapping else '',
+                'is_builtin': parse_boolean(row[header_mapping['is_builtin']]) if 'is_builtin' in header_mapping else False,
+            }
+        )
+        
+        if not created:
+            # 更新现有记录
+            module.description = str(row[header_mapping['description']]).strip() if 'description' in header_mapping else ''
+            module.is_builtin = parse_boolean(row[header_mapping['is_builtin']]) if 'is_builtin' in header_mapping else False
+            module.save()
+        
+        return 1
+    except Exception as e:
+        raise Exception(f"处理模块数据失败: {str(e)}")
+
+def process_function_row(row, header_mapping):
+    """处理函数数据行"""
+    try:
+        library_name = str(row[header_mapping['library_name']]).strip()
+        module_name = str(row[header_mapping['module_name']]).strip()
+        function_name = str(row[header_mapping['function_name']]).strip()
+        
+        if not library_name or not module_name or not function_name or 'nan' in [library_name, module_name, function_name]:
+            return 0
+        
+        # 获取模块
+        try:
+            module = Module.objects.get(library__library_name=library_name, module_name=module_name)
+        except Module.DoesNotExist:
+            raise Exception(f"模块 '{library_name}.{module_name}' 不存在")
+        
+        # 获取操作类型
+        operation_type = None
+        if 'operation_type' in header_mapping:
+            operation_type_name = str(row[header_mapping['operation_type']]).strip()
+            if operation_type_name and operation_type_name != 'nan':
+                operation_type, _ = OperationType.objects.get_or_create(
+                    operation_name_cn=operation_type_name,
+                    defaults={'operation_name': operation_type_name}
+                )
+        
+        # 检查是否已存在
+        function, created = Function.objects.get_or_create(
+            module=module,
+            function_name=function_name,
+            defaults={
+                'function_name_cn': str(row[header_mapping['function_name_cn']]).strip() if 'function_name_cn' in header_mapping else '',
+                'description': str(row[header_mapping['description']]).strip() if 'description' in header_mapping else '',
+                'description_cn': str(row[header_mapping['description_cn']]).strip() if 'description_cn' in header_mapping else '',
+                'operation_type': operation_type,
+                'syntax': str(row[header_mapping['syntax']]).strip() if 'syntax' in header_mapping else '',
+                'parameters_text': str(row[header_mapping['parameters_text']]).strip() if 'parameters_text' in header_mapping else '',
+                'return_value': str(row[header_mapping['return_value']]).strip() if 'return_value' in header_mapping else '',
+                'return_value_cn': str(row[header_mapping['return_value_cn']]).strip() if 'return_value_cn' in header_mapping else '',
+                'example': str(row[header_mapping['example']]).strip() if 'example' in header_mapping else '',
+                'example_cn': str(row[header_mapping['example_cn']]).strip() if 'example_cn' in header_mapping else '',
+                'availability': str(row[header_mapping['availability']]).strip() if 'availability' in header_mapping else '',
+                'version_added': str(row[header_mapping['version_added']]).strip() if 'version_added' in header_mapping else '',
+            }
+        )
+        
+        if not created:
+            # 更新现有记录
+            function.function_name_cn = str(row[header_mapping['function_name_cn']]).strip() if 'function_name_cn' in header_mapping else ''
+            function.description = str(row[header_mapping['description']]).strip() if 'description' in header_mapping else ''
+            function.description_cn = str(row[header_mapping['description_cn']]).strip() if 'description_cn' in header_mapping else ''
+            function.operation_type = operation_type
+            function.syntax = str(row[header_mapping['syntax']]).strip() if 'syntax' in header_mapping else ''
+            function.parameters_text = str(row[header_mapping['parameters_text']]).strip() if 'parameters_text' in header_mapping else ''
+            function.return_value = str(row[header_mapping['return_value']]).strip() if 'return_value' in header_mapping else ''
+            function.return_value_cn = str(row[header_mapping['return_value_cn']]).strip() if 'return_value_cn' in header_mapping else ''
+            function.example = str(row[header_mapping['example']]).strip() if 'example' in header_mapping else ''
+            function.example_cn = str(row[header_mapping['example_cn']]).strip() if 'example_cn' in header_mapping else ''
+            function.availability = str(row[header_mapping['availability']]).strip() if 'availability' in header_mapping else ''
+            function.version_added = str(row[header_mapping['version_added']]).strip() if 'version_added' in header_mapping else ''
+            function.save()
+        
+        return 1
+    except Exception as e:
+        raise Exception(f"处理函数数据失败: {str(e)}")
+
+def process_parameter_row(row, header_mapping):
+    """处理参数数据行"""
+    try:
+        library_name = str(row[header_mapping['library_name']]).strip()
+        module_name = str(row[header_mapping['module_name']]).strip()
+        function_name = str(row[header_mapping['function_name']]).strip()
+        parameter_name = str(row[header_mapping['parameter_name']]).strip()
+        
+        if not all([library_name, module_name, function_name, parameter_name]) or 'nan' in [library_name, module_name, function_name, parameter_name]:
+            return 0
+        
+        # 获取函数
+        try:
+            function = Function.objects.get(
+                module__library__library_name=library_name,
+                module__module_name=module_name,
+                function_name=function_name
+            )
+        except Function.DoesNotExist:
+            raise Exception(f"函数 '{library_name}.{module_name}.{function_name}' 不存在")
+        
+        # 检查是否已存在
+        parameter, created = Parameter.objects.get_or_create(
+            function=function,
+            parameter_name=parameter_name,
+            defaults={
+                'parameter_name_cn': str(row[header_mapping['parameter_name_cn']]).strip() if 'parameter_name_cn' in header_mapping else '',
+                'data_type': str(row[header_mapping['data_type']]).strip() if 'data_type' in header_mapping else '',
+                'is_required': parse_boolean(row[header_mapping['is_required']]) if 'is_required' in header_mapping else True,
+                'default_value': str(row[header_mapping['default_value']]).strip() if 'default_value' in header_mapping else '',
+                'description': str(row[header_mapping['description']]).strip() if 'description' in header_mapping else '',
+                'description_cn': str(row[header_mapping['description_cn']]).strip() if 'description_cn' in header_mapping else '',
+            }
+        )
+        
+        if not created:
+            # 更新现有记录
+            parameter.parameter_name_cn = str(row[header_mapping['parameter_name_cn']]).strip() if 'parameter_name_cn' in header_mapping else ''
+            parameter.data_type = str(row[header_mapping['data_type']]).strip() if 'data_type' in header_mapping else ''
+            parameter.is_required = parse_boolean(row[header_mapping['is_required']]) if 'is_required' in header_mapping else True
+            parameter.default_value = str(row[header_mapping['default_value']]).strip() if 'default_value' in header_mapping else ''
+            parameter.description = str(row[header_mapping['description']]).strip() if 'description' in header_mapping else ''
+            parameter.description_cn = str(row[header_mapping['description_cn']]).strip() if 'description_cn' in header_mapping else ''
+            parameter.save()
+        
+        return 1
+    except Exception as e:
+        raise Exception(f"处理参数数据失败: {str(e)}")
+
+def process_operation_type_row(row, header_mapping):
+    """处理操作类型数据行"""
+    try:
+        operation_name = str(row[header_mapping['operation_name']]).strip()
+        if not operation_name or operation_name == 'nan':
+            return 0
+        
+        # 检查是否已存在
+        operation_type, created = OperationType.objects.get_or_create(
+            operation_name=operation_name,
+            defaults={
+                'operation_name_cn': str(row[header_mapping['operation_name_cn']]).strip() if 'operation_name_cn' in header_mapping else operation_name,
+                'description': str(row[header_mapping['description']]).strip() if 'description' in header_mapping else '',
+            }
+        )
+        
+        if not created:
+            # 更新现有记录
+            operation_type.operation_name_cn = str(row[header_mapping['operation_name_cn']]).strip() if 'operation_name_cn' in header_mapping else operation_name
+            operation_type.description = str(row[header_mapping['description']]).strip() if 'description' in header_mapping else ''
+            operation_type.save()
+        
+        return 1
+    except Exception as e:
+        raise Exception(f"处理操作类型数据失败: {str(e)}")
+
+def parse_boolean(value):
+    """解析布尔值"""
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        value = value.strip().lower()
+        if value in ['true', '1', 'yes', '是', 't']:
+            return True
+        elif value in ['false', '0', 'no', '否', 'f']:
+            return False
+    return False
 
 @require_http_methods(["GET"])
 def get_function_stats_api(request):
