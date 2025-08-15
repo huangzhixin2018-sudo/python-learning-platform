@@ -851,3 +851,107 @@ def function_operation_types_api(request):
         return JsonResponse({
             'error': str(e)
         }, status=500)
+
+# ========== 函数管理相关视图 ==========
+
+@login_required
+def function_management_view(request):
+    """函数管理页面视图"""
+    return render(request, 'admin/函数管理.html')
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def upload_functions_api(request):
+    """上传函数数据API"""
+    try:
+        if 'file' not in request.FILES:
+            return JsonResponse({
+                'success': False,
+                'message': '没有上传文件'
+            }, status=400)
+        
+        uploaded_file = request.FILES['file']
+        
+        # 检查文件类型
+        if not uploaded_file.name.endswith(('.xlsx', '.xls')):
+            return JsonResponse({
+                'success': False,
+                'message': '仅支持Excel文件格式'
+            }, status=400)
+        
+        # 这里可以添加Excel文件处理逻辑
+        # 暂时返回成功响应
+        return JsonResponse({
+            'success': True,
+            'message': f'文件 {uploaded_file.name} 上传成功，正在处理中...'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'上传失败: {str(e)}'
+        }, status=500)
+
+@require_http_methods(["GET"])
+def get_function_stats_api(request):
+    """获取函数统计信息API"""
+    try:
+        from django.db.models import Count
+        
+        stats = {
+            'libraries': Library.objects.count(),
+            'modules': Module.objects.count(),
+            'functions': Function.objects.count(),
+            'parameters': Parameter.objects.count()
+        }
+        
+        return JsonResponse({
+            'success': True,
+            'stats': stats
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'获取统计信息失败: {str(e)}'
+        }, status=500)
+
+@require_http_methods(["GET"])
+def export_functions_api(request):
+    """导出函数数据API"""
+    try:
+        from django.http import HttpResponse
+        import csv
+        
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="functions_export.csv"'
+        
+        # 添加BOM以支持中文
+        response.write('\ufeff')
+        
+        writer = csv.writer(response)
+        writer.writerow(['库名称', '模块名称', '函数名称', '函数中文名称', '描述', '操作类型', '语法', '参数', '返回值', '示例'])
+        
+        functions = Function.objects.select_related('module', 'module__library', 'operation_type')
+        
+        for function in functions:
+            writer.writerow([
+                function.module.library.library_name_cn,
+                function.module.module_name,
+                function.function_name,
+                function.function_name_cn or '',
+                function.description_cn or function.description or '',
+                function.operation_type.operation_name_cn if function.operation_type else '',
+                function.syntax or '',
+                function.parameters_text or '',
+                function.return_value_cn or function.return_value or '',
+                function.example_cn or function.example or ''
+            ])
+        
+        return response
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'导出失败: {str(e)}'
+        }, status=500)

@@ -44,10 +44,18 @@ urlpatterns = [
     path('api/create-superuser/', views.create_superuser_api, name='create_superuser_api'),
     path('api/reset-admin-password/', views.reset_admin_password_api, name='reset_admin_password_api'),
     
+    # 函数管理页面路由
+    path('manage/function-management/', views.function_management_view, name='function_management'),
+    
     # 函数库相关API路由
     path('api/function-library/', views.function_library_api, name='function_library_api'),
     path('api/function-query/', views.function_query_api, name='function_query_api'),
     path('api/function-libraries/', views.function_libraries_list_api, name='function_libraries_list_api'),
     path('api/function-modules/', views.function_modules_list_api, name='function_modules_list_api'),
     path('api/function-operation-types/', views.function_operation_types_api, name='function_operation_types_api'),
+    
+    # 函数管理API路由
+    path('api/upload-functions/', views.upload_functions_api, name='upload_functions'),
+    path('api/function-stats/', views.get_function_stats_api, name='get_function_stats'),
+    path('api/export-functions/', views.export_functions_api, name='export_functions'),
 ]
