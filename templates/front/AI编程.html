@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>数据结构博客</title>
+  <title>AI编程教程</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -159,6 +159,20 @@
       font-weight: 500;
     }
 
+    .menu-category {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0.75rem 0;
+      color: rgba(0,0,0,0.6);
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+
+    .menu-category:first-child {
+      margin-top: 0;
+    }
+
     /* 主内容区 */
     .main-content {
       flex: 1;
@@ -209,6 +223,25 @@
       color: #555;
     }
 
+    /* 代码块样式 */
+    .chat-style-codeblock {
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      padding: 1rem;
+      position: relative;
+      margin: 1rem 0;
+      font-family: 'Fira Code', Consolas, monospace;
+      font-size: 0.9rem;
+      overflow: auto;
+    }
+
+    .chat-style-codeblock pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #333;
+    }
+
     footer {
       background-color: var(--card-bg);
       padding: 2rem 0;
@@ -247,62 +280,75 @@
   <!-- 主内容区域：左侧文章列表 + 右侧内容 -->
   <main class="main-layout">
     
-    <!-- 左侧边栏：文章列表 -->
+    <!-- 左侧边栏：分类树 -->
     <aside class="sidebar">
-      
-      <ul class="article-list">
-        <li><a href="#" data-post="post1" class="active">在喧嚣中寻找宁静</a></li>
-        <li><a href="#" data-post="post2">数字极简主义的生活方式</a></li>
-        <li><a href="#" data-post="post3">阅读是如何改变我的</a></li>
-        <li><a href="#" data-post="post4">清晨写作的力量</a></li>
-        <li><a href="#" data-post="post5">慢旅行：重新定义目的地</a></li>
-      </ul>
+      <h2>AI编程教程</h2>
+      {% if category_tree %}
+        <ul class="article-list">
+          {% for main_category in category_tree %}
+            <div class="menu-category">{{ main_category.main_category.name }}</div>
+            {% for sub_category in main_category.sub_categories %}
+              {% if sub_category.slug %}
+                <li><a href="{% url 'Pythonfun:category' sub_category.slug %}?type=ai-programming" 
+                       title="文章数量: {{ sub_category.article_count }}"
+                       {% if current_category and current_category.id == sub_category.id %}class="active"{% endif %}>
+                  {{ sub_category.name }}
+                </a></li>
+              {% endif %}
+            {% endfor %}
+          {% empty %}
+            <div class="menu-category">暂无分类</div>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <ul class="article-list">
+          <li><a href="#" data-post="post1" class="active">暂无AI编程教程</a></li>
+        </ul>
+      {% endif %}
     </aside>
 
     <!-- 右侧主内容 -->
     <section class="main-content">
-      <article id="post1" class="post active">
-        <h1>在喧嚣中寻找宁静</h1>
-        <div class="date">2025年4月5日</div>
-        <p>在这个信息爆炸的时代，我们每天被无数的通知、消息和任务包围。手机震动、邮件提醒、社交媒体的红点……仿佛只要稍作停顿，就会被世界抛下。然而，正是在这样的节奏中，我们更需要学会“暂停”。</p>
-        <p>心理学家米哈里·契克森米哈赖提出的“心流”（Flow）状态，正是源于专注与宁静。当我们不再被外界干扰，而是全情投入于某件事时，时间仿佛静止，内心也获得极大的满足。</p>
-        <blockquote>宁静不是逃避，而是一种更深层的参与。</blockquote>
-        <p>我曾在京都的一座小庭院中度过一个清晨。没有手机，没有电脑，只有风吹过竹叶的声音，和茶杯上升起的热气。那一刻，我忽然明白：真正的自由，不是做更多事，而是有能力不做任何事。</p>
-        <p>现代科技本应服务于人，但很多时候，我们反而成了它的仆人。想要找回内心的平静，或许可以从最简单的习惯开始：每天留出15分钟“无屏幕时间”，在公园散步，写日记，或只是安静地坐着。</p>
-        <p>生活不必总是高效。有时候，发呆、放空、甚至“浪费时间”，才是滋养灵魂的养分。</p>
-      </article>
-
-      <article id="post2" class="post">
-        <h1>数字极简主义的生活方式</h1>
-        <div class="date">2025年3月28日</div>
-        <p>我们拥有比以往任何时候都更多的应用、订阅和设备，但幸福感并未随之增长。相反，许多人感到疲惫、分心、焦虑。数字极简主义并非拒绝科技，而是有意识地使用它。</p>
-        <p>我尝试了为期一个月的“数字断舍离”：卸载非必要 App，关闭所有非紧急通知，每天只在固定时间查看邮件。结果令人惊讶：注意力更集中，睡眠质量提升，甚至创造力也增强了。</p>
-        <p>真正的自由，是能决定何时连接，何时断开。从今天起，不妨问自己：这个工具是在服务我，还是在消耗我？</p>
-      </article>
-
-      <article id="post3" class="post">
-        <h1>阅读是如何改变我的</h1>
-        <div class="date">2025年3月20日</div>
-        <p>三年前，我几乎不读书。手机刷到凌晨，内容却空洞无物。直到一位朋友送我一本纸质书，说：“试试每天读10页。”我照做了，从此改变了人生轨迹。</p>
-        <p>阅读不仅扩展了知识，更重要的是塑造了思维。书中的沉默对话，让我学会独立思考；不同作者的视角，教会我共情与理解。现在，我每天早晨留出45分钟阅读时间，它成了我一天中最清醒的时刻。</p>
-        <p>在这个短视频主导的时代，深度阅读是一种抵抗。它提醒我们：思想需要时间沉淀，成长无法速成。</p>
-      </article>
-
-      <article id="post4" class="post">
-        <h1>清晨写作的力量</h1>
-        <div class="date">2025年3月12日</div>
-        <p>我坚持清晨写作已有一年。每天起床后第一件事，就是打开笔记本，写下任何浮现脑海的想法——无需逻辑，无需修饰，甚至无需通顺。</p>
-        <p>这种“自由书写”像是一场心灵清理。焦虑、困惑、灵感、梦境……统统倾倒出来。奇怪的是，写完之后，头脑异常清晰，一整天都更有方向感。</p>
-        <p>写作不是为了发表，而是为了倾听自己。当你开始记录，你就不再是生活的被动经历者，而成了主动的观察者。</p>
-      </article>
-
-      <article id="post5" class="post">
-        <h1>慢旅行：重新定义目的地</h1>
-        <div class="date">2025年3月5日</div>
-        <p>我曾以为旅行就是打卡景点、拍够照片、发完朋友圈。直到一次在葡萄牙小镇迷路，被迫走进一家家庭咖啡馆，和老板聊了两个小时，才明白什么是真正的旅行。</p>
-        <p>慢旅行不追求“去过多少地方”，而是关注“体验了多少生活”。住在民宿而非酒店，步行探索而非赶行程，学几句当地话，吃一顿非游客菜单的晚餐——这些微小瞬间，往往成为最深的记忆。</p>
-        <p>世界很大，但不必急于看完。有时候，走得慢一点，反而看得更多。</p>
-      </article>
+      {% if current_article %}
+        <article id="post1" class="post active">
+          <h1>{{ current_article.title }}</h1>
+          {% if current_article.subtitle %}
+            <h2 style="color: #8d99ae; font-weight: 400; margin-bottom: 1rem;">{{ current_article.subtitle }}</h2>
+          {% endif %}
+          <div class="date">{{ current_article.created_at|date:"Y年m月d日" }}</div>
+          {% if current_article.summary %}
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; font-style: italic;">{{ current_article.summary }}</div>
+          {% endif %}
+          {% if current_article.content_html %}
+            {{ current_article.content_html|safe }}
+          {% elif current_article.content_code %}
+            <div class="chat-style-codeblock">
+              <pre><code class="language-{{ current_article.code_language }}">{{ current_article.content_code }}</code></pre>
+            </div>
+          {% else %}
+            <p>文章内容正在加载中...</p>
+          {% endif %}
+        </article>
+      {% elif current_category %}
+        <article id="post1" class="post active">
+          <h1>{{ current_category.name }}</h1>
+          <div class="date">分类页面</div>
+          {% if no_articles_message %}
+            <p>{{ no_articles_message }}</p>
+            <p>请稍后再来查看，或者选择其他分类。</p>
+          {% else %}
+            <p>欢迎来到 {{ current_category.name }} 分类！</p>
+            <p>这里将展示该分类下的所有AI编程教程文章。</p>
+          {% endif %}
+        </article>
+      {% else %}
+        <article id="post1" class="post active">
+          <h1>AI编程教程</h1>
+          <div class="date">暂无内容</div>
+          <p>目前还没有AI编程相关的教程内容。</p>
+          <p>请稍后再来查看，或者联系管理员添加相关教程。</p>
+        </article>
+      {% endif %}
     </section>
 
   </main>
@@ -320,25 +366,7 @@
     </div>
   </footer>
 
-  <!-- 切换文章的脚本 -->
-  <script>
-    document.querySelectorAll('.article-list a').forEach(link => {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
 
-        // 更新左侧激活状态
-        document.querySelectorAll('.article-list a').forEach(a => a.classList.remove('active'));
-        this.classList.add('active');
-
-        // 切换内容
-        const target = this.getAttribute('data-post');
-        document.querySelectorAll('.post').forEach(post => {
-          post.classList.remove('active');
-        });
-        document.getElementById(target).classList.add('active');
-      });
-    });
-  </script>
 
 </body>
 </html>

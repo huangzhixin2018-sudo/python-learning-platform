@@ -372,7 +372,7 @@
           {% for sub_category in main_category.sub_categories %}
             {% if sub_category.slug %}
           <li class="menu-item">
-            <a href="{% url 'Pythonfun:category' sub_category.slug %}" 
+            <a href="{% url 'Pythonfun:category' sub_category.slug %}?type=grammar" 
                title="文章数量: {{ sub_category.article_count }}">
               {{ sub_category.name }}
             </a>

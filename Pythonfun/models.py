@@ -60,14 +60,14 @@ class SubCategory(models.Model):
 class Article(models.Model):
     """文章模型"""
     class ContentType(models.TextChoices):
-        TUTORIAL = 'TU', _('教程')
-        STRUCTURE = 'ST', _('结构')
-        STORY = 'SO', _('故事')
+        GRAMMAR = 'GR', _('语法')
+        DATA_STRUCTURE = 'DS', _('数据结构')
+        AI_PROGRAMMING = 'AI', _('AI编程')
 
     title = models.CharField(_("文章标题"), max_length=200)
     subtitle = models.CharField(_("副标题"), max_length=200, blank=True, null=True)
     summary = models.TextField(_("摘要"))
-    content_type = models.CharField(_("内容类型"), max_length=2, choices=ContentType.choices, default=ContentType.TUTORIAL)
+    content_type = models.CharField(_("内容类型"), max_length=2, choices=ContentType.choices, default=ContentType.GRAMMAR)
     read_time_minutes = models.PositiveIntegerField(_("预计阅读时间"), default=5)
     
     content_html = models.TextField(_("富文本内容"), help_text=_("用于存储TinyMCE编辑器的HTML内容"))

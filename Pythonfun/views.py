@@ -29,7 +29,14 @@ def login_view(request):
     return render(request, 'admin/登录.html')
 
 def index_view(request):
-    """首页视图 - 显示分类树和默认第一篇文章"""
+    """语法页面视图 - 显示语法类型的文章"""
+    # 获取语法类型的文章
+    articles = Article.objects.filter(
+        content_type=Article.ContentType.GRAMMAR,
+        is_published=True
+    ).order_by('-created_at')
+    
+    # 获取分类树
     main_categories = MainCategory.objects.filter(is_enabled=True).order_by('order')
     category_tree = []
     for main_category in main_categories:
@@ -41,7 +48,7 @@ def index_view(request):
         for sub in sub_categories:
             article_count = Article.objects.filter(
                 category=sub,
-                content_type=Article.ContentType.TUTORIAL,
+                content_type=Article.ContentType.GRAMMAR,
                 is_published=True
             ).count()
             sub.article_count = article_count
@@ -50,26 +57,43 @@ def index_view(request):
             'main_category': main_category,
             'sub_categories': sub_categories_with_count
         })
+    
+    # 获取当前文章（用于显示默认文章）
     current_article = Article.objects.filter(
-        content_type=Article.ContentType.TUTORIAL,
+        content_type=Article.ContentType.GRAMMAR,
         is_published=True
     ).order_by('created_at').first()
     
     # 如果没有已发布的文章，且用户是管理员，尝试获取未发布的文章（用于管理员预览）
     if not current_article and request.user.is_authenticated and request.user.is_staff:
         current_article = Article.objects.filter(
-            content_type=Article.ContentType.TUTORIAL,
+            content_type=Article.ContentType.GRAMMAR,
             is_published=False
         ).order_by('created_at').first()
+    
     context = {
+        'articles': articles,
         'category_tree': category_tree,
         'current_article': current_article,
+        'content_type': 'grammar'
     }
     return render(request, 'front/index.html', context)
 
 def category_view(request, slug):
-    """子分类文章显示视图"""
+    """子分类文章显示视图 - 根据内容类型显示到不同页面"""
     try:
+        # 从URL参数或请求中获取内容类型
+        content_type = request.GET.get('type', 'grammar')  # 默认为语法
+        
+        # 映射内容类型到模型字段
+        content_type_map = {
+            'grammar': Article.ContentType.GRAMMAR,
+            'data-structure': Article.ContentType.DATA_STRUCTURE,
+            'ai-programming': Article.ContentType.AI_PROGRAMMING
+        }
+        
+        model_content_type = content_type_map.get(content_type, Article.ContentType.GRAMMAR)
+        
         # 获取分类树
         main_categories = MainCategory.objects.filter(is_enabled=True).order_by('order')
         category_tree = []
@@ -82,7 +106,7 @@ def category_view(request, slug):
             for sub in sub_categories:
                 article_count = Article.objects.filter(
                     category=sub,
-                    content_type=Article.ContentType.TUTORIAL,
+                    content_type=model_content_type,
                     is_published=True
                 ).count()
                 sub.article_count = article_count
@@ -103,7 +127,7 @@ def category_view(request, slug):
         # 获取当前分类的文章
         current_article = Article.objects.filter(
             category=current_category,
-            content_type=Article.ContentType.TUTORIAL,
+            content_type=model_content_type,
             is_published=True
         ).order_by('created_at').first()
         
@@ -111,20 +135,30 @@ def category_view(request, slug):
         if not current_article and request.user.is_authenticated and request.user.is_staff:
             current_article = Article.objects.filter(
                 category=current_category,
-                content_type=Article.ContentType.TUTORIAL,
+                content_type=model_content_type,
                 is_published=False
             ).order_by('created_at').first()
+        
+        # 根据内容类型选择模板
+        template_map = {
+            'grammar': 'front/index.html',
+            'data-structure': 'front/数据结构.html',
+            'ai-programming': 'front/AI编程.html'
+        }
+        
+        template_name = template_map.get(content_type, 'front/index.html')
         
         # 构建上下文
         context = {
             'category_tree': category_tree,
             'current_category': current_category,
             'current_article': current_article,
+            'content_type': content_type
         }
         
         # 如果没有文章，添加提示信息
         if not current_article:
-            context['no_articles_message'] = f'分类 "{current_category.name}" 暂无文章'
+            context['no_articles_message'] = f'分类 "{current_category.name}" 暂无{content_type}类型的文章'
         else:
             # 如果有文章，确保文章内容被正确处理
             if hasattr(current_article, 'content') and current_article.content:
@@ -132,7 +166,7 @@ def category_view(request, slug):
                 import markdown
                 current_article.content_html = markdown.markdown(current_article.content)
         
-        return render(request, 'front/index.html', context)
+        return render(request, template_name, context)
         
     except Exception as e:
         # 记录错误并返回友好的错误页面
@@ -164,7 +198,7 @@ def tutorial_detail_view(request, pk):
         return render(request, 'front/404.html', {'error_message': '教程不存在或未发布'})
 
     related_tutorials = Article.objects.filter(
-        category=tutorial.category, content_type=Article.ContentType.TUTORIAL, is_published=True
+        category=tutorial.category, content_type=Article.ContentType.GRAMMAR, is_published=True
     ).exclude(pk=pk)[:5]
     
     context = {
@@ -342,7 +376,7 @@ def article_api(request):
             content_html=data.get('content_html', ''),
             content_code=data.get('content_code', ''),
             code_language=data.get('code_language', ''),
-            content_type=data.get('content_type', Article.ContentType.TUTORIAL),
+            content_type=data.get('content_type', Article.ContentType.GRAMMAR),
             read_time_minutes=data.get('read_time_minutes', 5),
             is_published=data.get('is_published', False)
         )
@@ -394,7 +428,7 @@ def course_api(request):
         page = request.GET.get('page', 1)
         page_size = 10 # Assuming a default page size
 
-        courses = Article.objects.filter(content_type=Article.ContentType.TUTORIAL)
+        courses = Article.objects.filter(content_type=Article.ContentType.GRAMMAR)
 
         # Add pagination
         paginator = Paginator(courses, page_size)
@@ -431,7 +465,7 @@ def course_api(request):
             content_html=data.get('content_html', ''),
             content_code=data.get('content_code', ''),
             code_language=data.get('code_language', ''),
-            content_type=Article.ContentType.TUTORIAL,
+            content_type=Article.ContentType.GRAMMAR,
             is_published=data.get('is_published', False)
         )
         if data.get('category_id'):
@@ -444,7 +478,7 @@ def course_api(request):
 @csrf_exempt
 @require_http_methods(["GET", "PUT", "DELETE"])
 def course_detail_api(request, pk):
-    course = get_object_or_404(Article, pk=pk, content_type=Article.ContentType.TUTORIAL)
+    course = get_object_or_404(Article, pk=pk, content_type=Article.ContentType.GRAMMAR)
     if request.method == 'GET':
         data = {
             'id': course.id,
@@ -501,7 +535,7 @@ def course_detail_api(request, pk):
 def course_publish_api(request, pk):
     """发布/取消发布教程API"""
     try:
-        course = get_object_or_404(Article, pk=pk, content_type=Article.ContentType.TUTORIAL)
+        course = get_object_or_404(Article, pk=pk, content_type=Article.ContentType.GRAMMAR)
         data = json.loads(request.body)
         
         # 支持多种请求格式
@@ -553,11 +587,77 @@ def function_query_view(request):
 
 def data_structure_view(request):
     """数据结构页面视图"""
-    return render(request, 'front/数据结构.html')
+    # 获取数据结构类型的文章
+    articles = Article.objects.filter(
+        content_type=Article.ContentType.DATA_STRUCTURE,
+        is_published=True
+    ).order_by('-created_at')
+    
+    # 获取分类树
+    main_categories = MainCategory.objects.filter(is_enabled=True).order_by('order')
+    category_tree = []
+    for main_category in main_categories:
+        sub_categories = SubCategory.objects.filter(
+            parent=main_category,
+            is_enabled=True
+        ).order_by('id')
+        sub_categories_with_count = []
+        for sub in sub_categories:
+            article_count = Article.objects.filter(
+                category=sub,
+                content_type=Article.ContentType.DATA_STRUCTURE,
+                is_published=True
+            ).count()
+            sub.article_count = article_count
+            sub_categories_with_count.append(sub)
+        category_tree.append({
+            'main_category': main_category,
+            'sub_categories': sub_categories_with_count
+        })
+    
+    context = {
+        'articles': articles,
+        'category_tree': category_tree,
+        'content_type': 'data_structure'
+    }
+    return render(request, 'front/数据结构.html', context)
 
 def ai_programming_view(request):
     """AI编程页面视图"""
-    return render(request, 'front/AI编程.html')
+    # 获取AI编程类型的文章
+    articles = Article.objects.filter(
+        content_type=Article.ContentType.AI_PROGRAMMING,
+        is_published=True
+    ).order_by('-created_at')
+    
+    # 获取分类树
+    main_categories = MainCategory.objects.filter(is_enabled=True).order_by('order')
+    category_tree = []
+    for main_category in main_categories:
+        sub_categories = SubCategory.objects.filter(
+            parent=main_category,
+            is_enabled=True
+        ).order_by('id')
+        sub_categories_with_count = []
+        for sub in sub_categories:
+            article_count = Article.objects.filter(
+                category=sub,
+                content_type=Article.ContentType.AI_PROGRAMMING,
+                is_published=True
+            ).count()
+            sub.article_count = article_count
+            sub_categories_with_count.append(sub)
+        category_tree.append({
+            'main_category': main_category,
+            'sub_categories': sub_categories_with_count
+        })
+    
+    context = {
+        'articles': articles,
+        'category_tree': category_tree,
+        'content_type': 'ai_programming'
+    }
+    return render(request, 'front/AI编程.html', context)
 
 def project_view(request):
     """项目页面视图"""

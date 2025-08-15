@@ -97,20 +97,26 @@
             background-color: rgba(255,255,255,0.1);
             border-left: 3px solid var(--accent-color);
         }
-        /* 主内容区 */
+        /* 主内容区 - 重构为上下布局 */
         .admin-main {
             flex: 1;
             padding: 2rem;
+            max-width: calc(100vw - 260px);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
         /* 顶部导航栏 */
         .top-navbar {
             background: white;
             border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
+            padding: 1rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
         .nav-left {
             display: flex;
@@ -126,13 +132,20 @@
             padding: 0.5rem;
             border-radius: var(--border-radius);
             transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .back-btn:hover {
             background: var(--bg-color);
+            color: var(--primary-color);
         }
         .page-title {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
             color: var(--secondary-color);
+            font-weight: 600;
         }
         .nav-actions {
             display: flex;
@@ -155,9 +168,11 @@
         .btn-primary {
             background: var(--primary-color);
             color: white;
+            box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
         }
         .btn-primary:hover {
             background: #3a56d4;
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
         }
         .btn-secondary {
             background: #6c757d;
@@ -166,13 +181,6 @@
         .btn-secondary:hover {
             background: #5a6268;
         }
-        .btn-success {
-            background: var(--success-color);
-            color: white;
-        }
-        .btn-success:hover {
-            background: #059669;
-        }
         .btn-outline {
             background: transparent;
             border: 1px solid var(--border-color);
@@ -180,64 +188,90 @@
         }
         .btn-outline:hover {
             background: var(--bg-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
         }
-        /* 主编辑区域 */
-        .editor-container {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 120px);
-            background: white;
+        /* 配置卡片 - 紧凑设计 */
+        .config-card {
+            background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            overflow: hidden;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
         }
-        /* 顶部工具栏 */
-        .editor-sidebar {
-            width: 100%;
-            background: white;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
             border-bottom: 1px solid var(--border-color);
-            padding: 1.5rem;
-            overflow-y: auto;
-            max-height: 300px;
         }
-        .sidebar-section {
-            margin-bottom: 2rem;
-        }
-        .sidebar-title {
+        .card-title {
             font-size: 1.1rem;
             font-weight: 600;
-            color: var(--text-color);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-title i {
+            color: var(--primary-color);
+            font-size: 1rem;
+        }
+        .card-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        /* 表单设计 - 紧凑布局 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        .form-section {
             margin-bottom: 1rem;
         }
-        /* 水平布局的表单组 */
+        .form-section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-section-title i {
+            color: var(--primary-color);
+            font-size: 0.95rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
         .form-row {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.75rem;
         }
         .form-row .form-group {
             flex: 1;
-            margin-bottom: 0;
-        }
-        .form-row .form-group:first-child {
-            flex: 2;
-        }
-        .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.75rem;
         }
         .form-label {
             display: block;
             font-weight: 500;
             color: var(--text-color);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
         }
         .form-control {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.5rem 0.75rem;
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: var(--transition);
+            background: var(--card-bg);
+            color: var(--text-color);
         }
         .form-control:focus {
             outline: none;
@@ -250,7 +284,11 @@
             background-repeat: no-repeat;
             background-size: 1.5em 1.5em;
             padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
+        /* 标签输入 */
         .tag-input-container {
             display: flex;
             flex-wrap: wrap;
@@ -260,23 +298,34 @@
             border-radius: var(--border-radius);
             min-height: 2.5rem;
             align-items: center;
+            background: var(--card-bg);
         }
         .tag {
             background: var(--primary-color);
             color: white;
-            padding: 0.25rem 0.75rem;
+            padding: 0.2rem 0.6rem;
             border-radius: 1rem;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            transition: var(--transition);
+        }
+        .tag:hover {
+            background: #3a56d4;
         }
         .tag-remove {
             background: none;
             border: none;
             color: white;
             cursor: pointer;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+        .tag-remove:hover {
+            opacity: 1;
+            transform: scale(1.1);
         }
         .tag-input {
             border: none;
@@ -284,66 +333,93 @@
             flex: 1;
             min-width: 100px;
             padding: 0.25rem;
+            background: transparent;
+            color: var(--text-color);
+            font-size: 0.85rem;
         }
         /* 内容类型选择器 */
         .content-type-tabs {
             display: flex;
             background: var(--bg-color);
             border-radius: var(--border-radius);
-            padding: 0.25rem;
-            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
         }
         .content-type-tab {
             flex: 1;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem 0.75rem;
             border: none;
             background: transparent;
             color: var(--text-color);
             cursor: pointer;
-            border-radius: calc(var(--border-radius) - 2px);
             transition: var(--transition);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
         .content-type-tab.active {
-            background: white;
-            color: var(--primary-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--primary-color);
+            color: white;
         }
-        /* 主编辑区域 */
-        .main-editor {
-            flex: 1;
+        .content-type-tab:not(.active):hover {
+            background: rgba(67, 97, 238, 0.05);
+            color: var(--primary-color);
+        }
+                 /* 编辑器卡片 - 新的设计 */
+         .editor-card {
+             flex: 1;
+             background: var(--card-bg);
+             border-radius: var(--border-radius);
+             box-shadow: var(--box-shadow);
+             border: 1px solid var(--border-color);
+             display: flex;
+             flex-direction: column;
+             min-height: 500px;
+             resize: vertical;
+             overflow: hidden;
+         }
+        .editor-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
-            flex-direction: column;
-            background: white;
+            align-items: center;
+            gap: 1rem;
         }
         .editor-tabs {
             display: flex;
             background: var(--bg-color);
-            border-bottom: 1px solid var(--border-color);
-            padding: 0 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
         }
         .editor-tab {
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1.5rem;
             border: none;
             background: transparent;
             color: var(--text-color);
             cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: var(--transition);
             font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
         }
         .editor-tab.active {
             color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-            background: white;
+            background: var(--card-bg);
         }
         .editor-tab:hover:not(.active) {
             color: var(--primary-color);
             background: rgba(67, 97, 238, 0.05);
         }
-        .editor-content {
+        .editor-body {
             flex: 1;
             position: relative;
+            overflow: hidden;
         }
         .editor-pane {
             position: absolute;
@@ -352,33 +428,145 @@
             right: 0;
             bottom: 0;
             display: none;
+            overflow: visible;
+            height: auto;
         }
         .editor-pane.active {
             display: block;
         }
-        /* 富文本编辑器 */
-        .rich-text-editor {
-            height: 100%;
-        }
-        /* 代码编辑器 */
+                 /* 富文本编辑器 - 自定义样式 */
+         .rich-text-editor {
+             height: auto !important;
+             min-height: 400px !important;
+             max-height: none !important;
+             overflow-y: visible !important;
+             transition: height 0.3s ease;
+             resize: none !important;
+         }
+         
+         /* TinyMCE编辑器容器样式 */
+         .tox-tinymce {
+             height: auto !important;
+             min-height: 400px !important;
+             max-height: none !important;
+         }
+         
+         /* TinyMCE编辑器内容区域 */
+         .tox-edit-area {
+             height: auto !important;
+             min-height: 360px !important;
+             max-height: none !important;
+         }
+         
+         /* TinyMCE编辑器iframe */
+         .tox-edit-area__iframe {
+             height: auto !important;
+             min-height: 360px !important;
+             max-height: none !important;
+         }
+         
+         /* 确保TinyMCE编辑器能够自动调整高度 */
+         .tox .tox-edit-area {
+             height: auto !important;
+             min-height: 360px !important;
+             max-height: none !important;
+         }
+         
+         .tox .tox-edit-area__iframe {
+             height: auto !important;
+             min-height: 360px !important;
+             max-height: none !important;
+         }
+         
+         /* 关键：确保TinyMCE编辑器容器能够自动调整 */
+         .tox-tinymce {
+             height: auto !important;
+             min-height: 400px !important;
+             max-height: none !important;
+             overflow: visible !important;
+         }
+         
+         /* 确保编辑器内容区域能够自动调整 */
+         .tox .tox-edit-area {
+             height: auto !important;
+             min-height: 360px !important;
+             max-height: none !important;
+             overflow: visible !important;
+         }
+         
+         /* 确保编辑器iframe能够自动调整 */
+         .tox .tox-edit-area__iframe {
+             height: auto !important;
+             min-height: 360px !important;
+             max-height: none !important;
+             overflow: visible !important;
+         }
+         
+         /* 移除TinyMCE编辑器的灰色背景 */
+         .tox-edit-area__iframe {
+             background: transparent !important;
+         }
+         
+         /* 确保编辑器内容区域透明 */
+         .tox .tox-edit-area__iframe {
+             background: transparent !important;
+         }
+         
+         /* 移除代码块插入时的灰色背景 */
+         .mce-content-body {
+             background: transparent !important;
+         }
+         
+         .mce-content-body * {
+             background: transparent !important;
+         }
+         
+         /* 确保代码块样式正确 */
+         .chat-style-codeblock {
+             background-color: #f0f0f0 !important;
+             border-radius: 10px !important;
+             padding: 1rem !important;
+             position: relative !important;
+             margin: 1rem 0 !important;
+             font-family: 'Fira Code', Consolas, monospace !important;
+             font-size: 0.9rem !important;
+             overflow: auto !important;
+         }
+         
+         /* 移除TinyMCE工具栏的分割线 */
+         .tox .tox-toolbar {
+             border-bottom: none !important;
+         }
+         
+         .tox .tox-toolbar__group {
+             border-right: none !important;
+         }
+         
+         .tox .tox-toolbar__primary {
+             border-bottom: none !important;
+         }
+        /* 代码编辑器 - 专业风格 */
         .code-editor-container {
             height: 100%;
             display: flex;
             flex-direction: column;
         }
         .code-editor-toolbar {
-            padding: 1rem;
-            background: #f8f9fa;
+            padding: 0.75rem 1rem;
+            background: var(--bg-color);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .code-language-select {
-            padding: 0.5rem;
+            padding: 0.5rem 0.75rem;
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            background: white;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.85rem;
+            cursor: pointer;
         }
         .code-actions {
             display: flex;
@@ -387,29 +575,51 @@
         .code-btn {
             padding: 0.5rem 1rem;
             border: 1px solid var(--border-color);
-            background: white;
+            background: var(--card-bg);
             border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 0.8rem;
             transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .code-btn:hover {
             background: var(--bg-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
         }
         .monaco-editor-container {
             flex: 1;
             min-height: 400px;
         }
-        /* 预览区域 */
+        /* 预览区域 - 更专业的排版 */
         .preview-container {
             padding: 2rem;
-            background: white;
+            background: var(--card-bg);
             height: 100%;
             overflow-y: auto;
         }
         .preview-content {
             max-width: 800px;
             margin: 0 auto;
+            line-height: 1.7;
+        }
+        .preview-content h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        .preview-content h2 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        .preview-content p {
+            margin-bottom: 1.25rem;
         }
         /* ChatGPT风格的代码块 */
         .chat-style-codeblock {
@@ -446,46 +656,113 @@
             color: #000;
         }
         /* 响应式设计 */
-        @media (max-width: 1024px) {
-            .form-row {
-                flex-direction: column;
-                gap: 0.5rem;
+        @media (max-width: 1200px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
             }
-            .form-row .form-group {
-                flex: none;
+        }
+        @media (max-width: 1024px) {
+            .form-grid {
+                grid-template-columns: 1fr;
             }
         }
         @media (max-width: 768px) {
             .admin-sidebar {
-                width: 100%;
-                height: auto;
-                position: static;
+                width: 72px;
+                overflow: hidden;
+            }
+            .admin-sidebar:hover {
+                width: 260px;
+            }
+            .admin-logo span {
+                display: none;
+            }
+            .admin-sidebar:hover .admin-logo span {
+                display: inline;
+            }
+            .menu-category {
+                display: none;
+            }
+            .admin-sidebar:hover .menu-category {
+                display: block;
+            }
+            .menu-item a span {
+                display: none;
+            }
+            .admin-sidebar:hover .menu-item a span {
+                display: inline;
             }
             .admin-main {
-                padding: 1.5rem;
+                padding: 1rem;
+                max-width: calc(100vw - 72px);
             }
-            .editor-container {
+            .admin-sidebar:hover ~ .admin-main {
+                max-width: calc(100vw - 260px);
+            }
+            .top-navbar {
                 flex-direction: column;
-                height: auto;
+                align-items: flex-start;
+                gap: 1rem;
             }
-            .editor-sidebar {
+            .nav-actions {
                 width: 100%;
-                border-bottom: 1px solid var(--border-color);
-                max-height: 400px;
+                justify-content: flex-end;
+            }
+            .editor-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            .editor-tabs {
+                width: 100%;
+            }
+            .editor-tab {
+                flex: 1;
+                padding: 0.75rem;
+                justify-content: center;
             }
             .form-row {
                 flex-direction: column;
                 gap: 0.5rem;
             }
-            .form-row .form-group {
-                flex: none;
+        }
+        @media (max-width: 576px) {
+            .admin-sidebar {
+                position: fixed;
+                bottom: 0;
+                top: auto;
+                height: auto;
+                width: 100%;
+                z-index: 1000;
+                padding: 0.5rem 0;
+                border-top: 1px solid rgba(255,255,255,0.1);
             }
-            .nav-actions {
-                gap: 0.5rem;
+            .admin-menu {
+                display: flex;
+                overflow-x: auto;
+                padding: 0 0.5rem;
             }
-            .btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.8rem;
+            .menu-item {
+                margin: 0;
+                padding: 0.5rem;
+            }
+            .menu-item a {
+                flex-direction: column;
+                font-size: 0.7rem;
+                gap: 0.25rem;
+            }
+            .menu-item i {
+                font-size: 1rem;
+            }
+            .admin-logo {
+                display: none;
+            }
+            .menu-category {
+                display: none;
+            }
+            .admin-main {
+                padding-bottom: 70px;
+                max-width: 100vw;
             }
         }
     </style>
@@ -516,7 +793,8 @@
             </li>
         </ul>
     </aside>
-    <!-- 主内容区 -->
+    
+    <!-- 主内容区 - 重构为上下布局 -->
     <main class="admin-main">
         <!-- 顶部导航栏 -->
         <nav class="top-navbar">
@@ -527,45 +805,52 @@
                 <h1 class="page-title">内容编辑器</h1>
             </div>
             <div class="nav-actions">
-                <button class="btn btn-secondary" onclick="previewContent()">
-                    <i class="fas fa-eye"></i>
-                    预览
-                </button>
+                                 <button class="btn btn-outline" onclick="previewContent()">
+                     <i class="fas fa-eye"></i>
+                     预览
+                 </button>
+                 
                 <button class="btn btn-primary" onclick="saveToList()">
-                    <i class="fas fa-list-alt"></i>
-                    保存到列表
+                    <i class="fas fa-save"></i>
+                    保存文章
                 </button>
             </div>
         </nav>
-        <!-- 主编辑区域 -->
-        <div class="editor-container">
-            <!-- 顶部工具栏 -->
-            <div class="editor-sidebar">
-                <!-- 基本信息 -->
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">基本信息</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">标题</label>
-                            <input type="text" class="form-control" id="title" name="title" value="">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">副标题</label>
-                            <input type="text" class="form-control" id="article-subtitle" placeholder="可选的副标题">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">预计阅读时间（分钟）</label>
-                            <input type="number" class="form-control" id="read-time" min="1" max="120" value="5">
-                        </div>
+        
+        <!-- 配置卡片 - 新的设计 -->
+        <div class="config-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-cog"></i>
+                    内容配置
+                </h2>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="fas fa-info-circle"></i>
+                        基本信息
+                    </h3>
+                    <div class="form-group">
+                        <label class="form-label">标题</label>
+                        <input type="text" class="form-control" id="title" name="title" placeholder="输入文章标题">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">副标题</label>
+                        <input type="text" class="form-control" id="article-subtitle" placeholder="可选的副标题">
                     </div>
                     <div class="form-group">
                         <label class="form-label">摘要</label>
                         <textarea class="form-control" id="article-summary" rows="2" placeholder="文章摘要，用于搜索和展示"></textarea>
                     </div>
                 </div>
-                <!-- 分类和标签 -->
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">分类和标签</h3>
+                
+                <div class="form-section">
+                    <h3 class="form-section-title">
+                        <i class="fas fa-tags"></i>
+                        分类信息
+                    </h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">主分类</label>
@@ -587,27 +872,39 @@
                                 <option value="modules">模块与包</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">标签</label>
-                            <div class="tag-input-container" id="tag-container">
-                                <input type="text" class="tag-input" placeholder="添加标签，按回车确认" id="tag-input">
-                            </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">内容类型</label>
+                        <div class="content-type-tabs">
+                            <button class="content-type-tab active" data-type="grammar">
+                                <i class="fas fa-graduation-cap"></i>
+                                语法
+                            </button>
+                            <button class="content-type-tab" data-type="data-structure">
+                                <i class="fas fa-sitemap"></i>
+                                数据结构
+                            </button>
+                            <button class="content-type-tab" data-type="ai-programming">
+                                <i class="fas fa-robot"></i>
+                                AI编程
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">标签</label>
+                        <div class="tag-input-container" id="tag-container">
+                            <input type="text" class="tag-input" placeholder="添加标签，按回车确认" id="tag-input">
                         </div>
                     </div>
                 </div>
-                <!-- 内容类型 -->
-                <div class="sidebar-section">
-                    <h3 class="sidebar-title">内容类型</h3>
-                    <div class="content-type-tabs">
-                        <button class="content-type-tab active" data-type="tutorial">教程</button>
-                        <button class="content-type-tab" data-type="structure">结构</button>
-                        <button class="content-type-tab" data-type="story">故事</button>
-                    </div>
-                </div>
+                
+
             </div>
-            <!-- 主编辑区域 -->
-            <div class="main-editor">
-                <!-- 编辑器标签页 -->
+        </div>
+        
+        <!-- 编辑器卡片 - 新的设计 -->
+        <div class="editor-card">
+            <div class="editor-header">
                 <div class="editor-tabs">
                     <button class="editor-tab active" data-tab="rich-text">
                         <i class="fas fa-edit"></i>
@@ -622,52 +919,54 @@
                         预览
                     </button>
                 </div>
-                <!-- 编辑器内容区域 -->
-                <div class="editor-content">
-                    <!-- 富文本编辑器 -->
-                    <div class="editor-pane active" id="rich-text-pane">
-                        <textarea id="rich-text-editor" class="rich-text-editor"></textarea>
-                    </div>
-                    <!-- 代码编辑器 -->
-                    <div class="editor-pane" id="code-pane">
-                        <div class="code-editor-container">
-                            <div class="code-editor-toolbar">
-                                <div>
-                                    <label>语言：</label>
-                                    <select class="code-language-select" id="code-language">
-                                        <option value="python">Python</option>
-                                        <option value="javascript">JavaScript</option>
-                                        <option value="html">HTML</option>
-                                        <option value="css">CSS</option>
-                                        <option value="sql">SQL</option>
-                                        <option value="json">JSON</option>
-                                    </select>
-                                </div>
-                                <div class="code-actions">
-                                    <button class="code-btn" onclick="formatCode()">
-                                        <i class="fas fa-magic"></i>
-                                        格式化
-                                    </button>
-                                    <button class="code-btn" onclick="runCode()">
-                                        <i class="fas fa-play"></i>
-                                        运行
-                                    </button>
-                                    <button class="code-btn" onclick="insertCodeBlock()">
-                                        <i class="fas fa-plus"></i>
-                                        插入代码块
-                                    </button>
-                                </div>
+            </div>
+            
+            <div class="editor-body">
+                <!-- 富文本编辑器 -->
+                <div class="editor-pane active" id="rich-text-pane">
+                    <textarea id="rich-text-editor" class="rich-text-editor"></textarea>
+                </div>
+                
+                <!-- 代码编辑器 -->
+                <div class="editor-pane" id="code-pane">
+                    <div class="code-editor-container">
+                        <div class="code-editor-toolbar">
+                            <div>
+                                <label>语言：</label>
+                                <select class="code-language-select" id="code-language">
+                                    <option value="python">Python</option>
+                                    <option value="javascript">JavaScript</option>
+                                    <option value="html">HTML</option>
+                                    <option value="css">CSS</option>
+                                    <option value="sql">SQL</option>
+                                    <option value="json">JSON</option>
+                                </select>
                             </div>
-                            <div class="monaco-editor-container" id="monaco-editor"></div>
+                            <div class="code-actions">
+                                <button class="code-btn" onclick="formatCode()">
+                                    <i class="fas fa-magic"></i>
+                                    格式化
+                                </button>
+                                <button class="code-btn" onclick="runCode()">
+                                    <i class="fas fa-play"></i>
+                                    运行
+                                </button>
+                                <button class="code-btn" onclick="insertCodeBlock()">
+                                    <i class="fas fa-plus"></i>
+                                    插入代码块
+                                </button>
+                            </div>
                         </div>
+                        <div class="monaco-editor-container" id="monaco-editor"></div>
                     </div>
-                    <!-- 预览面板 -->
-                    <div class="editor-pane" id="preview-pane">
-                        <div class="preview-container">
-                            <div class="preview-content" id="preview-content">
-                                <h1>文章预览</h1>
-                                <p>在这里可以预览您编辑的内容...</p>
-                            </div>
+                </div>
+                
+                <!-- 预览面板 -->
+                <div class="editor-pane" id="preview-pane">
+                    <div class="preview-container">
+                        <div class="preview-content" id="preview-content">
+                            <h1>文章预览</h1>
+                            <p>在这里可以预览您编辑的内容...</p>
                         </div>
                     </div>
                 </div>
@@ -711,9 +1010,9 @@
         // 编辑器就绪状态检查
         function isEditorReady(editorType) {
             if (editorType === 'richText') {
-                return tinymceEditor && currentEditorStates.richText === EditorState.TINYMCE;
+                return tinymceEditor && (currentEditorStates.richText === EditorState.TINYMCE || currentEditorStates.richText === EditorState.FALLBACK_RICH_TEXT);
             } else if (editorType === 'code') {
-                return monacoEditor && currentEditorStates.code === EditorState.MONACO;
+                return monacoEditor && (currentEditorStates.code === EditorState.MONACO || currentEditorStates.code === EditorState.FALLBACK_CODE);
             }
             return false;
         }
@@ -867,10 +1166,10 @@
                     
                     // 填充表单字段
                     document.getElementById('title').value = data.title || '';
-                    document.getElementById('description').value = data.description || '';
+                    // description字段已移除
                     document.getElementById('article-subtitle').value = data.subtitle || '';
                     document.getElementById('article-summary').value = data.summary || '';
-                    document.getElementById('read-time').value = data.read_time_minutes || EDITOR_CONFIG.DEFAULT_READ_TIME;
+                    // 阅读时间字段已移除，使用默认值
                     
                     // 设置内容类型 - 如果是教程模式，强制设置为TUTORIAL
                     document.querySelectorAll('.content-type-tab').forEach(tab => {
@@ -878,23 +1177,23 @@
                     });
                     
                     if (isCourse) {
-                        // 教程模式，强制设置为TUTORIAL
-                        document.querySelector('[data-type="tutorial"]').classList.add('active');
-                        // 同时隐藏内容类型选择，因为教程只能是TUTORIAL
+                        // 教程模式，强制设置为GRAMMAR
+                        document.querySelector('[data-type="grammar"]').classList.add('active');
+                        // 同时隐藏内容类型选择，因为教程只能是GRAMMAR
                         document.querySelector('.content-type-tabs').style.display = 'none';
                     } else {
                         // 普通文章模式，根据实际内容类型设置
                         document.querySelector('.content-type-tabs').style.display = 'flex';
                         if (data.content_type) {
                             const contentTypeMap = {
-                                'STORY': 'story',
-                                'STRUCTURE': 'structure',
-                                'TUTORIAL': 'tutorial'
+                                'AI_PROGRAMMING': 'ai-programming',
+                                'DATA_STRUCTURE': 'data-structure',
+                                'GRAMMAR': 'grammar'
                             };
-                            const tabId = contentTypeMap[data.content_type] || 'tutorial';
+                            const tabId = contentTypeMap[data.content_type] || 'grammar';
                             document.querySelector(`[data-type="${tabId}"]`).classList.add('active');
                         } else {
-                            document.querySelector('[data-type="tutorial"]').classList.add('active');
+                            document.querySelector('[data-type="grammar"]').classList.add('active');
                         }
                     }
                     
@@ -1187,35 +1486,37 @@
                 try {
                     tinymce.init({
                         selector: '#rich-text-editor',
-                        height: '100%',
+                        height: 400,
+                        min_height: 400,
                         menubar: false,
                         language: 'zh_CN',
                         language_url: 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.7.0/langs/zh_CN.js',
                         plugins: [
                             'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                             'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                            'insertdatetime', 'media', 'table', 'help', 'wordcount'
                         ],
                         toolbar: 'undo redo | blocks | ' + 
                             'bold italic forecolor | alignleft aligncenter ' + 
                             'alignright alignjustify | bullist numlist outdent indent | ' + 
                             'removeformat | code | help',
                         content_style: 'body { font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif; font-size:14px; line-height:1.6; }',
+                        resize: true,
+                        auto_focus: false,
+                        statusbar: false,
+                        branding: false,
                         setup: function(editor) {
                             tinymceEditor = editor;
                             currentEditorStates.richText = EditorState.TINYMCE;
                             console.log('TinyMCE编辑器初始化成功');
+                            
+                            // 监听内容变化
                             editor.on('change', function() {
                                 updatePreview();
                             });
                         },
                         init_instance_callback: function(editor) {
                             console.log('TinyMCE编辑器完全加载完成');
-                            // 如果是在编辑模式下，设置内容
-                            if (isEditMode && currentArticleId) {
-                                // 内容会在loadArticle中设置
-                                console.log('TinyMCE编辑器就绪，等待加载文章内容');
-                            }
                         }
                     }).catch(function(error) {
                         console.error('TinyMCE初始化失败:', error);
@@ -1228,14 +1529,16 @@
             }, 100);
         }
         
-        // 创建回退富文本编辑器
-        function createFallbackRichTextEditor() {
-            console.log('创建回退富文本编辑器');
-            const editorDiv = document.getElementById('rich-text-editor');
-            if (editorDiv) {
-                editorDiv.innerHTML = '<textarea id="fallback-rich-text-editor" style="width:100%;height:400px;border:1px solid #ccc;padding:10px;font-family:sans-serif;resize:vertical;"></textarea>';
-                const fallbackEditor = document.getElementById('fallback-rich-text-editor');
-                fallbackEditor.placeholder = '在这里输入文章内容...';
+
+         
+                  // 创建回退富文本编辑器
+         function createFallbackRichTextEditor() {
+             console.log('创建回退富文本编辑器');
+             const editorDiv = document.getElementById('rich-text-editor');
+             if (editorDiv) {
+                 editorDiv.innerHTML = '<textarea id="fallback-rich-text-editor" style="width:100%;height:400px;min-height:400px;border:1px solid #ccc;padding:10px;font-family:sans-serif;resize:vertical;overflow-y:auto;"></textarea>';
+                 const fallbackEditor = document.getElementById('fallback-rich-text-editor');
+                 fallbackEditor.placeholder = '在这里输入文章内容...';
                 
                 tinymceEditor = {
                     getContent: () => fallbackEditor.value,
@@ -1331,6 +1634,10 @@
                 console.log('回退代码编辑器创建完成');
             }
         }
+        // 自动保存相关变量
+        let autoSaveTimer = null;
+        let lastSavedContent = '';
+        
         // 初始化事件监听器
         function initEventListeners() {
             // 编辑器标签页切换
@@ -1380,6 +1687,97 @@
             
             // 初始加载分类数据
             loadCategories();
+            
+            // 设置自动保存（每5分钟自动保存一次）
+            setInterval(() => {
+                if (currentArticleId && isEditMode) {
+                    autoSave();
+                }
+            }, 5 * 60 * 1000); // 5分钟
+        }
+        
+        // 自动保存功能
+        function autoSave() {
+            // 检查内容是否有变化
+            const currentContent = getCurrentContent();
+            if (currentContent === lastSavedContent) {
+                return; // 内容没有变化，不需要保存
+            }
+            
+            // 静默保存，不显示加载状态
+            const title = document.getElementById('title').value;
+            const subtitle = document.getElementById('article-subtitle').value;
+            const summary = document.getElementById('article-summary').value;
+            const categoryId = document.getElementById('sub-category').value;
+            const readTimeMinutes = EDITOR_CONFIG.DEFAULT_READ_TIME;
+            
+            // 获取内容类型
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeParam = urlParams.get('type');
+            let contentType = 'GRAMMAR';
+            
+            if (typeParam === 'course' || (isEditMode && window.location.href.includes('type=course'))) {
+                contentType = 'GRAMMAR';
+            } else {
+                document.querySelectorAll('.content-type-tab').forEach(tab => {
+                    if (tab.classList.contains('active')) {
+                        const typeMap = {
+                            'grammar': 'GRAMMAR',
+                            'data-structure': 'DATA_STRUCTURE',
+                            'ai-programming': 'AI_PROGRAMMING'
+                        };
+                        contentType = typeMap[tab.dataset.type] || 'GRAMMAR';
+                    }
+                });
+            }
+            
+            const contentHtml = isEditorReady('richText') ? tinymceEditor.getContent() : '';
+            const contentCode = isEditorReady('code') ? monacoEditor.getValue() : '';
+            const codeLanguage = document.getElementById('code-language').value;
+            
+            const articleData = {
+                title: title,
+                subtitle: subtitle,
+                summary: summary,
+                content_type: contentType,
+                read_time_minutes: parseInt(readTimeMinutes),
+                category_id: categoryId || null,
+                content_html: contentHtml,
+                content_code: contentCode,
+                code_language: codeLanguage,
+                tags: tags
+            };
+            
+            fetch(`/api/articles/${currentArticleId}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify(articleData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    lastSavedContent = getCurrentContent();
+                    console.log('自动保存成功');
+                }
+            })
+            .catch(error => {
+                console.error('自动保存失败:', error);
+            });
+        }
+        
+        // 获取当前内容用于比较
+        function getCurrentContent() {
+            const title = document.getElementById('title').value;
+            const subtitle = document.getElementById('article-subtitle').value;
+            const summary = document.getElementById('article-summary').value;
+            const richTextContent = isEditorReady('richText') ? tinymceEditor.getContent() : '';
+            const codeContent = isEditorReady('code') ? monacoEditor.getValue() : '';
+            const tagsString = tags.join(',');
+            
+            return `${title}|${subtitle}|${summary}|${richTextContent}|${codeContent}|${tagsString}`;
         }
         // 切换编辑器标签页
         function switchEditorTab(tabName) {
@@ -1583,44 +1981,112 @@
                 showConfirmButton: false
             });
         }
-        // 工具栏功能
-        function previewContent() {
-            switchEditorTab('preview');
-        }
+
+         
+                  // 工具栏功能
+         function previewContent() {
+             switchEditorTab('preview');
+         }
         
         function saveToList() {
-            if (confirm('确定要保存这篇文章吗？')) {
-                saveArticle();
+            // 验证必填字段
+            const title = document.getElementById('title').value.trim();
+            if (!title) {
+                Swal.fire({
+                    title: '保存失败',
+                    text: '请填写文章标题',
+                    icon: 'warning',
+                    confirmButtonText: '确定'
+                });
+                return;
             }
+            
+            // 验证分类选择
+            const categoryId = document.getElementById('sub-category').value;
+            if (!categoryId) {
+                Swal.fire({
+                    title: '保存失败',
+                    text: '请选择文章分类',
+                    icon: 'warning',
+                    confirmButtonText: '确定'
+                });
+                return;
+            }
+            
+            // 验证内容
+            let hasContent = false;
+            if (isEditorReady('richText')) {
+                const richTextContent = tinymceEditor.getContent().trim();
+                if (richTextContent) hasContent = true;
+            }
+            if (isEditorReady('code')) {
+                const codeContent = monacoEditor.getValue().trim();
+                if (codeContent) hasContent = true;
+            }
+            
+            if (!hasContent) {
+                Swal.fire({
+                    title: '保存失败',
+                    text: '请至少添加一些内容（富文本或代码）',
+                    icon: 'warning',
+                    confirmButtonText: '确定'
+                });
+                return;
+            }
+            
+            Swal.fire({
+                title: '确认保存',
+                text: '确定要保存这篇文章吗？',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '保存',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    saveArticle();
+                }
+            });
         }
         
         // 保存文章到后端
         function saveArticle() {
+            // 显示加载状态
+            Swal.fire({
+                title: '正在保存...',
+                text: '请稍候，正在保存文章',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
             // 收集表单数据
             const title = document.getElementById('title').value;
             const subtitle = document.getElementById('article-subtitle').value;
             const summary = document.getElementById('article-summary').value;
             const categoryId = document.getElementById('sub-category').value;
-            const readTimeMinutes = document.getElementById('read-time').value || EDITOR_CONFIG.DEFAULT_READ_TIME;
+            const readTimeMinutes = EDITOR_CONFIG.DEFAULT_READ_TIME;
             
             // 获取内容类型 - 根据编辑模式决定
             const urlParams = new URLSearchParams(window.location.search);
             const typeParam = urlParams.get('type');
-            let contentType = 'TUTORIAL'; // 默认为教程
+            let contentType = 'GRAMMAR'; // 默认为语法
             
-            // 如果是教程编辑模式，强制为TUTORIAL
+            // 如果是教程编辑模式，强制为GRAMMAR
             if (typeParam === 'course' || (isEditMode && window.location.href.includes('type=course'))) {
-                contentType = 'TUTORIAL';
+                contentType = 'GRAMMAR';
             } else {
                 // 普通文章模式，根据选择的内容类型
                 document.querySelectorAll('.content-type-tab').forEach(tab => {
                     if (tab.classList.contains('active')) {
                         const typeMap = {
-                            'tutorial': 'TUTORIAL',
-                            'story': 'STORY',
-                            'structure': 'STRUCTURE'
+                            'grammar': 'GRAMMAR',
+                            'data-structure': 'DATA_STRUCTURE',
+                            'ai-programming': 'AI_PROGRAMMING'
                         };
-                        contentType = typeMap[tab.dataset.type] || 'TUTORIAL';
+                        contentType = typeMap[tab.dataset.type] || 'GRAMMAR';
                     }
                 });
             }
@@ -1647,7 +2113,7 @@
             };
             
             // 确定请求URL和方法
-            let url = contentType === 'TUTORIAL' ? '/api/courses/' : '/api/articles/';
+            let url = '/api/articles/'; // 统一使用articles API
             let method = 'POST';
             
             if (isEditMode && currentArticleId) {
@@ -1671,6 +2137,9 @@
                 return response.json();
             })
             .then(data => {
+                // 关闭加载状态
+                Swal.close();
+                
                 if (data.status === 'success') {
                     // 如果是新建文章，更新URL和状态
                     if (!isEditMode && data.id) {
@@ -1694,9 +2163,21 @@
                     // 可以选择跳转到列表页
                     // window.location.href = '/manage/course-management/';
                 } else {
+                    // 处理服务器返回的错误信息
+                    let errorMessage = data.message || '未知错误';
+                    if (data.errors) {
+                        // 如果有详细的错误信息，显示第一个错误
+                        const firstError = Object.values(data.errors)[0];
+                        if (Array.isArray(firstError)) {
+                            errorMessage = firstError[0];
+                        } else if (typeof firstError === 'string') {
+                            errorMessage = firstError;
+                        }
+                    }
+                    
                     Swal.fire({
                         title: '保存失败',
-                        text: data.message || '未知错误',
+                        text: errorMessage,
                         icon: 'error',
                         confirmButtonText: '确定'
                     });
@@ -1704,9 +2185,27 @@
             })
             .catch(error => {
                 console.error('保存文章失败:', error);
+                
+                // 关闭加载状态
+                Swal.close();
+                
+                // 根据错误类型显示不同的错误信息
+                let errorMessage = '网络错误或服务器异常';
+                if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+                    errorMessage = '网络连接失败，请检查网络连接后重试';
+                } else if (error.message.includes('401')) {
+                    errorMessage = '登录已过期，请重新登录';
+                } else if (error.message.includes('403')) {
+                    errorMessage = '没有权限执行此操作';
+                } else if (error.message.includes('500')) {
+                    errorMessage = '服务器内部错误，请稍后重试';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
                 Swal.fire({
                     title: '保存失败',
-                    text: error.message || '网络错误或服务器异常',
+                    text: errorMessage,
                     icon: 'error',
                     confirmButtonText: '确定'
                 });
