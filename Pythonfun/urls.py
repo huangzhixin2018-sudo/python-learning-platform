@@ -33,7 +33,7 @@ urlpatterns = [
     path('function-library/', views.function_library_view, name='function_library'),
     path('function-query/', views.function_query_view, name='function_query'),
     path('data-structure/', views.data_structure_view, name='data_structure'),
-    path('statement/', views.statement_view, name='statement'),
+    path('ai-programming/', views.ai_programming_view, name='ai_programming'),
     path('project/', views.project_view, name='project'),
     
     # 系统管理页面

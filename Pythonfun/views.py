@@ -555,9 +555,9 @@ def data_structure_view(request):
     """数据结构页面视图"""
     return render(request, 'front/数据结构.html')
 
-def statement_view(request):
-    """语句页面视图"""
-    return render(request, 'front/语句.html')
+def ai_programming_view(request):
+    """AI编程页面视图"""
+    return render(request, 'front/AI编程.html')
 
 def project_view(request):
     """项目页面视图"""
