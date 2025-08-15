@@ -256,15 +256,36 @@
     /* 表格信息 */
     .table-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
       margin-top: 1.5rem;
+    }
+    
+    @media (max-width: 1400px) {
+      .table-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    @media (max-width: 1000px) {
+      .table-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .table-grid {
+        grid-template-columns: 1fr;
+      }
     }
     .table-card {
       background: var(--bg-color);
       border: 1px solid #eee;
       border-radius: var(--border-radius);
-      padding: 1.5rem;
+      padding: 1rem;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
     }
     .table-name {
       font-weight: 600;
@@ -274,20 +295,29 @@
     }
     .field-list {
       list-style: none;
+      margin: 0;
+      padding: 0;
+      flex: 1;
     }
     .field-item {
-      padding: 0.5rem 0;
+      padding: 0.4rem 0;
       border-bottom: 1px solid #eee;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--text-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .field-item:last-child {
       border-bottom: none;
     }
     .field-type {
       color: var(--light-text);
-      font-size: 0.8rem;
-      margin-left: 0.5rem;
+      font-size: 0.75rem;
+      background: #f8f9fa;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
     }
 
     /* 提示框 */
@@ -641,75 +671,55 @@
     // 加载表结构
     function loadTableInfo() {
       const tableGrid = document.getElementById('table-grid');
-      tableGrid.innerHTML = '';
+      tableGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #666;">正在加载表结构信息...</div>';
 
-      const tables = [
-        {
-          name: '函数库 (libraries)',
-          fields: [
-            { name: 'id', type: 'Integer' },
-            { name: 'name', type: 'String(100)' },
-            { name: 'description', type: 'Text' },
-            { name: 'created_at', type: 'DateTime' }
-          ]
-        },
-        {
-          name: '模块 (modules)',
-          fields: [
-            { name: 'id', type: 'Integer' },
-            { name: 'library_id', type: 'ForeignKey' },
-            { name: 'name', type: 'String(100)' },
-            { name: 'path', type: 'String(200)' }
-          ]
-        },
-        {
-          name: '函数 (functions)',
-          fields: [
-            { name: 'id', type: 'Integer' },
-            { name: 'module_id', type: 'ForeignKey' },
-            { name: 'name', type: 'String(100)' },
-            { name: 'signature', type: 'String(200)' },
-            { name: 'docstring', type: 'Text' }
-          ]
-        },
-        {
-          name: '参数 (parameters)',
-          fields: [
-            { name: 'id', type: 'Integer' },
-            { name: 'function_id', type: 'ForeignKey' },
-            { name: 'name', type: 'String(50)' },
-            { name: 'type', type: 'String(50)' },
-            { name: 'default_value', type: 'String(100)' },
-            { name: 'description', type: 'Text' }
-          ]
-        }
-      ];
+      fetch('{% url "Pythonfun:get_table_structure" %}')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            tableGrid.innerHTML = '';
+            
+            Object.values(data.tables).forEach(table => {
+              const card = document.createElement('div');
+              card.className = 'table-card';
 
-      tables.forEach(table => {
-        const card = document.createElement('div');
-        card.className = 'table-card';
+              const title = document.createElement('div');
+              title.className = 'table-name';
+              title.textContent = table.name;
+              card.appendChild(title);
 
-        const title = document.createElement('div');
-        title.className = 'table-name';
-        title.textContent = table.name;
-        card.appendChild(title);
+              const list = document.createElement('ul');
+              list.className = 'field-list';
+              table.fields.forEach(field => {
+                const li = document.createElement('li');
+                li.className = 'field-item';
+                
+                // 分离字段名和类型
+                const fieldParts = field.split(' (');
+                const fieldName = fieldParts[0];
+                const fieldType = fieldParts[1] ? fieldParts[1].replace(')', '') : '';
+                
+                li.textContent = fieldName;
+                if (fieldType) {
+                  const span = document.createElement('span');
+                  span.className = 'field-type';
+                  span.textContent = fieldType;
+                  li.appendChild(span);
+                }
+                list.appendChild(li);
+              });
+              card.appendChild(list);
 
-        const list = document.createElement('ul');
-        list.className = 'field-list';
-        table.fields.forEach(field => {
-          const li = document.createElement('li');
-          li.className = 'field-item';
-          li.textContent = field.name;
-          const span = document.createElement('span');
-          span.className = 'field-type';
-          span.textContent = field.type;
-          li.appendChild(span);
-          list.appendChild(li);
+              tableGrid.appendChild(card);
+            });
+          } else {
+            tableGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #e74c3c;">加载表结构失败: ' + (data.message || '未知错误') + '</div>';
+          }
+        })
+        .catch(err => {
+          console.error('加载表结构失败:', err);
+          tableGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #e74c3c;">加载表结构失败: ' + err.message + '</div>';
         });
-        card.appendChild(list);
-
-        tableGrid.appendChild(card);
-      });
     }
 
 

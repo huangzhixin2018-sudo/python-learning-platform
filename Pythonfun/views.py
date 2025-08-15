@@ -917,6 +917,99 @@ def get_function_stats_api(request):
         }, status=500)
 
 @require_http_methods(["GET"])
+def get_table_structure_api(request):
+    """获取数据表结构API"""
+    try:
+        from django.db import connection
+        
+        # 定义表结构信息
+        table_structures = {
+            'function_library': {
+                'name': '函数库 (Library)',
+                'fields': [
+                    'library_id (AutoField)',
+                    'library_name (CharField)',
+                    'library_name_cn (CharField)',
+                    'description (TextField)',
+                    'version (CharField)',
+                    'category (CharField)',
+                    'is_builtin (BooleanField)',
+                    'is_standard (BooleanField)',
+                    'created_at (DateTimeField)',
+                    'updated_at (DateTimeField)'
+                ]
+            },
+            'function_module': {
+                'name': '模块 (Module)',
+                'fields': [
+                    'module_id (AutoField)',
+                    'library_id (ForeignKey)',
+                    'module_name (CharField)',
+                    'description (TextField)',
+                    'is_builtin (BooleanField)',
+                    'created_at (DateTimeField)',
+                    'updated_at (DateTimeField)'
+                ]
+            },
+            'function_info': {
+                'name': '函数 (Function)',
+                'fields': [
+                    'function_id (AutoField)',
+                    'module_id (ForeignKey)',
+                    'function_name (CharField)',
+                    'function_name_cn (CharField)',
+                    'description (TextField)',
+                    'description_cn (TextField)',
+                    'operation_type_id (ForeignKey)',
+                    'syntax (TextField)',
+                    'parameters_text (TextField)',
+                    'return_value (TextField)',
+                    'return_value_cn (TextField)',
+                    'example (TextField)',
+                    'example_cn (TextField)',
+                    'availability (CharField)',
+                    'version_added (CharField)',
+                    'created_at (DateTimeField)',
+                    'updated_at (DateTimeField)'
+                ]
+            },
+            'function_parameter': {
+                'name': '参数 (Parameter)',
+                'fields': [
+                    'parameter_id (AutoField)',
+                    'function_id (ForeignKey)',
+                    'parameter_name (CharField)',
+                    'parameter_name_cn (CharField)',
+                    'data_type (CharField)',
+                    'is_required (BooleanField)',
+                    'default_value (CharField)',
+                    'description (TextField)',
+                    'description_cn (TextField)'
+                ]
+            },
+            'function_operation_type': {
+                'name': '操作类型 (OperationType)',
+                'fields': [
+                    'operation_type_id (AutoField)',
+                    'operation_name (CharField)',
+                    'operation_name_cn (CharField)',
+                    'description (TextField)'
+                ]
+            }
+        }
+        
+        return JsonResponse({
+            'success': True,
+            'tables': table_structures
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'获取表结构失败: {str(e)}'
+        }, status=500)
+
+@require_http_methods(["GET"])
 def export_functions_api(request):
     """导出函数数据API"""
     try:

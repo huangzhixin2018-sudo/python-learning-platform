@@ -57,5 +57,6 @@ urlpatterns = [
     # 函数管理API路由
     path('api/upload-functions/', views.upload_functions_api, name='upload_functions'),
     path('api/function-stats/', views.get_function_stats_api, name='get_function_stats'),
+    path('api/table-structure/', views.get_table_structure_api, name='get_table_structure'),
     path('api/export-functions/', views.export_functions_api, name='export_functions'),
 ]
