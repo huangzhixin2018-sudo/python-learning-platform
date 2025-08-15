@@ -1131,3 +1131,188 @@ def export_functions_api(request):
             'success': False,
             'message': f'导出失败: {str(e)}'
         }, status=500)
+
+@require_http_methods(["GET"])
+def download_template_api(request):
+    """下载数据模板API"""
+    try:
+        from django.http import HttpResponse
+        import openpyxl
+        from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+        from openpyxl.utils import get_column_letter
+        import io
+        
+        # 创建工作簿
+        wb = openpyxl.Workbook()
+        
+        # 创建5个工作表，对应5个数据表
+        tables = [
+            {
+                'name': '函数库表',
+                'sheet_name': 'Library',
+                'headers': [
+                    'library_name', 'library_name_cn', 'description', 'version', 
+                    'category', 'is_builtin', 'is_standard'
+                ],
+                'header_names': [
+                    '库名称(英文)', '库名称(中文)', '描述', '版本', 
+                    '分类', '是否内置', '是否标准库'
+                ],
+                'sample_data': [
+                    ['os', '操作系统接口', '提供操作系统相关功能', '3.x', '系统', True, True],
+                    ['sys', '系统相关参数', '系统相关的参数和函数', '3.x', '系统', True, True]
+                ]
+            },
+            {
+                'name': '模块表',
+                'sheet_name': 'Module',
+                'headers': [
+                    'library_name', 'module_name', 'description', 'is_builtin'
+                ],
+                'header_names': [
+                    '所属库名称', '模块名称', '描述', '是否内置'
+                ],
+                'sample_data': [
+                    ['os', 'path', '路径操作相关函数', True],
+                    ['os', 'file', '文件操作相关函数', True]
+                ]
+            },
+            {
+                'name': '函数表',
+                'sheet_name': 'Function',
+                'headers': [
+                    'library_name', 'module_name', 'function_name', 'function_name_cn',
+                    'description', 'description_cn', 'operation_type', 'syntax',
+                    'parameters_text', 'return_value', 'return_value_cn', 'example',
+                    'example_cn', 'availability', 'version_added'
+                ],
+                'header_names': [
+                    '所属库名称', '所属模块名称', '函数名称(英文)', '函数名称(中文)',
+                    '描述(英文)', '描述(中文)', '操作类型', '语法',
+                    '参数文本', '返回值(英文)', '返回值(中文)', '示例(英文)',
+                    '示例(中文)', '可用性', '版本'
+                ],
+                'sample_data': [
+                    ['os', 'path', 'join', '路径拼接', 'Join path components', '拼接路径组件', '路径操作', 'os.path.join(path, *paths)', 'path, *paths', 'str', '字符串', 'os.path.join("a", "b")', 'os.path.join("a", "b")', 'All', '1.4']
+                ]
+            },
+            {
+                'name': '参数表',
+                'sheet_name': 'Parameter',
+                'headers': [
+                    'library_name', 'module_name', 'function_name', 'parameter_name',
+                    'parameter_name_cn', 'data_type', 'is_required', 'default_value',
+                    'description', 'description_cn'
+                ],
+                'header_names': [
+                    '所属库名称', '所属模块名称', '所属函数名称', '参数名称(英文)',
+                    '参数名称(中文)', '数据类型', '是否必需', '默认值',
+                    '描述(英文)', '描述(中文)'
+                ],
+                'sample_data': [
+                    ['os', 'path', 'join', 'path', '路径', 'str', True, '', 'Base path', '基础路径'],
+                    ['os', 'path', 'join', '*paths', '路径列表', 'str', False, '', 'Additional paths', '额外路径']
+                ]
+            },
+            {
+                'name': '操作类型表',
+                'sheet_name': 'OperationType',
+                'headers': [
+                    'operation_name', 'operation_name_cn', 'description'
+                ],
+                'header_names': [
+                    '操作类型(英文)', '操作类型(中文)', '描述'
+                ],
+                'sample_data': [
+                    ['File Operation', '文件操作', '文件相关的操作类型'],
+                    ['Path Operation', '路径操作', '路径相关的操作类型']
+                ]
+            }
+        ]
+        
+        # 为每个表创建工作表
+        for table in tables:
+            # 删除默认工作表（如果是第一个表）
+            if table == tables[0]:
+                ws = wb.active
+                ws.title = table['sheet_name']
+            else:
+                ws = wb.create_sheet(title=table['sheet_name'])
+            
+            # 设置表头样式
+            header_font = Font(bold=True, color="FFFFFF", size=12)
+            header_fill = PatternFill(start_color="366092", end_color="366092", fill_type="solid")
+            header_alignment = Alignment(horizontal="center", vertical="center")
+            border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            
+            # 写入表头
+            for col, header in enumerate(table['header_names'], 1):
+                cell = ws.cell(row=1, column=col, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.alignment = header_alignment
+                cell.border = border
+            
+            # 写入示例数据
+            for row, data in enumerate(table['sample_data'], 2):
+                for col, value in enumerate(data, 1):
+                    cell = ws.cell(row=row, column=col, value=value)
+                    cell.border = border
+                    cell.alignment = Alignment(horizontal="left", vertical="center")
+            
+            # 添加说明行
+            note_row = len(table['sample_data']) + 3
+            ws.cell(row=note_row, column=1, value="说明：")
+            ws.cell(row=note_row, column=1).font = Font(bold=True, color="FF0000")
+            
+            note_row += 1
+            ws.cell(row=note_row, column=1, value="1. 请按照示例格式填写数据")
+            note_row += 1
+            ws.cell(row=note_row, column=1, value="2. 布尔值请填写：True 或 False")
+            note_row += 1
+            ws.cell(row=note_row, column=1, value="3. 必填字段不能为空")
+            note_row += 1
+            ws.cell(row=note_row, column=1, value="4. 删除示例数据行后再上传")
+            
+            # 自动调整列宽
+            for col in range(1, len(table['headers']) + 1):
+                column_letter = get_column_letter(col)
+                max_length = 0
+                column = ws[column_letter]
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                adjusted_width = min(max_length + 3, 40)  # 最大宽度40
+                ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # 删除默认工作表（如果还存在）
+        if 'Sheet' in wb.sheetnames:
+            wb.remove(wb['Sheet'])
+        
+        # 保存到内存
+        output = io.BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # 创建响应
+        response = HttpResponse(
+            output.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="函数数据库模板.xlsx"'
+        
+        return response
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'下载模板失败: {str(e)}'
+        }, status=500)

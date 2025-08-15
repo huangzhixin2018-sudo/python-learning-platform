@@ -654,8 +654,8 @@
     // 下载模板
     function downloadTemplate() {
       const link = document.createElement('a');
-      link.href = '/static/templates/function_template.xlsx';
-      link.download = '函数导入模板.xlsx';
+      link.href = '{% url "Pythonfun:download_template" %}';
+      link.download = '函数数据库模板.xlsx';
       link.click();
     }
 
