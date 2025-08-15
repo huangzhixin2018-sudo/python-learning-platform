@@ -119,6 +119,7 @@ class Library(models.Model):
     category = models.CharField(_("分类"), max_length=100, blank=True, null=True)
     is_builtin = models.BooleanField(_("是否内置"), default=False)
     is_standard = models.BooleanField(_("是否标准库"), default=False)
+    library_type = models.CharField(_("库类型"), max_length=100, default="standard")
     created_at = models.DateTimeField(_("创建时间"), auto_now_add=True)
     updated_at = models.DateTimeField(_("更新时间"), auto_now=True)
 
@@ -135,7 +136,9 @@ class Module(models.Model):
     module_id = models.AutoField(_("模块ID"), primary_key=True)
     library = models.ForeignKey(Library, on_delete=models.CASCADE, related_name='modules', verbose_name=_("所属库"))
     module_name = models.CharField(_("模块名称"), max_length=100)
+    module_name_cn = models.CharField(_("模块中文名称"), max_length=100, default="")
     description = models.TextField(_("描述"), blank=True, null=True)
+    source_file = models.CharField(_("源文件"), max_length=200, blank=True, null=True)
     is_builtin = models.BooleanField(_("是否内置"), default=False)
     created_at = models.DateTimeField(_("创建时间"), auto_now_add=True)
     updated_at = models.DateTimeField(_("更新时间"), auto_now=True)
@@ -155,6 +158,8 @@ class OperationType(models.Model):
     operation_name = models.CharField(_("操作类型名称"), max_length=100, unique=True)
     operation_name_cn = models.CharField(_("操作类型中文名称"), max_length=100)
     description = models.TextField(_("描述"), blank=True, null=True)
+    created_at = models.DateTimeField(_("创建时间"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("更新时间"), auto_now=True)
 
     class Meta:
         verbose_name = _("操作类型")
@@ -204,6 +209,10 @@ class Parameter(models.Model):
     default_value = models.CharField(_("默认值"), max_length=200, blank=True, null=True)
     description = models.TextField(_("描述"), blank=True, null=True)
     description_cn = models.TextField(_("中文描述"), blank=True, null=True)
+    constraints = models.TextField(_("约束条件"), blank=True, null=True)
+    parameter_type = models.CharField(_("参数类型"), max_length=100, default="positional")
+    position = models.IntegerField(_("位置"), default=0)
+    example_usage = models.TextField(_("使用示例"), blank=True, null=True)
 
     class Meta:
         verbose_name = _("参数信息")
