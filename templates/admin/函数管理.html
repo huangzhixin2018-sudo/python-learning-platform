@@ -179,6 +179,11 @@
       margin-bottom: 1rem;
       flex-wrap: wrap;
     }
+    
+    .upload-controls .btn {
+      flex: 1;
+      min-width: 140px;
+    }
     .file-input {
       display: none;
     }
@@ -487,13 +492,13 @@
       </div>
     </div>
 
-    <!-- 上传函数表（简化为两个按钮） -->
+    <!-- 数据库管理 -->
     <div class="card">
       <div class="card-header">
-        <h2 class="card-title"><i class="fas fa-upload"></i> 上传函数表</h2>
+        <h2 class="card-title"><i class="fas fa-database"></i> 数据库管理</h2>
       </div>
       <div class="card-body">
-        <!-- 两个按钮 + 文件状态 -->
+        <!-- 三个按钮 + 文件状态 -->
         <div class="upload-controls">
           <input type="file" id="file-input" class="file-input" accept=".xlsx,.xls">
           <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
@@ -501,6 +506,9 @@
           </button>
           <button class="btn btn-info" onclick="downloadTemplate()">
             <i class="fas fa-download"></i> 下载模板
+          </button>
+          <button class="btn btn-success" onclick="downloadDatabase()">
+            <i class="fas fa-database"></i> 下载数据库表
           </button>
         </div>
 
@@ -648,6 +656,14 @@
       const link = document.createElement('a');
       link.href = '/static/templates/function_template.xlsx';
       link.download = '函数导入模板.xlsx';
+      link.click();
+    }
+
+    // 下载数据库表
+    function downloadDatabase() {
+      const link = document.createElement('a');
+      link.href = '{% url "Pythonfun:export_functions" %}';
+      link.download = '函数数据库表.csv';
       link.click();
     }
 
