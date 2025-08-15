@@ -184,19 +184,21 @@
         /* 主编辑区域 */
         .editor-container {
             display: flex;
+            flex-direction: column;
             height: calc(100vh - 120px);
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             overflow: hidden;
         }
-        /* 左侧工具栏 */
+        /* 顶部工具栏 */
         .editor-sidebar {
-            width: 300px;
+            width: 100%;
             background: white;
-            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
             padding: 1.5rem;
             overflow-y: auto;
+            max-height: 300px;
         }
         .sidebar-section {
             margin-bottom: 2rem;
@@ -206,6 +208,19 @@
             font-weight: 600;
             color: var(--text-color);
             margin-bottom: 1rem;
+        }
+        /* 水平布局的表单组 */
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .form-row .form-group:first-child {
+            flex: 2;
         }
         .form-group {
             margin-bottom: 1.5rem;
@@ -432,8 +447,12 @@
         }
         /* 响应式设计 */
         @media (max-width: 1024px) {
-            .editor-sidebar {
-                width: 250px;
+            .form-row {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .form-row .form-group {
+                flex: none;
             }
         }
         @media (max-width: 768px) {
@@ -451,9 +470,15 @@
             }
             .editor-sidebar {
                 width: 100%;
-                border-right: none;
                 border-bottom: 1px solid var(--border-color);
-                max-height: 300px;
+                max-height: 400px;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .form-row .form-group {
+                flex: none;
             }
             .nav-actions {
                 gap: 0.5rem;
@@ -514,52 +539,59 @@
         </nav>
         <!-- 主编辑区域 -->
         <div class="editor-container">
-            <!-- 左侧工具栏 -->
+            <!-- 顶部工具栏 -->
             <div class="editor-sidebar">
                 <!-- 基本信息 -->
                 <div class="sidebar-section">
                     <h3 class="sidebar-title">基本信息</h3>
-                    <div class="form-group">
-                        <label class="form-label">标题</label>
-                        <input type="text" class="form-control" id="title" name="title" value="">
-                        <textarea class="form-control" id="description" name="description"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">副标题</label>
-                        <input type="text" class="form-control" id="article-subtitle" placeholder="可选的副标题">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">标题</label>
+                            <input type="text" class="form-control" id="title" name="title" value="">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">副标题</label>
+                            <input type="text" class="form-control" id="article-subtitle" placeholder="可选的副标题">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">预计阅读时间（分钟）</label>
+                            <input type="number" class="form-control" id="read-time" min="1" max="120" value="5">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">摘要</label>
-                        <textarea class="form-control" id="article-summary" rows="3" placeholder="文章摘要，用于搜索和展示"></textarea>
+                        <textarea class="form-control" id="article-summary" rows="2" placeholder="文章摘要，用于搜索和展示"></textarea>
                     </div>
                 </div>
                 <!-- 分类和标签 -->
                 <div class="sidebar-section">
                     <h3 class="sidebar-title">分类和标签</h3>
-                    <div class="form-group">
-                        <label class="form-label">主分类</label>
-                        <select class="form-control form-select" id="primary-category">
-                            <option value="">选择主分类</option>
-                            <option value="basic">基础语法</option>
-                            <option value="data-structure">数据结构</option>
-                            <option value="advanced">高级特性</option>
-                            <option value="projects">项目实战</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">子分类</label>
-                        <select class="form-control form-select" id="sub-category">
-                            <option value="">选择子分类</option>
-                            <option value="variables">变量与数据类型</option>
-                            <option value="functions">函数</option>
-                            <option value="classes">类与对象</option>
-                            <option value="modules">模块与包</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">标签</label>
-                        <div class="tag-input-container" id="tag-container">
-                            <input type="text" class="tag-input" placeholder="添加标签，按回车确认" id="tag-input">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">主分类</label>
+                            <select class="form-control form-select" id="primary-category">
+                                <option value="">选择主分类</option>
+                                <option value="basic">基础语法</option>
+                                <option value="data-structure">数据结构</option>
+                                <option value="advanced">高级特性</option>
+                                <option value="projects">项目实战</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">子分类</label>
+                            <select class="form-control form-select" id="sub-category">
+                                <option value="">选择子分类</option>
+                                <option value="variables">变量与数据类型</option>
+                                <option value="functions">函数</option>
+                                <option value="classes">类与对象</option>
+                                <option value="modules">模块与包</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">标签</label>
+                            <div class="tag-input-container" id="tag-container">
+                                <input type="text" class="tag-input" placeholder="添加标签，按回车确认" id="tag-input">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -570,10 +602,6 @@
                         <button class="content-type-tab active" data-type="tutorial">教程</button>
                         <button class="content-type-tab" data-type="structure">结构</button>
                         <button class="content-type-tab" data-type="story">故事</button>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">预计阅读时间（分钟）</label>
-                        <input type="number" class="form-control" id="read-time" min="1" max="120" value="5">
                     </div>
                 </div>
             </div>
@@ -1334,7 +1362,7 @@
                 }
             });
             // 表单字段变化时更新预览
-            ['title', 'description', 'article-subtitle', 'article-summary'].forEach(id => {
+            ['title', 'article-subtitle', 'article-summary'].forEach(id => {
                 document.getElementById(id).addEventListener('input', updatePreview);
             });
             
