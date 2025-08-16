@@ -113,28 +113,47 @@ def category_view(request, slug):
                 is_published=False
             ).order_by('created_at').first()
         
-        # 总是构建分类树，不管是否有文章
+        # 构建分类树，只包含有指定内容类型文章的分类
         category_tree = []
-        # 获取所有主分类
-        main_categories = MainCategory.objects.filter(is_enabled=True).order_by('id')
         
-        for main_category in main_categories:
-            sub_categories = SubCategory.objects.filter(
-                parent=main_category,
-                is_enabled=True
-            ).order_by('id')
-            sub_categories_with_count = []
-            for sub in sub_categories:
-                article_count = Article.objects.filter(
-                    category=sub,
-                    content_type=model_content_type,
-                    is_published=True
-                ).count()
-                sub.article_count = article_count
-                sub_categories_with_count.append(sub)
+        # 获取包含指定内容类型文章的子分类
+        sub_categories_with_articles = SubCategory.objects.filter(
+            article__content_type=model_content_type,
+            article__is_published=True,
+            is_enabled=True
+        ).distinct().order_by('parent__id', 'id')
+        
+        # 按主分类分组
+        current_main_category = None
+        current_sub_categories = []
+        
+        for sub_category in sub_categories_with_articles:
+            if current_main_category != sub_category.parent:
+                # 保存前一个主分类的数据
+                if current_main_category and current_sub_categories:
+                    category_tree.append({
+                        'main_category': current_main_category,
+                        'sub_categories': current_sub_categories
+                    })
+                
+                # 开始新的主分类
+                current_main_category = sub_category.parent
+                current_sub_categories = []
+            
+            # 计算文章数量
+            article_count = Article.objects.filter(
+                category=sub_category,
+                content_type=model_content_type,
+                is_published=True
+            ).count()
+            sub_category.article_count = article_count
+            current_sub_categories.append(sub_category)
+        
+        # 添加最后一个主分类的数据
+        if current_main_category and current_sub_categories:
             category_tree.append({
-                'main_category': main_category,
-                'sub_categories': sub_categories_with_count
+                'main_category': current_main_category,
+                'sub_categories': current_sub_categories
             })
         
         # 根据内容类型选择模板

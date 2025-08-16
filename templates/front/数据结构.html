@@ -120,14 +120,7 @@
       flex-shrink: 0;
     }
 
-    .sidebar h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--text-color);
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--primary-color);
-    }
+
 
     .article-list {
       list-style: none;
@@ -248,9 +241,8 @@
   <!-- 主内容区域：左侧文章列表 + 右侧内容 -->
   <main class="main-layout">
     
-    <!-- 左侧边栏：文章列表 -->
+    <!-- 左侧边栏：子分类列表 -->
     <aside class="sidebar">
-      <h2>数据结构教程</h2>
       {% if category_tree %}
         <ul class="article-list">
           {% for main_category in category_tree %}
@@ -267,7 +259,7 @@
         </ul>
       {% else %}
         <ul class="article-list">
-          <li><a href="#" class="active">在喧嚣中寻找宁静</a></li>
+          <li><a href="#" class="active">数据结构基础入门</a></li>
         </ul>
       {% endif %}
     </aside>
