@@ -72,6 +72,8 @@
     .badge-primary { background-color: rgba(67, 97, 238, 0.1); color: var(--primary-color); }
     .badge-success { background-color: rgba(76, 175, 80, 0.1); color: var(--success-color); }
     .badge-warning { background-color: rgba(255, 152, 0, 0.1); color: var(--warning-color); }
+    .badge-info { background-color: rgba(23, 162, 184, 0.1); color: #17a2b8; }
+    .badge-secondary { background-color: rgba(108, 117, 125, 0.1); color: #6c757d; }
     .btn { 
       padding: 0.625rem 1.25rem; 
       border-radius: var(--border-radius); 
@@ -524,13 +526,13 @@
 
   <main class="admin-main">
     <header class="admin-header">
-      <h1 class="page-title">教程管理</h1>
+      <h1 class="page-title">文章管理</h1>
       <div class="user-profile"><span>管理员</span><div class="user-avatar">A</div></div>
     </header>
 
     <div class="card">
       <div class="card-header">
-        <h2 class="card-title">所有教程</h2>
+        <h2 class="card-title">所有文章</h2>
       </div>
       
       <!-- 操作工具栏 -->
@@ -550,7 +552,7 @@
           
           <div class="action-buttons">
             <a href="#" class="btn btn-primary" id="addTutorialBtn">
-              <i class="fas fa-plus"></i> 添加教程
+              <i class="fas fa-plus"></i> 添加文章
             </a>
           </div>
         </div>
@@ -587,7 +589,7 @@
                 <input type="checkbox" id="selectAllCheckbox" title="全选/取消全选">
               </th>
               <th>ID</th>
-              <th>教程名称</th>
+              <th>文章名称</th>
               <th>分类</th>
               <th>内容类型</th>
               <th>标签</th>
@@ -1146,12 +1148,24 @@
         const hasRequiredFields = course.title && course.title.trim() && 
                                 course.category_name && course.category_name.trim();
         
+        // 根据内容类型设置不同的样式
+        let contentTypeBadge = '';
+        if (course.content_type === 'GR') {
+          contentTypeBadge = '<span class="badge badge-primary">语法</span>';
+        } else if (course.content_type === 'DS') {
+          contentTypeBadge = '<span class="badge badge-info">数据结构</span>';
+        } else if (course.content_type === 'AI') {
+          contentTypeBadge = '<span class="badge badge-success">AI编程</span>';
+        } else {
+          contentTypeBadge = '<span class="badge badge-secondary">其他</span>';
+        }
+        
         row.innerHTML = `
           <td><input type="checkbox" class="course-checkbox" data-id="${course.id}"></td>
           <td>${course.id}</td>
           <td>${escapeHtml(course.title || '无标题')}</td>
           <td>${course.category_name ? escapeHtml(course.category_name) : '未分类'}</td>
-          <td>教程</td>
+          <td>${contentTypeBadge}</td>
           <td>${escapeHtml(tagsList)}</td>
           <td>
             ${course.is_published ? 

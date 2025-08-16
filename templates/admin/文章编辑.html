@@ -1177,18 +1177,18 @@
                     });
                     
                     if (isCourse) {
-                        // 教程模式，强制设置为GRAMMAR
+                        // 教程模式，强制设置为语法类型
                         document.querySelector('[data-type="grammar"]').classList.add('active');
-                        // 同时隐藏内容类型选择，因为教程只能是GRAMMAR
+                        // 同时隐藏内容类型选择，因为教程只能是语法类型
                         document.querySelector('.content-type-tabs').style.display = 'none';
                     } else {
                         // 普通文章模式，根据实际内容类型设置
                         document.querySelector('.content-type-tabs').style.display = 'flex';
                         if (data.content_type) {
                             const contentTypeMap = {
-                                'AI_PROGRAMMING': 'ai-programming',
-                                'DATA_STRUCTURE': 'data-structure',
-                                'GRAMMAR': 'grammar'
+                                'AI': 'ai-programming',      // 修复：AI -> ai-programming
+                                'DS': 'data-structure',      // 修复：DS -> data-structure
+                                'GR': 'grammar'              // 修复：GR -> grammar
                             };
                             const tabId = contentTypeMap[data.content_type] || 'grammar';
                             document.querySelector(`[data-type="${tabId}"]`).classList.add('active');
@@ -1714,19 +1714,19 @@
             // 获取内容类型
             const urlParams = new URLSearchParams(window.location.search);
             const typeParam = urlParams.get('type');
-            let contentType = 'GRAMMAR';
+            let contentType = 'GR';  // 修复：默认值改为'GR'
             
             if (typeParam === 'course' || (isEditMode && window.location.href.includes('type=course'))) {
-                contentType = 'GRAMMAR';
+                contentType = 'GR';  // 修复：教程类型改为'GR'
             } else {
                 document.querySelectorAll('.content-type-tab').forEach(tab => {
                     if (tab.classList.contains('active')) {
                         const typeMap = {
-                            'grammar': 'GRAMMAR',
-                            'data-structure': 'DATA_STRUCTURE',
-                            'ai-programming': 'AI_PROGRAMMING'
+                            'grammar': 'GR',           // 修复：grammar -> GR
+                            'data-structure': 'DS',    // 修复：data-structure -> DS
+                            'ai-programming': 'AI'     // 修复：ai-programming -> AI
                         };
-                        contentType = typeMap[tab.dataset.type] || 'GRAMMAR';
+                        contentType = typeMap[tab.dataset.type] || 'GR';  // 修复：默认值改为'GR'
                     }
                 });
             }
@@ -2072,21 +2072,21 @@
             // 获取内容类型 - 根据编辑模式决定
             const urlParams = new URLSearchParams(window.location.search);
             const typeParam = urlParams.get('type');
-            let contentType = 'GRAMMAR'; // 默认为语法
+            let contentType = 'GR'; // 默认为语法
             
-            // 如果是教程编辑模式，强制为GRAMMAR
+            // 如果是教程编辑模式，强制为语法类型
             if (typeParam === 'course' || (isEditMode && window.location.href.includes('type=course'))) {
-                contentType = 'GRAMMAR';
+                contentType = 'GR';
             } else {
                 // 普通文章模式，根据选择的内容类型
                 document.querySelectorAll('.content-type-tab').forEach(tab => {
                     if (tab.classList.contains('active')) {
                         const typeMap = {
-                            'grammar': 'GRAMMAR',
-                            'data-structure': 'DATA_STRUCTURE',
-                            'ai-programming': 'AI_PROGRAMMING'
+                            'grammar': 'GR',
+                            'data-structure': 'DS',
+                            'ai-programming': 'AI'
                         };
-                        contentType = typeMap[tab.dataset.type] || 'GRAMMAR';
+                        contentType = typeMap[tab.dataset.type] || 'GR';
                     }
                 });
             }

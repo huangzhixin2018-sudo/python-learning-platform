@@ -429,7 +429,8 @@ def course_api(request):
         page = request.GET.get('page', 1)
         page_size = 10 # Assuming a default page size
 
-        courses = Article.objects.filter(content_type=Article.ContentType.GRAMMAR)
+        # 显示所有文章，不再限制内容类型
+        courses = Article.objects.all()
 
         # Add pagination
         paginator = Paginator(courses, page_size)
@@ -449,6 +450,8 @@ def course_api(request):
                 'created_at': course.created_at.isoformat(),
                 'updated_at': course.updated_at.isoformat(),
                 'category_name': course.category.name if course.category else None,
+                'content_type': course.content_type,
+                'content_type_display': course.get_content_type_display(),
                 'tags': [tag.name for tag in course.tags.all()]
             } for course in courses_page.object_list],
             'current_page': courses_page.number,
@@ -479,7 +482,8 @@ def course_api(request):
 @csrf_exempt
 @require_http_methods(["GET", "PUT", "DELETE"])
 def course_detail_api(request, pk):
-    course = get_object_or_404(Article, pk=pk, content_type=Article.ContentType.GRAMMAR)
+    # 允许编辑所有类型的文章，不再限制内容类型
+    course = get_object_or_404(Article, pk=pk)
     if request.method == 'GET':
         data = {
             'id': course.id,
@@ -536,7 +540,8 @@ def course_detail_api(request, pk):
 def course_publish_api(request, pk):
     """发布/取消发布教程API"""
     try:
-        course = get_object_or_404(Article, pk=pk, content_type=Article.ContentType.GRAMMAR)
+        # 允许发布/取消发布所有类型的文章，不再限制内容类型
+        course = get_object_or_404(Article, pk=pk)
         data = json.loads(request.body)
         
         # 支持多种请求格式
