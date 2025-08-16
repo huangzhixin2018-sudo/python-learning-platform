@@ -113,30 +113,29 @@ def category_view(request, slug):
                 is_published=False
             ).order_by('created_at').first()
         
-        # 只有当有文章时才构建分类树
+        # 总是构建分类树，不管是否有文章
         category_tree = []
-        if current_article:
-            # 获取所有主分类
-            main_categories = MainCategory.objects.filter(is_enabled=True).order_by('id')
-            
-            for main_category in main_categories:
-                sub_categories = SubCategory.objects.filter(
-                    parent=main_category,
-                    is_enabled=True
-                ).order_by('id')
-                sub_categories_with_count = []
-                for sub in sub_categories:
-                    article_count = Article.objects.filter(
-                        category=sub,
-                        content_type=model_content_type,
-                        is_published=True
-                    ).count()
-                    sub.article_count = article_count
-                    sub_categories_with_count.append(sub)
-                category_tree.append({
-                    'main_category': main_category,
-                    'sub_categories': sub_categories_with_count
-                })
+        # 获取所有主分类
+        main_categories = MainCategory.objects.filter(is_enabled=True).order_by('id')
+        
+        for main_category in main_categories:
+            sub_categories = SubCategory.objects.filter(
+                parent=main_category,
+                is_enabled=True
+            ).order_by('id')
+            sub_categories_with_count = []
+            for sub in sub_categories:
+                article_count = Article.objects.filter(
+                    category=sub,
+                    content_type=model_content_type,
+                    is_published=True
+                ).count()
+                sub.article_count = article_count
+                sub_categories_with_count.append(sub)
+            category_tree.append({
+                'main_category': main_category,
+                'sub_categories': sub_categories_with_count
+            })
         
         # 根据内容类型选择模板
         template_map = {
@@ -259,6 +258,7 @@ def main_category_detail_api(request, pk):
         data = {
             'id': main_category.id,
             'name': main_category.name,
+            'slug': main_category.slug,
             'order': main_category.order,
             'is_enabled': main_category.is_enabled
         }
@@ -328,6 +328,7 @@ def sub_category_detail_api(request, pk):
         data = {
             'id': sub_category.id,
             'name': sub_category.name,
+            'slug': sub_category.slug,
             'parent_id': sub_category.parent.id if sub_category.parent else None,
             'is_enabled': sub_category.is_enabled
         }
@@ -335,6 +336,7 @@ def sub_category_detail_api(request, pk):
     elif request.method == 'PUT':
         data = json.loads(request.body)
         sub_category.name = data.get('name', sub_category.name)
+        sub_category.slug = data.get('slug', sub_category.slug)  # 添加slug字段更新
         if 'parent_id' in data:
             parent_id = data.get('parent_id')
             if parent_id:
@@ -614,9 +616,23 @@ def data_structure_view(request):
             'sub_categories': sub_categories_with_count
         })
     
+    # 获取当前文章（用于显示默认文章）
+    current_article = Article.objects.filter(
+        content_type=Article.ContentType.DATA_STRUCTURE,
+        is_published=True
+    ).order_by('created_at').first()
+    
+    # 如果没有已发布的文章，且用户是管理员，尝试获取未发布的文章（用于管理员预览）
+    if not current_article and request.user.is_authenticated and request.user.is_staff:
+        current_article = Article.objects.filter(
+            content_type=Article.ContentType.DATA_STRUCTURE,
+            is_published=False
+        ).order_by('created_at').first()
+    
     context = {
         'articles': articles,
         'category_tree': category_tree,
+        'current_article': current_article,
         'content_type': 'data_structure'
     }
     return render(request, 'front/数据结构.html', context)
@@ -651,9 +667,23 @@ def ai_programming_view(request):
             'sub_categories': sub_categories_with_count
         })
     
+    # 获取当前文章（用于显示默认文章）
+    current_article = Article.objects.filter(
+        content_type=Article.ContentType.AI_PROGRAMMING,
+        is_published=True
+    ).order_by('created_at').first()
+    
+    # 如果没有已发布的文章，且用户是管理员，尝试获取未发布的文章（用于管理员预览）
+    if not current_article and request.user.is_authenticated and request.user.is_staff:
+        current_article = Article.objects.filter(
+            content_type=Article.ContentType.AI_PROGRAMMING,
+            is_published=False
+        ).order_by('created_at').first()
+    
     context = {
         'articles': articles,
         'category_tree': category_tree,
+        'current_article': current_article,
         'content_type': 'ai_programming'
     }
     return render(request, 'front/AI编程.html', context)

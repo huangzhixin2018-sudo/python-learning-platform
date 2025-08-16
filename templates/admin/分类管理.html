@@ -653,9 +653,19 @@
         const cancelBtn = document.getElementById(cancelBtnId);
         
         openBtn.addEventListener('click', () => {
+            // 重置表单
             document.getElementById(formId).reset();
-            document.getElementById(titleId).textContent = openBtn.textContent.trim();
-            if(formId === 'subCategoryForm') updateParentCategoryOptions();
+            
+            // 修复：确保清空隐藏的ID字段，避免编辑模式
+            if (formId === 'categoryForm') {
+                document.getElementById('categoryId').value = '';
+                document.getElementById('modalTitle').textContent = '添加主分类';
+            } else if (formId === 'subCategoryForm') {
+                document.getElementById('subCategoryId').value = '';
+                document.getElementById('subModalTitle').textContent = '添加子分类';
+                updateParentCategoryOptions();
+            }
+            
             modal.classList.add('show');
         });
 
@@ -767,22 +777,31 @@
             showToast(`主分类已${id ? '更新' : '添加'}`);
             categoryModal.classList.remove('show');
             fetchMainCategories(id ? currentMainPage : 1); // 编辑时留着当前页，添加时去第一页
+            // 修复：主分类更新后同时刷新子分类列表，确保主分类选项同步
+            fetchSubCategories(currentSubPage);
         } catch (error) {
             showToast(`操作失败: ${error.message}`, 'danger');
         }
     });
 
-    function editCategory(id) {
-        const cat = mainCategoriesCache.find(c => c.id === id);
-        if (!cat) return showToast('找不到分类信息', 'danger');
-
-        document.getElementById('modalTitle').textContent = '编辑主分类';
-        document.getElementById('categoryId').value = cat.id;
-        document.getElementById('categoryName').value = cat.name;
-        document.getElementById('categorySlug').value = cat.slug;
-        document.getElementById('categoryOrder').value = cat.order;
-        document.getElementById('categoryStatus').value = cat.is_enabled.toString();
-        categoryModal.classList.add('show');
+    async function editCategory(id) {
+        try {
+            // 修复：使用专门的API端点获取单个主分类信息
+            const response = await fetch(`${mainCategoryApiUrl}${id}/`);
+            if (!response.ok) throw new Error('获取主分类信息失败');
+            const cat = await response.json();
+            
+            document.getElementById('modalTitle').textContent = '编辑主分类';
+            document.getElementById('categoryId').value = cat.id;
+            document.getElementById('categoryName').value = cat.name;
+            document.getElementById('categorySlug').value = cat.slug || '';
+            document.getElementById('categoryOrder').value = cat.order || 0;
+            document.getElementById('categoryStatus').value = cat.is_enabled.toString();
+            categoryModal.classList.add('show');
+        } catch (error) {
+            showToast('获取主分类信息失败: ' + error.message, 'danger');
+            console.error('Edit category error:', error);
+        }
     }
 
     async function deleteCategory(id) {
@@ -796,6 +815,8 @@
             if (response.status !== 204) throw new Error('删除失败');
             showToast('主分类已删除');
             fetchMainCategories(currentMainPage);
+            // 修复：删除主分类后同时刷新子分类列表，避免显示不存在的主分类
+            fetchSubCategories(currentSubPage);
         } catch (error) {
             showToast(error.message, 'danger');
         }
@@ -845,12 +866,25 @@
     function updateParentCategoryOptions() {
         const select = document.getElementById('parentCategory');
         select.innerHTML = '<option value="">请选择主分类</option>';
-        mainCategoriesCache.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat.id;
-            option.textContent = cat.name;
-            select.appendChild(option);
-        });
+        // 修复：确保主分类缓存存在且有效
+        if (mainCategoriesCache && mainCategoriesCache.length > 0) {
+            mainCategoriesCache.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                select.appendChild(option);
+            });
+        } else {
+            // 如果缓存为空，重新获取主分类数据
+            fetchMainCategories().then(() => {
+                mainCategoriesCache.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    select.appendChild(option);
+                });
+            });
+        }
     }
 
     document.getElementById('saveSubCategoryBtn').addEventListener('click', async () => {
@@ -888,21 +922,28 @@
     });
 
     async function editSubCategory(id) {
-        // We need the full sub-category list to find the one to edit
-        // A better approach would be a dedicated API endpoint GET /api/sub-categories/<id>/
-        const response = await fetch(`${subCategoryApiUrl}?page=${currentSubPage}`);
-        const data = await response.json();
-        const cat = data.items.find(c => c.id === id);
-        if (!cat) return showToast('找不到子分类信息', 'danger');
-
-        await updateParentCategoryOptions();
-        document.getElementById('subModalTitle').textContent = '编辑子分类';
-        document.getElementById('subCategoryId').value = cat.id;
-        document.getElementById('subCategoryName').value = cat.name;
-        document.getElementById('subCategorySlug').value = cat.slug;
-        document.getElementById('parentCategory').value = cat.parent_id;
-        document.getElementById('subCategoryStatus').value = cat.is_enabled.toString();
-        subCategoryModal.classList.add('show');
+        try {
+            // 修复：使用专门的API端点获取单个子分类信息
+            const response = await fetch(`${subCategoryApiUrl}${id}/`);
+            if (!response.ok) throw new Error('获取子分类信息失败');
+            const cat = await response.json();
+            
+            // 先更新主分类选项
+            await updateParentCategoryOptions();
+            
+            // 设置表单数据
+            document.getElementById('subModalTitle').textContent = '编辑子分类';
+            document.getElementById('subCategoryId').value = cat.id;
+            document.getElementById('subCategoryName').value = cat.name;
+            document.getElementById('subCategorySlug').value = cat.slug || '';
+            document.getElementById('parentCategory').value = cat.parent_id || '';
+            document.getElementById('subCategoryStatus').value = cat.is_enabled.toString();
+            
+            subCategoryModal.classList.add('show');
+        } catch (error) {
+            showToast('获取子分类信息失败: ' + error.message, 'danger');
+            console.error('Edit sub category error:', error);
+        }
     }
 
     async function deleteSubCategory(id) {
