@@ -672,72 +672,8 @@
     // ================= TBA切换功能 =================
     let currentTbaType = 'grammar'; // 默认选中语法
     
-    // 模拟不同TBA类型对应的分类数据
-    const tbaCategoryData = {
-      'grammar': {
-        mainCategories: [
-          { id: 1, name: '基础语法', slug: 'basic-grammar', order: 1, is_enabled: true },
-          { id: 2, name: '控制语句', slug: 'control-statements', order: 2, is_enabled: true },
-          { id: 3, name: '高级特性', slug: 'advanced-features', order: 3, is_enabled: true },
-          { id: 4, name: '函数编程', slug: 'functional-programming', order: 4, is_enabled: true }
-        ],
-        subCategories: [
-          { id: 1, parent_id: 1, parent_name: '基础语法', name: '变量和数据类型', slug: 'variables', is_enabled: true },
-          { id: 2, parent_id: 1, parent_name: '基础语法', name: '运算符', slug: 'operators', is_enabled: true },
-          { id: 3, parent_id: 1, parent_name: '基础语法', name: '字符串操作', slug: 'string-operations', is_enabled: true },
-          { id: 4, parent_id: 2, parent_name: '控制语句', name: '条件语句', slug: 'conditional-statements', is_enabled: true },
-          { id: 5, parent_id: 2, parent_name: '控制语句', name: '循环语句', slug: 'loop-statements', is_enabled: true },
-          { id: 6, parent_id: 2, parent_name: '控制语句', name: '异常处理', slug: 'exception-handling', is_enabled: true },
-          { id: 7, parent_id: 3, parent_name: '高级特性', name: '装饰器', slug: 'decorators', is_enabled: true },
-          { id: 8, parent_id: 3, parent_name: '高级特性', name: '生成器', slug: 'generators', is_enabled: true },
-          { id: 9, parent_id: 3, parent_name: '高级特性', name: '上下文管理器', slug: 'context-managers', is_enabled: true },
-          { id: 10, parent_id: 4, parent_name: '函数编程', name: 'Lambda函数', slug: 'lambda-functions', is_enabled: true },
-          { id: 11, parent_id: 4, parent_name: '函数编程', name: '高阶函数', slug: 'higher-order-functions', is_enabled: true },
-          { id: 12, parent_id: 4, parent_name: '函数编程', name: '闭包', slug: 'closures', is_enabled: true }
-        ]
-      },
-      'data_structure': {
-        mainCategories: [
-          { id: 4, name: '基础数据结构', slug: 'basic-data-structures', order: 1, is_enabled: true },
-          { id: 5, name: '高级数据结构', slug: 'advanced-data-structures', order: 2, is_enabled: true }
-        ],
-        subCategories: [
-          { id: 6, parent_id: 4, parent_name: '基础数据结构', name: '列表和元组', slug: 'lists-tuples', is_enabled: true },
-          { id: 7, parent_id: 4, parent_name: '基础数据结构', name: '字典和集合', slug: 'dicts-sets', is_enabled: true },
-          { id: 8, parent_id: 5, parent_name: '高级数据结构', name: '堆栈和队列', slug: 'stacks-queues', is_enabled: true },
-          { id: 9, parent_id: 5, parent_name: '高级数据结构', name: '树和图', slug: 'trees-graphs', is_enabled: true }
-        ]
-      },
-      'ai_programming': {
-        mainCategories: [
-          { id: 6, name: '机器学习基础', slug: 'ml-basics', order: 1, is_enabled: true },
-          { id: 7, name: '深度学习', slug: 'deep-learning', order: 2, is_enabled: true },
-          { id: 8, name: '自然语言处理', slug: 'nlp', order: 3, is_enabled: true }
-        ],
-        subCategories: [
-          { id: 10, parent_id: 6, parent_name: '机器学习基础', name: '数据预处理', slug: 'data-preprocessing', is_enabled: true },
-          { id: 11, parent_id: 6, parent_name: '机器学习基础', name: '模型训练', slug: 'model-training', is_enabled: true },
-          { id: 12, parent_id: 7, parent_name: '深度学习', name: '神经网络', slug: 'neural-networks', is_enabled: true },
-          { id: 13, parent_id: 7, parent_name: '深度学习', name: '卷积神经网络', slug: 'cnn', is_enabled: true },
-          { id: 14, parent_id: 8, parent_name: '自然语言处理', name: '文本分析', slug: 'text-analysis', is_enabled: true }
-        ]
-      },
-      'project': {
-        mainCategories: [
-          { id: 9, name: 'Web开发项目', slug: 'web-projects', order: 1, is_enabled: true },
-          { id: 10, name: '数据分析项目', slug: 'data-analysis-projects', order: 2, is_enabled: true },
-          { id: 11, name: 'AI应用项目', slug: 'ai-applications', order: 3, is_enabled: true }
-        ],
-        subCategories: [
-          { id: 15, parent_id: 9, parent_name: 'Web开发项目', name: 'Django网站', slug: 'django-website', is_enabled: true },
-          { id: 16, parent_id: 9, parent_name: 'Web开发项目', name: 'Flask API', slug: 'flask-api', is_enabled: true },
-          { id: 17, parent_id: 10, parent_name: '数据分析项目', name: '数据可视化', slug: 'data-visualization', is_enabled: true },
-          { id: 18, parent_id: 10, parent_name: '数据分析项目', name: '统计分析', slug: 'statistical-analysis', is_enabled: true },
-          { id: 19, parent_id: 11, parent_name: 'AI应用项目', name: '聊天机器人', slug: 'chatbot', is_enabled: true },
-          { id: 20, parent_id: 11, parent_name: 'AI应用项目', name: '图像识别', slug: 'image-recognition', is_enabled: true }
-        ]
-      }
-    };
+    // TBA类型配置（用于标识当前选中的类型）
+    const tbaTypes = ['grammar', 'data_structure', 'ai_programming', 'project'];
     
     function setupTbaToggle() {
       const tbaButtons = document.querySelectorAll('.tba-btn');
@@ -760,17 +696,41 @@
     
     // 根据TBA类型加载对应的分类数据
     function loadTbaCategoryData(tbaType) {
-      const data = tbaCategoryData[tbaType];
-      if (!data) return;
-      
-      // 更新主分类数据
-      updateMainCategoryTable(data.mainCategories);
-      
-      // 更新子分类数据
-      updateSubCategoryTable(data.subCategories);
-      
-      // 更新主分类缓存（用于子分类下拉选择）
-      mainCategoriesCache = data.mainCategories;
+      // 从API获取真实的主分类数据
+      fetch('/api/main-categories/')
+        .then(response => response.json())
+        .then(data => {
+          if (data.items && data.items.length > 0) {
+            updateMainCategoryTable(data.items);
+            mainCategoriesCache = data.items;
+            
+            // 获取所有子分类数据
+            return fetch('/api/sub-categories/');
+          } else {
+            updateMainCategoryTable([]);
+            updateSubCategoryTable([]);
+            return null;
+          }
+        })
+        .then(response => {
+          if (response) {
+            return response.json();
+          }
+          return null;
+        })
+        .then(subData => {
+          if (subData && subData.items && subData.items.length > 0) {
+            // 根据TBA类型过滤子分类（这里可以根据需要添加过滤逻辑）
+            updateSubCategoryTable(subData.items);
+          } else {
+            updateSubCategoryTable([]);
+          }
+        })
+        .catch(error => {
+          console.error('加载分类数据失败:', error);
+          updateMainCategoryTable([]);
+          updateSubCategoryTable([]);
+        });
     }
     
     // 更新主分类表格
@@ -790,7 +750,7 @@
           <td>${cat.id}</td>
           <td>${cat.name}</td>
           <td>${cat.slug}</td>
-          <td>${cat.order}</td>
+          <td>${cat.order || 0}</td>
           <td>${statusBadge}</td>
           <td>
             <div class="btn-group">
