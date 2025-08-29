@@ -696,6 +696,13 @@
     
     // 根据TBA类型加载对应的分类数据
     function loadTbaCategoryData(tbaType) {
+      // 项目tab显示空白数据
+      if (tbaType === 'project') {
+        updateMainCategoryTable([]);
+        updateSubCategoryTable([]);
+        return;
+      }
+      
       // 从API获取真实的主分类数据
       fetch('/api/main-categories/', {
         headers: {
