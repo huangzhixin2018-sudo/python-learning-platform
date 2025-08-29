@@ -700,6 +700,7 @@
       if (tbaType === 'project') {
         updateMainCategoryTable([]);
         updateSubCategoryTable([]);
+        mainCategoriesCache = []; // 清空缓存
         return;
       }
       
@@ -815,6 +816,13 @@
       setupTbaToggle(); // 初始化TBA切换功能
       // 加载默认的语法分类数据
       loadTbaCategoryData('grammar');
+      
+      // 确保项目tab初始状态为空
+      if (currentTbaType === 'project') {
+        updateMainCategoryTable([]);
+        updateSubCategoryTable([]);
+        mainCategoriesCache = [];
+      }
     });
   </script>
 </body>
