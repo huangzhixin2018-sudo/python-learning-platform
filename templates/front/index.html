@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>{% if latest_articles.0 %}{{ latest_articles.0.title }} | {% endif %}Python学习</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --text-color: #2b2d42;
+      --light-text: #6b7280;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --border-color: #e5e7eb;
+      --border-radius: 8px;
+      --sidebar-width: 260px;
+    }
+    
+    body {
+      margin: 0;
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    /* 导航栏 */
+    header {
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .logo:hover {
+      color: var(--secondary-color);
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+    
+    .nav-links a {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      position: relative;
+    }
+    
+    .nav-links a:hover {
+      color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    .nav-links a.active {
+      color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.15);
+      font-weight: 600;
+    }
+    
+    .login-btn {
+      padding: 0.5rem 1.25rem;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 6px;
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .login-btn:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+    }
+    
+    /* 主体布局 */
+    .main-container {
+      display: flex;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      gap: 2rem;
+    }
+    
+    /* 左侧目录 */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+    }
+    
+    .sidebar-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      position: sticky;
+      top: 80px;
+    }
+    
+    .sidebar-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0 0 1.5rem 0;
+      color: var(--primary-color);
+    }
+    
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .menu-category {
+      font-size: 0.85rem;
+      color: var(--light-text);
+      margin: 1.5rem 0 0.5rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .menu-item {
+      margin-bottom: 0.5rem;
+    }
+    
+    .menu-item a {
+      display: block;
+      padding: 0.5rem 0;
+      color: var(--text-color);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .menu-item a:hover, .menu-item.active a {
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+    
+    .article-count {
+      font-size: 0.8rem;
+      color: var(--light-text);
+      font-weight: normal;
+    }
+    
+    /* 内容区域 */
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .article-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .article-header {
+      margin-bottom: 2rem;
+    }
+    
+    .article-title {
+      font-size: 2rem;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.3;
+    }
+    
+    .article-subtitle {
+      font-size: 1.1rem;
+      color: var(--light-text);
+      margin: 0 0 1.5rem 0;
+    }
+    
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      color: var(--light-text);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .meta-item svg {
+      margin-right: 0.5rem;
+      width: 16px;
+      height: 16px;
+    }
+    
+    /* 简约摘要 */
+    .article-summary {
+      background: #f8fafc;
+      padding: 1.25rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 2rem;
+      border: 1px solid var(--border-color);
+    }
+    
+    .article-summary p {
+      margin: 0;
+      color: var(--text-color);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    
+    /* 内容样式 */
+    .article-content h2 {
+      margin: 2rem 0 1.25rem 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .article-content p {
+      margin: 1.25rem 0;
+    }
+    
+    /* 代码块 */
+    .article-content pre {
+      background: #f8fafc;
+      padding: 1rem;
+      overflow-x: auto;
+      border-radius: var(--border-radius);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin: 1.5rem 0;
+      border: 1px solid var(--border-color);
+    }
+    
+    /* 提示框 */
+    .note {
+      background: #f0f5ff;
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin: 1.5rem 0;
+      font-size: 0.9rem;
+    }
+    
+    ol, ul {
+      padding-left: 1.5rem;
+      margin: 1.25rem 0;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+    }
+    
+    strong {
+      color: var(--secondary-color);
+    }
+    
+    /* 页脚 */
+    footer {
+      background-color: var(--card-bg);
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--light-text);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .footer-links a {
+      color: var(--light-text);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .footer-links a:hover {
+      color: var(--primary-color);
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 220px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+      }
+      
+      .sidebar-card {
+        position: static;
+        margin-bottom: 1.5rem;
+      }
+      
+      .article-card {
+        padding: 1.5rem;
+      }
+      
+      .article-title {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="{% url 'Pythonfun:index' %}" class="logo"></a>
+            <div class="nav-links">
+                <a href="{% url 'Pythonfun:index' %}" class="active">语法</a>
+                <a href="{% url 'Pythonfun:function_library' %}">函数库</a>
+                <a href="{% url 'Pythonfun:function_query' %}">函数查询</a>
+                <a href="{% url 'Pythonfun:data_structure' %}">数据结构</a>
+                <a href="{% url 'Pythonfun:ai_programming' %}">AI编程</a>
+                <a href="{% url 'Pythonfun:project' %}">项目</a>
+            </div>
+            <a href="/login/" class="login-btn">登录</a>
+        </div>
+    </header>
+
+  <div class="main-container">
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <h2 class="sidebar-title">教程目录</h2>
+        <ul class="sidebar-menu">
+          {% for main_category in category_tree %}
+          <div class="menu-category">{{ main_category.main_category.name }}</div>
+          {% for sub_category in main_category.sub_categories %}
+            {% if sub_category.slug %}
+          <li class="menu-item">
+            <a href="{% url 'Pythonfun:category' sub_category.slug %}?type=grammar" 
+               title="文章数量: {{ sub_category.article_count }}">
+              {{ sub_category.name }}
+            </a>
+          </li>
+            {% endif %}
+          {% endfor %}
+          {% empty %}
+          <div class="menu-category">暂无分类</div>
+          {% endfor %}
+        </ul>
+      </div>
+    </aside>
+
+    <main class="content">
+      {% if current_article %}
+        <div class="article-card">
+          <div class="article-header">
+            <h1 class="article-title">{{ current_article.title }}</h1>
+            {% if current_article.subtitle %}
+              <p class="article-subtitle">{{ current_article.subtitle }}</p>
+            {% endif %}
+            <div class="article-meta">
+              <span class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {{ current_article.category.parent.name }} - {{ current_article.category.name }}
+              </span>
+              <span class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {{ current_article.created_at|date:"Y年m月d日" }}
+              </span>
+              {% if current_article.read_time_minutes %}
+              <span class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                阅读时间: {{ current_article.read_time_minutes }}分钟
+              </span>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if current_article.summary %}
+            <div class="article-summary">
+              <p>{{ current_article.summary }}</p>
+            </div>
+          {% endif %}
+          
+          <article class="article-content">
+            {% if current_article.content_html %}
+              {{ current_article.content_html|safe }}
+            {% elif current_article.content %}
+              {{ current_article.content|safe }}
+            {% else %}
+              <p>文章内容正在加载中...</p>
+            {% endif %}
+          </article>
+        </div>
+      {% elif current_category %}
+        <div class="article-card">
+          <div class="article-header">
+            <h1 class="article-title">{{ current_category.name }}</h1>
+            {% if current_category.description %}
+              <p class="article-subtitle">{{ current_category.description }}</p>
+            {% endif %}
+            <div class="article-meta">
+              <span class="meta-item">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                {{ current_category.parent.name }} - {{ current_category.name }}
+              </span>
+            </div>
+          </div>
+
+          {% if no_articles_message %}
+            <div class="article-summary">
+              <p>{{ no_articles_message }}</p>
+              <p>请稍后再来查看，或者选择其他分类。</p>
+            </div>
+          {% else %}
+            <div class="article-summary">
+              <p>欢迎来到 {{ current_category.name }} 分类！</p>
+              <p>这里将展示该分类下的所有教程文章。</p>
+            </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="article-card">
+          <div class="welcome-section" style="text-align: center; padding: 2rem 0;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-color);">欢迎来到Python教程</h1>
+            <p style="font-size: 1.2rem; color: var(--light-text); margin-bottom: 2rem;">
+              请从左侧教程目录选择一个子分类来查看对应的详细教程
+            </p>
+            <div class="article-summary">
+              <p>
+                左侧菜单显示了所有可用的Python教程分类，每个子分类对应一篇完整的教程文章。<br>
+                点击任意子分类即可查看该分类下的详细教程内容。
+              </p>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </main>
+  </div>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="/privacy">隐私政策</a>
+        <a href="/terms">使用条款</a>
+        <a href="/faq">常见问题</a>
+        <a href="/feedback">意见反馈</a>
+      </div>
+              <p>&copy; 2025 Python学习 - 探索数据科学的无限可能</p>
+    </div>
+  </footer>
+
+</body>
+</html>

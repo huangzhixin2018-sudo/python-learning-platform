@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Vercel构建脚本
+echo "=== 开始Vercel构建 ==="
+
+# 显示Python环境信息
+echo "Python版本信息："
+python --version
+pip --version
+
+# 显示当前工作目录
+echo "当前工作目录："
+pwd
+
+# 显示文件列表
+echo "项目文件列表："
+ls -la
+
+# 升级pip
+echo "升级pip..."
+pip install --upgrade pip
+
+# 安装依赖
+echo "安装Python依赖..."
+pip install -r requirements-vercel.txt
+
+# 验证关键依赖
+echo "验证关键依赖安装..."
+python -c "import django; print(f'Django版本: {django.get_version()}')"
+python -c "import dj_database_url; print('dj-database-url导入成功')"
+python -c "import psycopg2; print('psycopg2导入成功')"
+
+# 显示已安装的包
+echo "已安装的包列表："
+pip list
+
+# 收集静态文件
+echo "收集静态文件..."
+python manage.py collectstatic --noinput --settings=mysite.settings_production
+
+# 显示静态文件收集结果
+echo "静态文件收集结果："
+ls -la staticfiles/
+
+# 运行数据库迁移
+echo "运行数据库迁移..."
+python manage.py migrate --settings=mysite.settings_production
+
+# 创建超级用户
+echo "创建超级用户..."
+python create_superuser.py
+
+# 显示构建输出目录
+echo "构建输出目录内容："
+ls -la /vercel/output/ 2>/dev/null || echo "构建输出目录不存在或无法访问"
+
+echo "=== 构建完成 ==="

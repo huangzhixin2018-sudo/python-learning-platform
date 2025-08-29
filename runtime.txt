@@ -1,0 +1,2 @@
+python-3.12.0
+# 使用Python 3.12，与Vercel默认版本保持一致

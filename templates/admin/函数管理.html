@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>思维空间 - 函数管理</title>
+  <!-- 字体与图标 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --accent-color: #4cc9f0;
+      --text-color: #2b2d42;
+      --light-text: #8d99ae;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --sidebar-bg: #2b2d42;
+      --sidebar-text: #edf2f4;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --success-color: #4caf50;
+      --warning-color: #ff9800;
+      --danger-color: #f44336;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 侧边栏样式 */
+    .admin-sidebar {
+      width: 260px;
+      background-color: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      padding: 1.5rem 0;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+    .admin-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 1.5rem;
+      color: white;
+    }
+    .admin-menu {
+      list-style: none;
+    }
+    .menu-category {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0.75rem 1.5rem;
+      color: rgba(255,255,255,0.6);
+    }
+    .menu-item {
+      padding: 0.75rem 1.5rem;
+      transition: all 0.2s;
+    }
+    .menu-item a {
+      color: var(--sidebar-text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      opacity: 0.8;
+    }
+    .menu-item a:hover, .menu-item.active a {
+      opacity: 1;
+    }
+    .menu-item i {
+      width: 24px;
+      margin-right: 0.75rem;
+      text-align: center;
+    }
+    .menu-item.active {
+      background-color: rgba(255,255,255,0.1);
+      border-left: 3px solid var(--accent-color);
+    }
+
+    /* 主内容区 */
+    .admin-main {
+      flex: 1;
+      padding: 2rem;
+    }
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .page-title {
+      font-size: 1.75rem;
+      color: var(--secondary-color);
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+    }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 1rem;
+      font-weight: bold;
+    }
+
+    /* 卡片容器 */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    /* 统计卡片 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      text-align: center;
+      box-shadow: var(--box-shadow);
+    }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+    .stat-label {
+      color: var(--light-text);
+      font-size: 0.9rem;
+    }
+
+    /* 简化上传控件 */
+    .upload-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+            .upload-controls .btn {
+          margin: 0 5px;
+          min-width: 120px;
+          height: 40px;
+        }
+    .file-input {
+      display: none;
+    }
+
+    /* 按钮样式 */
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius);
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: #3a56d8;
+    }
+    .btn-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+    .btn-success:hover {
+      background-color: #3d8b40;
+    }
+    .btn-warning {
+      background-color: var(--warning-color);
+      color: white;
+    }
+    .btn-warning:hover {
+      background-color: #e68a00;
+    }
+    .btn-info {
+      background-color: var(--accent-color);
+      color: white;
+    }
+    .btn-info:hover {
+      background-color: #3ab7d8;
+    }
+    .btn i {
+      margin-right: 0.5rem;
+    }
+
+    /* 文件上传状态显示 */
+    .upload-status {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: var(--success-color);
+      display: none;
+    }
+
+    /* 进度条 */
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #eee;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 1.5rem 0;
+      display: none;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* 表格信息 */
+    .table-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    @media (max-width: 1400px) {
+      .table-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    @media (max-width: 1000px) {
+      .table-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .table-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .table-card {
+      background: var(--bg-color);
+      border: 1px solid #eee;
+      border-radius: var(--border-radius);
+      padding: 1rem;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+    .table-name {
+      font-weight: 600;
+      color: var(--secondary-color);
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .field-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      flex: 1;
+    }
+    .field-item {
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #eee;
+      font-size: 0.85rem;
+      color: var(--text-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .field-item:last-child {
+      border-bottom: none;
+    }
+    .field-type {
+      color: var(--light-text);
+      font-size: 0.75rem;
+      background: #f8f9fa;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* 提示框 */
+    .alert {
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin: 1rem 0;
+      display: none;
+    }
+    .alert-success {
+      background-color: rgba(76, 175, 80, 0.1);
+      color: var(--success-color);
+      border: 1px solid rgba(76, 175, 80, 0.2);
+    }
+    .alert-error {
+      background-color: rgba(244, 67, 54, 0.1);
+      color: var(--danger-color);
+      border: 1px solid rgba(244, 67, 54, 0.2);
+    }
+    .alert-info {
+      background-color: rgba(76, 201, 240, 0.1);
+      color: var(--accent-color);
+      border: 1px solid rgba(76, 201, 240, 0.2);
+    }
+
+    /* 加载状态 */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 1.5rem;
+    }
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary-color);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 0.75rem;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* 管理后台导航卡片样式 */
+    .admin-nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .admin-nav-card {
+      background: var(--card-bg);
+      border: 1px solid #eee;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      text-decoration: none;
+      color: var(--text-color);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .admin-nav-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border-color: var(--primary-color);
+    }
+    .admin-nav-card.active {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      border-color: var(--primary-color);
+    }
+    .admin-nav-card.active i,
+    .admin-nav-card.active h3,
+    .admin-nav-card.active p {
+      color: white;
+    }
+    .admin-nav-card i {
+      font-size: 2rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+    .admin-nav-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--secondary-color);
+    }
+    .admin-nav-card p {
+      font-size: 0.9rem;
+      color: var(--light-text);
+      margin: 0;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .upload-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .admin-sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+      }
+      .admin-main {
+        padding: 1.5rem;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .nav-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 管理侧边栏 -->
+  <aside class="admin-sidebar">
+    <div class="admin-logo">思维空间CMS</div>
+    <ul class="admin-menu">
+      <div class="menu-category">内容管理</div>
+      <li class="menu-item"><a href="{% url 'Pythonfun:article_edit' %}"><i class="fas fa-edit"></i> 文章编辑</a></li>
+      <li class="menu-item"><a href="{% url 'Pythonfun:category_management' %}"><i class="fas fa-folder"></i> 分类管理</a></li>
+      <li class="menu-item"><a href="{% url 'Pythonfun:course_management' %}"><i class="fas fa-book"></i> 教程管理</a></li>
+      <li class="menu-item active"><a href="{% url 'Pythonfun:function_management' %}"><i class="fas fa-code"></i> 函数管理</a></li>
+
+      <div class="menu-category">系统管理</div>
+      <li class="menu-item"><a href="#"><i class="fas fa-users"></i> 用户管理</a></li>
+      <li class="menu-item"><a href="#"><i class="fas fa-cog"></i> 系统设置</a></li>
+
+      <div class="menu-category">统计</div>
+      <li class="menu-item"><a href="#"><i class="fas fa-chart-line"></i> 访问统计</a></li>
+      <li class="menu-item"><a href="#"><i class="fas fa-comments"></i> 评论管理</a></li>
+    </ul>
+  </aside>
+
+  <!-- 主内容区 -->
+  <main class="admin-main">
+    <header class="admin-header">
+      <h1 class="page-title"><i class="fas fa-code"></i> 函数管理</h1>
+      <div class="user-profile">
+        <a href="/login/" style="color: var(--text-color); text-decoration: none;">
+          <span>管理员</span>
+          <div class="user-avatar">A</div>
+        </a>
+      </div>
+    </header>
+
+    <!-- 统计信息 -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="library-count">0</div>
+        <div class="stat-label">库数量</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="module-count">0</div>
+        <div class="stat-label">模块数量</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="function-count">0</div>
+        <div class="stat-label">函数数量</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="parameter-count">0</div>
+        <div class="stat-label">参数数量</div>
+      </div>
+    </div>
+
+    <!-- 数据库管理 -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="fas fa-database"></i> 数据库管理</h2>
+      </div>
+      <div class="card-body">
+        <!-- 三个按钮 + 文件状态 -->
+        <div class="upload-controls">
+          <input type="file" id="file-input" class="file-input" accept=".xlsx,.xls">
+          <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+            <i class="fas fa-file-upload"></i> 上传文件
+          </button>
+          <button class="btn btn-info" onclick="downloadTemplate()">
+            <i class="fas fa-download"></i> 下载模板
+          </button>
+          <button class="btn btn-success" onclick="downloadDatabase()">
+            <i class="fas fa-database"></i> 下载数据库表
+          </button>
+        </div>
+
+        <!-- 上传成功后显示文件名 -->
+        <div class="upload-status" id="upload-status">
+          <i class="fas fa-check-circle"></i> 已上传: <span id="uploaded-filename"></span>
+        </div>
+
+        <!-- 进度条 -->
+        <div class="progress-bar" id="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <!-- 提示信息 -->
+        <div class="alert alert-success" id="success-alert"></div>
+        <div class="alert alert-error" id="error-alert"></div>
+        <div class="alert alert-info" id="info-alert"></div>
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>正在处理文件，请稍候...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 数据表信息 -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title"><i class="fas fa-database"></i> 数据表结构</h2>
+      </div>
+      <div class="card-body">
+        <p>当前系统中的函数相关数据表结构：</p>
+        <div class="table-grid" id="table-grid">
+          <!-- 表格信息将通过JavaScript动态加载 -->
+        </div>
+      </div>
+    </div>
+
+
+
+
+  </main>
+
+  <script>
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function () {
+      loadStats();
+      loadTableInfo();
+      setupFileUpload();
+    });
+
+    // 设置文件上传
+    function setupFileUpload() {
+      const fileInput = document.getElementById('file-input');
+      const progressBar = document.getElementById('progress-bar');
+      const progressFill = document.getElementById('progress-fill');
+      const successAlert = document.getElementById('success-alert');
+      const errorAlert = document.getElementById('error-alert');
+      const infoAlert = document.getElementById('info-alert');
+      const loading = document.getElementById('loading');
+      const uploadStatus = document.getElementById('upload-status');
+      const uploadedFilename = document.getElementById('uploaded-filename');
+
+      // 显示提示信息
+      function showAlert(type, message) {
+        const alert = type === 'success' ? successAlert :
+                     type === 'error' ? errorAlert : infoAlert;
+        alert.textContent = message;
+        alert.style.display = 'block';
+        setTimeout(() => {
+          alert.style.display = 'none';
+        }, 5000);
+      }
+
+              // 处理文件上传
+        fileInput.addEventListener('change', function () {
+          const file = fileInput.files[0];
+          if (!file) return;
+
+          const validTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+            'text/csv'
+          ];
+          const validExtensions = ['.xlsx', '.xls', '.csv'];
+          const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+          
+          if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
+            showAlert('error', '仅支持 .xlsx、.xls 或 .csv 文件！');
+            return;
+          }
+
+          // 检查文件大小 (50MB)
+          const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+          if (file.size > maxSize) {
+            showAlert('error', `文件大小超过限制。最大允许：50MB，当前文件：${(file.size / (1024*1024)).toFixed(2)}MB`);
+            return;
+          }
+
+          // 显示加载状态
+        loading.style.display = 'block';
+        progressBar.style.display = 'block';
+        progressFill.style.width = '0%';
+        showAlert('info', `正在上传: ${file.name}`);
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '{% url "Pythonfun:upload_functions" %}', true);
+
+        xhr.upload.onprogress = function (e) {
+          if (e.lengthComputable) {
+            const percent = (e.loaded / e.total) * 100;
+            progressFill.style.width = percent + '%';
+          }
+        };
+
+        xhr.onload = function () {
+          loading.style.display = 'none';
+          progressBar.style.display = 'none';
+          if (xhr.status === 200) {
+            try {
+              const res = JSON.parse(xhr.responseText);
+              if (res.success) {
+                progressFill.style.width = '100%';
+                
+                let message = res.message || '上传成功！';
+                
+                // 如果有警告信息，添加到消息中
+                if (res.warnings && res.warnings.length > 0) {
+                  message += '\n\n警告信息：';
+                  res.warnings.forEach((warning, index) => {
+                    message += `\n${index + 1}. ${warning}`;
+                  });
+                  if (res.total_errors > res.warnings.length) {
+                    message += `\n... 还有 ${res.total_errors - res.warnings.length} 个错误未显示`;
+                  }
+                }
+                
+                showAlert('success', message);
+                
+                // 显示已上传文件名
+                uploadedFilename.textContent = file.name;
+                uploadStatus.style.display = 'block';
+
+                loadStats();
+                loadTableInfo();
+              } else {
+                showAlert('error', res.message || '上传失败');
+              }
+            } catch (err) {
+              showAlert('error', '解析响应失败');
+            }
+          } else {
+            showAlert('error', `服务器错误 (${xhr.status})`);
+          }
+        };
+
+        xhr.onerror = () => {
+          loading.style.display = 'none';
+          showAlert('error', '网络错误');
+        };
+
+        xhr.send(formData);
+      });
+    }
+
+    // 下载模板
+    function downloadTemplate() {
+      const link = document.createElement('a');
+      link.href = '{% url "Pythonfun:download_template" %}';
+      link.download = '函数数据库模板.xlsx';
+      link.click();
+    }
+
+    // 下载数据库表
+    function downloadDatabase() {
+      const link = document.createElement('a');
+      link.href = '{% url "Pythonfun:export_functions" %}';
+      link.download = '函数数据库表.csv';
+      link.click();
+    }
+
+    // 加载统计
+    function loadStats() {
+      fetch('{% url "Pythonfun:get_function_stats" %}')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('library-count').textContent = data.stats.libraries || 0;
+            document.getElementById('module-count').textContent = data.stats.modules || 0;
+            document.getElementById('function-count').textContent = data.stats.functions || 0;
+            document.getElementById('parameter-count').textContent = data.stats.parameters || 0;
+          }
+        })
+        .catch(err => console.error('加载统计失败:', err));
+    }
+
+
+
+    // 加载表结构
+    function loadTableInfo() {
+      const tableGrid = document.getElementById('table-grid');
+      tableGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #666;">正在加载表结构信息...</div>';
+
+      fetch('{% url "Pythonfun:get_table_structure" %}')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            tableGrid.innerHTML = '';
+            
+            Object.values(data.tables).forEach(table => {
+              const card = document.createElement('div');
+              card.className = 'table-card';
+
+              const title = document.createElement('div');
+              title.className = 'table-name';
+              title.textContent = table.name;
+              card.appendChild(title);
+
+              const list = document.createElement('ul');
+              list.className = 'field-list';
+              table.fields.forEach(field => {
+                const li = document.createElement('li');
+                li.className = 'field-item';
+                
+                // 分离字段名和类型
+                const fieldParts = field.split(' (');
+                const fieldName = fieldParts[0];
+                const fieldType = fieldParts[1] ? fieldParts[1].replace(')', '') : '';
+                
+                li.textContent = fieldName;
+                if (fieldType) {
+                  const span = document.createElement('span');
+                  span.className = 'field-type';
+                  span.textContent = fieldType;
+                  li.appendChild(span);
+                }
+                list.appendChild(li);
+              });
+              card.appendChild(list);
+
+              tableGrid.appendChild(card);
+            });
+          } else {
+            tableGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #e74c3c;">加载表结构失败: ' + (data.message || '未知错误') + '</div>';
+          }
+        })
+        .catch(err => {
+          console.error('加载表结构失败:', err);
+          tableGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #e74c3c;">加载表结构失败: ' + err.message + '</div>';
+        });
+    }
+
+
+  </script>
+</body>
+</html>

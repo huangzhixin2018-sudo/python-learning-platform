@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>数据结构博客</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --text-color: #2b2d42;
+      --light-text: #6b7280;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --border-color: #e5e7eb;
+      --border-radius: 8px;
+      --sidebar-width: 260px;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ========== 顶部导航栏 ========== */
+    header {
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .logo:hover {
+      color: var(--secondary-color);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .nav-links a.active {
+      color: var(--primary-color);
+      background-color: rgba(67, 97, 238, 0.15);
+      font-weight: 600;
+    }
+
+    .login-btn {
+      padding: 0.5rem 1.25rem;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 6px;
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .login-btn:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+    }
+
+    /* ========== 主布局 ========== */
+    .main-layout {
+      display: flex;
+      flex: 1;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 1rem;
+      width: 100%;
+    }
+
+    /* 左侧边栏（文章列表） */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: white;
+      border-right: 1px solid var(--border-color);
+      padding: 40px 20px;
+      position: sticky;
+      top: 80px;
+      height: calc(100vh - 80px);
+      overflow-y: auto;
+      font-size: 0.95rem;
+    }
+
+    .sidebar h2 {
+      font-size: 1.3rem;
+      margin-bottom: 24px;
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+
+    .article-list {
+      list-style: none;
+    }
+
+    .article-list li {
+      margin-bottom: 12px;
+    }
+
+    .article-list a {
+      text-decoration: none;
+      color: #555;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: block;
+      transition: all 0.2s;
+    }
+
+    .article-list a:hover,
+    .article-list a.active {
+      background-color: #f0f0f0;
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+
+    /* 主内容区 */
+    .main-content {
+      flex: 1;
+      padding: 40px 40px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    }
+
+    .post {
+      opacity: 0;
+      transition: opacity 0.3s;
+      display: none;
+    }
+
+    .post.active {
+      opacity: 1;
+      display: block;
+    }
+
+    .post h1 {
+      font-family: 'Georgia', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .post .date {
+      font-size: 0.95rem;
+      color: #777;
+      margin-bottom: 30px;
+    }
+
+    .post p {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: #444;
+      margin-bottom: 20px;
+    }
+
+    .post blockquote {
+      margin: 30px 0;
+      padding-left: 24px;
+      border-left: 4px solid #ddd;
+      font-style: italic;
+      color: #555;
+    }
+
+    footer {
+      background-color: var(--card-bg);
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--light-text);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: auto;
+    }
+
+    .footer-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部导航栏 -->
+  <header>
+    <div class="header-container">
+      <a href="/" class="logo">Python学习</a>
+      <div class="nav-links">
+        <a href="/">语法</a>
+        <a href="/function-library/">函数库</a>
+        <a href="/function-query/">函数查询</a>
+        <a href="/data-structure/" class="active">数据结构</a>
+        <a href="/statement/">语句</a>
+        <a href="/project/">项目</a>
+      </div>
+      <a href="/login/" class="login-btn">登录</a>
+    </div>
+  </header>
+
+  <!-- 主内容区域：左侧文章列表 + 右侧内容 -->
+  <main class="main-layout">
+    
+    <!-- 左侧边栏：文章列表 -->
+    <aside class="sidebar">
+  
+      <ul class="article-list">
+        <li><a href="#" data-post="post1" class="active">在喧嚣中寻找宁静</a></li>
+        <li><a href="#" data-post="post2">数字极简主义的生活方式</a></li>
+        <li><a href="#" data-post="post3">阅读是如何改变我的</a></li>
+        <li><a href="#" data-post="post4">清晨写作的力量</a></li>
+        <li><a href="#" data-post="post5">慢旅行：重新定义目的地</a></li>
+      </ul>
+    </aside>
+
+    <!-- 右侧主内容 -->
+    <section class="main-content">
+      <article id="post1" class="post active">
+        <h1>在喧嚣中寻找宁静</h1>
+        <div class="date">2025年4月5日</div>
+        <p>在这个信息爆炸的时代，我们每天被无数的通知、消息和任务包围。手机震动、邮件提醒、社交媒体的红点……仿佛只要稍作停顿，就会被世界抛下。然而，正是在这样的节奏中，我们更需要学会“暂停”。</p>
+        <p>心理学家米哈里·契克森米哈赖提出的“心流”（Flow）状态，正是源于专注与宁静。当我们不再被外界干扰，而是全情投入于某件事时，时间仿佛静止，内心也获得极大的满足。</p>
+        <blockquote>宁静不是逃避，而是一种更深层的参与。</blockquote>
+        <p>我曾在京都的一座小庭院中度过一个清晨。没有手机，没有电脑，只有风吹过竹叶的声音，和茶杯上升起的热气。那一刻，我忽然明白：真正的自由，不是做更多事，而是有能力不做任何事。</p>
+        <p>现代科技本应服务于人，但很多时候，我们反而成了它的仆人。想要找回内心的平静，或许可以从最简单的习惯开始：每天留出15分钟“无屏幕时间”，在公园散步，写日记，或只是安静地坐着。</p>
+        <p>生活不必总是高效。有时候，发呆、放空、甚至“浪费时间”，才是滋养灵魂的养分。</p>
+      </article>
+
+      <article id="post2" class="post">
+        <h1>数字极简主义的生活方式</h1>
+        <div class="date">2025年3月28日</div>
+        <p>我们拥有比以往任何时候都更多的应用、订阅和设备，但幸福感并未随之增长。相反，许多人感到疲惫、分心、焦虑。数字极简主义并非拒绝科技，而是有意识地使用它。</p>
+        <p>我尝试了为期一个月的“数字断舍离”：卸载非必要 App，关闭所有非紧急通知，每天只在固定时间查看邮件。结果令人惊讶：注意力更集中，睡眠质量提升，甚至创造力也增强了。</p>
+        <p>真正的自由，是能决定何时连接，何时断开。从今天起，不妨问自己：这个工具是在服务我，还是在消耗我？</p>
+      </article>
+
+      <article id="post3" class="post">
+        <h1>阅读是如何改变我的</h1>
+        <div class="date">2025年3月20日</div>
+        <p>三年前，我几乎不读书。手机刷到凌晨，内容却空洞无物。直到一位朋友送我一本纸质书，说：“试试每天读10页。”我照做了，从此改变了人生轨迹。</p>
+        <p>阅读不仅扩展了知识，更重要的是塑造了思维。书中的沉默对话，让我学会独立思考；不同作者的视角，教会我共情与理解。现在，我每天早晨留出45分钟阅读时间，它成了我一天中最清醒的时刻。</p>
+        <p>在这个短视频主导的时代，深度阅读是一种抵抗。它提醒我们：思想需要时间沉淀，成长无法速成。</p>
+      </article>
+
+      <article id="post4" class="post">
+        <h1>清晨写作的力量</h1>
+        <div class="date">2025年3月12日</div>
+        <p>我坚持清晨写作已有一年。每天起床后第一件事，就是打开笔记本，写下任何浮现脑海的想法——无需逻辑，无需修饰，甚至无需通顺。</p>
+        <p>这种“自由书写”像是一场心灵清理。焦虑、困惑、灵感、梦境……统统倾倒出来。奇怪的是，写完之后，头脑异常清晰，一整天都更有方向感。</p>
+        <p>写作不是为了发表，而是为了倾听自己。当你开始记录，你就不再是生活的被动经历者，而成了主动的观察者。</p>
+      </article>
+
+      <article id="post5" class="post">
+        <h1>慢旅行：重新定义目的地</h1>
+        <div class="date">2025年3月5日</div>
+        <p>我曾以为旅行就是打卡景点、拍够照片、发完朋友圈。直到一次在葡萄牙小镇迷路，被迫走进一家家庭咖啡馆，和老板聊了两个小时，才明白什么是真正的旅行。</p>
+        <p>慢旅行不追求“去过多少地方”，而是关注“体验了多少生活”。住在民宿而非酒店，步行探索而非赶行程，学几句当地话，吃一顿非游客菜单的晚餐——这些微小瞬间，往往成为最深的记忆。</p>
+        <p>世界很大，但不必急于看完。有时候，走得慢一点，反而看得更多。</p>
+      </article>
+    </section>
+
+  </main>
+
+  <!-- 页脚 -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-links">
+        <a href="/privacy">隐私政策</a>
+        <a href="/terms">使用条款</a>
+        <a href="/faq">常见问题</a>
+        <a href="/feedback">意见反馈</a>
+      </div>
+      <p>&copy; 2025 Python学习 - 探索数据科学的无限可能</p>
+    </div>
+  </footer>
+
+  <!-- 切换文章的脚本 -->
+  <script>
+    document.querySelectorAll('.article-list a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        // 更新左侧激活状态
+        document.querySelectorAll('.article-list a').forEach(a => a.classList.remove('active'));
+        this.classList.add('active');
+
+        // 切换内容
+        const target = this.getAttribute('data-post');
+        document.querySelectorAll('.post').forEach(post => {
+          post.classList.remove('active');
+        });
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数库</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --text-color: #2b2d42;
+            --light-text: #6b7280;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --border-radius: 8px;
+            --sidebar-width: 260px;
+
+            /* 原库结构浏览器的变量保留 */
+            --module-color: #6c757d;
+            --class-color: #007bff;
+            --function-color: #6610f2;
+            --method-color: #d63384;
+            --attribute-color: #20c997;
+            --semantic-color: #495057;
+            --row-hover: #f8f9fa;
+            --active-module: #e7f1ff;
+            --input-structure: #fd7e14;
+            --output-structure: #28a745;
+            --operation-type: #6f42c1;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', 'Inter', 'Helvetica Neue', sans-serif;
+            background-color: #f8f9fa;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ========== 统一导航栏样式 ========== */
+        header {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .logo:hover {
+            color: var(--secondary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-links a.active {
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.15);
+            font-weight: 600;
+        }
+
+        .login-btn {
+            padding: 0.5rem 1.25rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .login-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+        }
+
+        /* ========== 原有内容样式（未改动） ========== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .content-area {
+            padding: 20px;
+        }
+
+        /* ========== 原有内容样式（未改动） ========== */
+        h1 {
+            margin: 0 0 15px 0;
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        select, input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        select:hover, input:hover {
+            border-color: var(--primary-color);
+        }
+
+        /* 思维导图交互优化 */
+        .structure-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .structure-table:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .structure-table th {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .structure-table th:hover {
+            background-color: #e9ecef;
+        }
+
+        .structure-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+            transition: all 0.2s ease;
+        }
+
+        .structure-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .structure-table tr {
+            transition: all 0.2s ease;
+        }
+
+        .structure-table tr:hover {
+            background-color: var(--row-hover);
+            transform: translateX(2px);
+        }
+
+        /* 类型标签的交互效果 */
+        .type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .type-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .type-function {
+            background-color: #e9ecef;
+            color: var(--function-color);
+        }
+
+        .type-function:hover {
+            background-color: #d1ecf1;
+        }
+
+        .type-method {
+            background-color: #e9ecef;
+            color: var(--method-color);
+        }
+
+        .type-method:hover {
+            background-color: #f8d7da;
+        }
+
+        .type-attribute {
+            background-color: #e9ecef;
+            color: var(--attribute-color);
+        }
+
+        .type-attribute:hover {
+            background-color: #d4edda;
+        }
+
+        /* 名称元素的交互效果 */
+        .function-name, .method-name, .attribute-name {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .function-name:hover, .method-name:hover, .attribute-name:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        /* 操作类型和语义描述的交互效果 */
+        .operation-type {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            color: var(--operation-type);
+            font-size: 14px;
+            transition: color 0.2s ease;
+        }
+
+        .operation-type:hover {
+            color: var(--secondary-color);
+        }
+
+        .semantic-desc {
+            color: var(--semantic-color);
+            font-size: 14px;
+            margin-top: 5px;
+            line-height: 1.5;
+            transition: color 0.2s ease;
+        }
+
+        .semantic-desc:hover {
+            color: var(--text-color);
+        }
+
+        /* 输入输出结构的交互效果 */
+        .input-structure, .output-structure {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            color: var(--input-structure);
+            font-size: 14px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .input-structure:hover, .output-structure:hover {
+            color: var(--secondary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .output-structure {
+            color: var(--output-structure);
+        }
+
+        /* 搜索高亮的交互效果 */
+        .search-highlight {
+            background-color: #fff3cd;
+            padding: 0 2px;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+        }
+
+        .search-highlight:hover {
+            background-color: #ffeaa7;
+            transform: scale(1.02);
+        }
+
+        /* 模块名和类名样式 */
+        .module-name {
+            font-weight: 600;
+            color: var(--module-color);
+            transition: color 0.2s ease;
+        }
+
+        .module-name:hover {
+            color: var(--primary-color);
+        }
+
+        .class-name {
+            font-weight: 600;
+            color: var(--class-color);
+            transition: color 0.2s ease;
+        }
+
+        .class-name:hover {
+            color: var(--secondary-color);
+        }
+
+        /* 空消息的样式优化 */
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-style: italic;
+            transition: color 0.2s ease;
+        }
+
+        .empty-message:hover {
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== 替换后的导航栏 ========== -->
+    <header>
+        <div class="header-container">
+            <a href="{% url 'Pythonfun:index' %}" class="logo"></a>
+            <div class="nav-links">
+                <a href="{% url 'Pythonfun:index' %}">语法</a>
+                <a href="{% url 'Pythonfun:function_library' %}" class="active">函数库</a>
+                <a href="{% url 'Pythonfun:function_query' %}">函数查询</a>
+                <a href="{% url 'Pythonfun:data_structure' %}">数据结构</a>
+                <a href="{% url 'Pythonfun:ai_programming' %}">AI编程</a>
+                <a href="{% url 'Pythonfun:project' %}">项目</a>
+                
+            </div>
+            <a href="/login/" class="login-btn">登录</a>
+        </div>
+    </header>
+
+    <!-- ========== 原有内容区域（完全未改动） ========== -->
+    <div class="container">
+        <div class="content-area">
+            <h1>Python 库结构浏览器</h1>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="library-selector">选择库</label>
+                    <select id="library-selector">
+                        <option value="">-- 请选择库 --</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="module-selector">选择模块</label>
+                    <select id="module-selector">
+                        <option value="">-- 请先选择库 --</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="class-selector">选择类</label>
+                    <select id="class-selector">
+                        <option value="">-- 全部类 --</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="type-selector">选择类型</label>
+                    <select id="type-selector">
+                        <option value="">全部类型</option>
+                        <option value="function">函数</option>
+                        <option value="method">方法</option>
+                        <option value="attribute">属性</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="operation-selector">操作类型</label>
+                    <select id="operation-selector">
+                        <option value="">全部操作</option>
+                        <option value="构造">构造</option>
+                        <option value="复制">复制</option>
+                        <option value="访问">访问</option>
+                        <option value="查询">查询</option>
+                        <option value="设置">设置</option>
+                        <option value="插入">插入</option>
+                        <option value="删除">删除</option>
+                        <option value="计算">计算</option>
+                        <option value="转换">转换</option>
+                        <option value="聚合">聚合</option>
+                        <option value="排序">排序</option>
+                        <option value="重组">重组</option>
+                        <option value="判断">判断</option>
+                        <option value="输入">输入</option>
+                        <option value="输出">输出</option>
+                        <option value="迭代">迭代</option>
+                        <option value="选择">选择</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="search-box">搜索</label>
+                    <input type="text" id="search-box" placeholder="搜索名称或描述...">
+                </div>
+            </div>
+            <table class="structure-table">
+                <thead>
+                    <tr>
+                        <th width="8%">模块</th>
+                        <th width="12%">类名</th>
+                        <th width="8%">类型</th>
+                        <th width="8%">操作类型</th>
+                        <th width="12%">名称</th>
+                        <th width="20%">语义</th>
+                        <th width="16%">输入数据结构</th>
+                        <th width="16%">输出数据结构</th>
+                    </tr>
+                </thead>
+                <tbody id="content-table">
+                    <tr>
+                        <td colspan="8" class="empty-message">请选择一个库和模块</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========== 动态数据加载脚本 ========== -->
+    <script>
+                let libraries = {};
+        
+        // 从API加载数据
+        async function loadLibraryData() {
+            try {
+                const response = await fetch('/api/function-library/');
+                if (response.ok) {
+                    libraries = await response.json();
+                    console.log('数据加载成功:', libraries);
+                    populateLibrarySelector();
+                    init();
+                } else {
+                    console.error('加载数据失败:', response.status);
+                    // 如果API失败，使用默认数据
+                    initWithDefaultData();
+                }
+            } catch (error) {
+                console.error('加载数据出错:', error);
+                // 如果API失败，使用默认数据
+                initWithDefaultData();
+            }
+        }
+        
+        // 动态填充库选择器
+        function populateLibrarySelector() {
+            const librarySelector = document.getElementById('library-selector');
+            librarySelector.innerHTML = '<option value="">-- 请选择库 --</option>';
+            
+            for (const [libraryKey, libraryData] of Object.entries(libraries)) {
+                const option = document.createElement('option');
+                option.value = libraryKey;
+                option.textContent = libraryData.name;
+                librarySelector.appendChild(option);
+            }
+        }
+        
+        
+
+        let currentLibrary = null;
+        let currentModule = null;
+        let currentClass = null;
+        let currentType = null;
+        let currentOperation = null;
+        let currentSearch = "";
+
+        const librarySelector = document.getElementById('library-selector');
+        const moduleSelector = document.getElementById('module-selector');
+        const classSelector = document.getElementById('class-selector');
+        const typeSelector = document.getElementById('type-selector');
+        const operationSelector = document.getElementById('operation-selector');
+        const searchBox = document.getElementById('search-box');
+        const contentTable = document.getElementById('content-table');
+
+        function init() {
+            librarySelector.addEventListener('change', function() {
+                currentLibrary = this.value;
+                currentModule = null;
+                currentClass = null;
+                currentType = null;
+                currentOperation = null;
+                currentSearch = "";
+                searchBox.value = "";
+                loadLibrary(currentLibrary);
+            });
+
+            moduleSelector.addEventListener('change', function() {
+                currentModule = this.value;
+                currentClass = null;
+                currentSearch = "";
+                searchBox.value = "";
+                loadClasses();
+                renderTable();
+            });
+
+            classSelector.addEventListener('change', function() {
+                currentClass = this.value;
+                renderTable();
+            });
+
+            typeSelector.addEventListener('change', function() {
+                currentType = this.value;
+                renderTable();
+            });
+
+            operationSelector.addEventListener('change', function() {
+                currentOperation = this.value;
+                renderTable();
+            });
+
+            searchBox.addEventListener('input', function() {
+                currentSearch = this.value.toLowerCase();
+                renderTable();
+            });
+
+            if (librarySelector.value) {
+                currentLibrary = librarySelector.value;
+                loadLibrary(currentLibrary);
+            }
+        }
+
+        function loadLibrary(libraryId) {
+            const library = libraries[libraryId];
+            generateModuleOptions(library.modules);
+            classSelector.innerHTML = '<option value="">-- 全部类 --</option>';
+            typeSelector.value = "";
+            operationSelector.value = "";
+            if (library.modules.length > 0) {
+                moduleSelector.value = library.modules[0].name;
+                currentModule = library.modules[0].name;
+                loadClasses();
+                renderTable();
+            } else {
+                contentTable.innerHTML = '<tr><td colspan="8" class="empty-message">该库没有可用模块</td></tr>';
+            }
+        }
+
+        function loadClasses() {
+            if (!currentLibrary || !currentModule) return;
+            const library = libraries[currentLibrary];
+            const module = library.modules.find(m => m.name === currentModule);
+            if (!module) return;
+            classSelector.innerHTML = '<option value="">-- 全部类 --</option>';
+            const classes = module.items.filter(item => item.type === 'class');
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.name;
+                option.textContent = cls.name;
+                classSelector.appendChild(option);
+            });
+        }
+
+        function generateModuleOptions(modules) {
+            moduleSelector.innerHTML = "";
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "-- 选择模块 --";
+            moduleSelector.appendChild(defaultOption);
+            modules.forEach(module => {
+                const option = document.createElement('option');
+                option.value = module.name;
+                option.textContent = `${module.name} - ${module.description}`;
+                moduleSelector.appendChild(option);
+            });
+        }
+
+        function renderTable() {
+            if (!currentLibrary || !currentModule) {
+                contentTable.innerHTML = '<tr><td colspan="8" class="empty-message">请选择一个库和模块</td></tr>';
+                return;
+            }
+            const library = libraries[currentLibrary];
+            const module = library.modules.find(m => m.name === currentModule);
+            if (!module) {
+                contentTable.innerHTML = '<tr><td colspan="8" class="empty-message">请选择一个模块</td></tr>';
+                return;
+            }
+            let tableContent = "";
+            let hasResults = false;
+            module.items.forEach(item => {
+                if (item.type === 'class') {
+                    if (currentClass && currentClass !== item.name) return;
+                    if (item.methods) {
+                        item.methods.forEach(method => {
+                            if ((!currentType || currentType === 'method') && 
+                                (!currentOperation || currentOperation === method.operation) &&
+                                matchesSearch(method.name, method.semantic)) {
+                                hasResults = true;
+                                tableContent += renderTableRow(
+                                    module.name,
+                                    item.name,
+                                    'method',
+                                    method.operation,
+                                    method.name,
+                                    method.semantic,
+                                    method.input,
+                                    method.output
+                                );
+                            }
+                        });
+                    }
+                    if (item.attributes) {
+                        item.attributes.forEach(attr => {
+                            if ((!currentType || currentType === 'attribute') && 
+                                (!currentOperation || currentOperation === attr.operation) &&
+                                matchesSearch(attr.name, attr.semantic)) {
+                                hasResults = true;
+                                tableContent += renderTableRow(
+                                    module.name,
+                                    item.name,
+                                    'attribute',
+                                    attr.operation,
+                                    attr.name,
+                                    attr.semantic,
+                                    attr.input,
+                                    attr.output
+                                );
+                            }
+                        });
+                    }
+                }
+                if (item.type === 'function') {
+                    if ((!currentType || currentType === 'function') && 
+                        (!currentClass || currentClass === '') && 
+                        (!currentOperation || currentOperation === item.operation) &&
+                        matchesSearch(item.name, item.semantic)) {
+                        hasResults = true;
+                        tableContent += renderTableRow(
+                            module.name,
+                            '-',
+                            'function',
+                            item.operation,
+                            item.name,
+                            item.semantic,
+                            item.input,
+                            item.output
+                        );
+                    }
+                }
+            });
+            if (!hasResults) {
+                tableContent = '<tr><td colspan="8" class="empty-message">没有找到匹配的结果</td></tr>';
+            }
+            contentTable.innerHTML = tableContent;
+        }
+
+        function renderTableRow(moduleName, className, type, operation, name, semantic, input, output) {
+            let typeBadge = '';
+            let nameElement = '';
+            switch(type) {
+                case 'function':
+                    typeBadge = `<span class="type-badge type-function">函数</span>`;
+                    nameElement = `<span class="function-name">${highlightSearch(name)}</span>`;
+                    break;
+                case 'method':
+                    typeBadge = `<span class="type-badge type-method">方法</span>`;
+                    nameElement = `<span class="method-name">${highlightSearch(name)}</span>`;
+                    break;
+                case 'attribute':
+                    typeBadge = `<span class="type-badge type-attribute">属性</span>`;
+                    nameElement = `<span class="attribute-name">${highlightSearch(name)}</span>`;
+                    break;
+            }
+            return `
+                <tr>
+                    <td class="module-name">${moduleName}</td>
+                    <td>${className === '-' ? '-' : `<span class="class-name">${className}</span>`}</td>
+                    <td>${typeBadge}</td>
+                    <td class="operation-type">${operation}</td>
+                    <td>${nameElement}</td>
+                    <td class="semantic-desc">${highlightSearch(semantic)}</td>
+                    <td class="input-structure">${highlightSearch(input)}</td>
+                    <td class="output-structure">${highlightSearch(output)}</td>
+                </tr>
+            `;
+        }
+
+        function matchesSearch(name, semantic) {
+            if (!currentSearch) return true;
+            return name.toLowerCase().includes(currentSearch) || 
+                   semantic.toLowerCase().includes(currentSearch);
+        }
+
+        function highlightSearch(text) {
+            if (!currentSearch || !text) return text;
+            const regex = new RegExp(currentSearch, 'gi');
+            return text.replace(regex, match => `<span class="search-highlight">${match}</span>`);
+        }
+
+        // 思维导图交互增强功能
+        function enhanceTableInteractivity() {
+            // 为表格行添加点击高亮效果
+            contentTable.addEventListener('click', function(e) {
+                const row = e.target.closest('tr');
+                if (row && !row.classList.contains('empty-message')) {
+                    // 移除其他行的高亮
+                    document.querySelectorAll('.structure-table tr').forEach(tr => {
+                        tr.classList.remove('highlighted-row');
+                    });
+                    // 添加当前行高亮
+                    row.classList.add('highlighted-row');
+                    
+                    // 平滑滚动到该行
+                    row.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }
+            });
+
+            // 为类型标签添加点击筛选功能
+            contentTable.addEventListener('click', function(e) {
+                if (e.target.classList.contains('type-badge')) {
+                    const type = e.target.textContent.trim();
+                    let typeValue = '';
+                    switch(type) {
+                        case '函数': typeValue = 'function'; break;
+                        case '方法': typeValue = 'method'; break;
+                        case '属性': typeValue = 'attribute'; break;
+                    }
+                    if (typeValue) {
+                        typeSelector.value = typeValue;
+                        currentType = typeValue;
+                        renderTable();
+                        
+                        // 添加视觉反馈
+                        e.target.style.transform = 'scale(1.1)';
+                        setTimeout(() => {
+                            e.target.style.transform = 'scale(1.05)';
+                        }, 200);
+                    }
+                }
+            });
+
+            // 为操作类型添加点击筛选功能
+            contentTable.addEventListener('click', function(e) {
+                if (e.target.classList.contains('operation-type')) {
+                    const operation = e.target.textContent.trim();
+                    operationSelector.value = operation;
+                    currentOperation = operation;
+                    renderTable();
+                    
+                    // 添加视觉反馈
+                    e.target.style.color = '#3a0ca3';
+                    setTimeout(() => {
+                        e.target.style.color = '';
+                    }, 500);
+                }
+            });
+        }
+
+        // 添加高亮行的样式
+        const style = document.createElement('style');
+        style.textContent = `
+            .highlighted-row {
+                background-color: rgba(67, 97, 238, 0.1) !important;
+                border-left: 4px solid #4361ee;
+                transform: translateX(4px);
+            }
+            
+            .highlighted-row td {
+                font-weight: 500;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 页面加载时从API获取数据
+        loadLibraryData();
+        
+        // 初始化交互增强功能
+        setTimeout(enhanceTableInteractivity, 100);
+    </script>
+</body>
+</html>
