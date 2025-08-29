@@ -697,7 +697,12 @@
     // 根据TBA类型加载对应的分类数据
     function loadTbaCategoryData(tbaType) {
       // 从API获取真实的主分类数据
-      fetch('/api/main-categories/')
+      fetch('/api/main-categories/', {
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+          'Content-Type': 'application/json'
+        }
+      })
         .then(response => response.json())
         .then(data => {
           if (data.items && data.items.length > 0) {
@@ -705,7 +710,12 @@
             mainCategoriesCache = data.items;
             
             // 获取所有子分类数据
-            return fetch('/api/sub-categories/');
+            return fetch('/api/sub-categories/', {
+              headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'Content-Type': 'application/json'
+              }
+            });
           } else {
             updateMainCategoryTable([]);
             updateSubCategoryTable([]);
