@@ -80,20 +80,55 @@ WSGI_APPLICATION = 'mysite.wsgi.app'
 # 数据库配置
 DATABASE_URL = config('DATABASE_URL', default=None)
 
+# 缓存配置
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 300,  # 5分钟默认缓存时间
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+            'CULL_FREQUENCY': 3,
+        }
+    }
+}
+
+# 静态文件配置优化
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+# 静态文件压缩和缓存
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# 性能优化设置
+# 启用Gzip压缩
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = DEBUG
+WHITENOISE_MAX_AGE = 31536000  # 1年缓存
+
+# 数据库连接池优化
 if DEBUG:
-    # 开发环境使用PostgreSQL连接池
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'postgres',
-            'USER': 'postgres.gbpegvuuwljgfwimyjsw',  # 连接池专用用户名
+            'USER': 'postgres.gbpegvuuwljgfwimyjsw',
             'PASSWORD': 'PLMQAZ123456', 
             'HOST': 'aws-0-ap-northeast-1.pooler.supabase.com',
             'PORT': '6543',
             'OPTIONS': {
                 'sslmode': 'require',
-                'options': '-c search_path=public'  # 指定schema
+                'options': '-c search_path=public'
             },
+            # 连接池优化
+            'CONN_MAX_AGE': 600,  # 连接最大存活时间10分钟
+            'CONN_HEALTH_CHECKS': True,
+            # 查询优化
+            'ATOMIC_REQUESTS': False,
+            'AUTOCOMMIT': True,
         }
     }
     print("[OK] 开发环境使用PostgreSQL连接池")
@@ -149,22 +184,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
 # Whitenoise配置
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# 认证相关配置
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/admin/category-management/'
-
 # 安全设置 - 生产环境
 if not DEBUG:
     SECURE_SSL_REDIRECT = True

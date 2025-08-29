@@ -12,6 +12,9 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.core.cache import cache
+from django.db.models import Count, Prefetch
+from .decorators import cache_view
 
 # ========== 页面渲染视图 ==========
 
@@ -28,48 +31,55 @@ def login_view(request):
             return render(request, 'admin/登录.html', status=401)
     return render(request, 'admin/登录.html')
 
+@cache_view(timeout=300, key_prefix='grammar_index')
 def index_view(request):
     """语法页面视图 - 显示语法类型的文章"""
-    # 获取语法类型的文章
-    articles = Article.objects.filter(
+    # 使用缓存减少数据库查询
+    cache_key = f'grammar_articles_{request.user.id if request.user.is_authenticated else "anonymous"}'
+    cached_data = cache.get(cache_key)
+    
+    if cached_data and not request.user.is_staff:  # 管理员不使用缓存
+        return render(request, 'front/index.html', cached_data)
+    
+    # 优化查询：一次性获取所有需要的数据
+    articles = Article.objects.select_related('category', 'category__parent').filter(
         content_type=Article.ContentType.GRAMMAR,
         is_published=True
     ).order_by('-created_at')
     
-    # 获取分类树
+    # 使用annotate优化文章数量查询
     main_categories = MainCategory.objects.filter(is_enabled=True).order_by('order')
     category_tree = []
+    
     for main_category in main_categories:
+        # 使用prefetch_related和annotate优化查询
         sub_categories = SubCategory.objects.filter(
             parent=main_category,
             is_enabled=True
+        ).annotate(
+            article_count=Count(
+                'article',
+                filter=models.Q(
+                    article__content_type=Article.ContentType.GRAMMAR,
+                    article__is_published=True
+                )
+            )
         ).order_by('id')
-        sub_categories_with_count = []
-        for sub in sub_categories:
-            article_count = Article.objects.filter(
-                category=sub,
-                content_type=Article.ContentType.GRAMMAR,
-                is_published=True
-            ).count()
-            sub.article_count = article_count
-            sub_categories_with_count.append(sub)
+        
         category_tree.append({
             'main_category': main_category,
-            'sub_categories': sub_categories_with_count
+            'sub_categories': sub_categories
         })
     
     # 获取当前文章（用于显示默认文章）
-    current_article = Article.objects.filter(
-        content_type=Article.ContentType.GRAMMAR,
-        is_published=True
-    ).order_by('created_at').first()
+    current_article = articles.first()
     
     # 如果没有已发布的文章，且用户是管理员，尝试获取未发布的文章（用于管理员预览）
     if not current_article and request.user.is_authenticated and request.user.is_staff:
         current_article = Article.objects.filter(
             content_type=Article.ContentType.GRAMMAR,
             is_published=False
-        ).order_by('created_at').first()
+        ).select_related('category', 'category__parent').order_by('created_at').first()
     
     context = {
         'articles': articles,
@@ -77,6 +87,11 @@ def index_view(request):
         'current_article': current_article,
         'content_type': 'grammar'
     }
+    
+    # 缓存结果（5分钟）
+    if not request.user.is_staff:
+        cache.set(cache_key, context, 300)
+    
     return render(request, 'front/index.html', context)
 
 def category_view(request, slug):
@@ -98,8 +113,8 @@ def category_view(request, slug):
                 'error_message': f'分类 "{slug}" 不存在或已被禁用'
             }, status=404)
         
-        # 获取当前分类的文章
-        current_article = Article.objects.filter(
+        # 获取当前分类的文章（优化查询）
+        current_article = Article.objects.select_related('category', 'category__parent').filter(
             category=current_category,
             content_type=model_content_type,
             is_published=True
@@ -107,7 +122,7 @@ def category_view(request, slug):
         
         # 如果没有已发布的文章，且用户是管理员，尝试获取未发布的文章（用于管理员预览）
         if not current_article and request.user.is_authenticated and request.user.is_staff:
-            current_article = Article.objects.filter(
+            current_article = Article.objects.select_related('category', 'category__parent').filter(
                 category=current_category,
                 content_type=model_content_type,
                 is_published=False
@@ -116,11 +131,19 @@ def category_view(request, slug):
         # 构建分类树，只包含有指定内容类型文章的分类
         category_tree = []
         
-        # 获取包含指定内容类型文章的子分类
-        sub_categories_with_articles = SubCategory.objects.filter(
+        # 获取包含指定内容类型文章的子分类（优化查询）
+        sub_categories_with_articles = SubCategory.objects.select_related('parent').filter(
             article__content_type=model_content_type,
             article__is_published=True,
             is_enabled=True
+        ).annotate(
+            article_count=models.Count(
+                'article',
+                filter=models.Q(
+                    article__content_type=model_content_type,
+                    article__is_published=True
+                )
+            )
         ).distinct().order_by('parent__id', 'id')
         
         # 按主分类分组
@@ -140,13 +163,7 @@ def category_view(request, slug):
                 current_main_category = sub_category.parent
                 current_sub_categories = []
             
-            # 计算文章数量
-            article_count = Article.objects.filter(
-                category=sub_category,
-                content_type=model_content_type,
-                is_published=True
-            ).count()
-            sub_category.article_count = article_count
+            # 文章数量已经在annotate中计算
             current_sub_categories.append(sub_category)
         
         # 添加最后一个主分类的数据

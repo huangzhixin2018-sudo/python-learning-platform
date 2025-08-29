@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 from django.utils.text import slugify
 
 # ========== 原有模型 ==========
@@ -158,7 +159,7 @@ class OperationType(models.Model):
     operation_name = models.CharField(_("操作类型名称"), max_length=100, unique=True)
     operation_name_cn = models.CharField(_("操作类型中文名称"), max_length=100)
     description = models.TextField(_("描述"), blank=True, null=True)
-    created_at = models.DateTimeField(_("创建时间"), auto_now_add=True)
+    created_at = models.DateTimeField(_("创建时间"), default=timezone.now)
     updated_at = models.DateTimeField(_("更新时间"), auto_now=True)
 
     class Meta:

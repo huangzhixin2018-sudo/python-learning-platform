@@ -4,10 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>思维空间 - 分类管理</title>
+  
+  <!-- 资源预加载优化 -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <!-- 关键CSS内联 -->
   <style>
+    /* 关键渲染路径CSS */
     :root {
       --primary-color: #4361ee;
       --secondary-color: #3a0ca3;
@@ -24,20 +29,24 @@
       --warning-color: #ff9800;
       --danger-color: #f44336;
     }
+    
+    /* 关键布局样式 */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
+    
     body {
-      font-family: 'Noto Sans SC', sans-serif;
+      font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
       line-height: 1.6;
       display: flex;
       min-height: 100vh;
     }
-    /* 侧边栏样式 */
+    
+    /* 侧边栏基础样式 */
     .admin-sidebar {
       width: 260px;
       background-color: var(--sidebar-bg);
@@ -46,436 +55,47 @@
       height: 100vh;
       position: sticky;
       top: 0;
+      z-index: 1000;
     }
-    .admin-logo {
-      font-size: 1.5rem;
-      font-weight: 700;
-      padding: 0 1.5rem 1.5rem;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      margin-bottom: 1.5rem;
-      color: white;
-    }
-    .admin-menu {
-      list-style: none;
-    }
-    .menu-category {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 0.75rem 1.5rem;
-      color: rgba(255,255,255,0.6);
-    }
-    .menu-item {
-      padding: 0.75rem 1.5rem;
-      transition: all 0.2s;
-    }
-    .menu-item a {
-      color: var(--sidebar-text);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      opacity: 0.8;
-    }
-    .menu-item a:hover, .menu-item.active a {
-      opacity: 1;
-    }
-    .menu-item i {
-      width: 24px;
-      margin-right: 0.75rem;
-      text-align: center;
-    }
-    .menu-item.active {
-      background-color: rgba(255,255,255,0.1);
-      border-left: 3px solid var(--accent-color);
-    }
-    /* 主内容区 */
+    
     .admin-main {
       flex: 1;
       padding: 2rem;
+      overflow-x: hidden;
     }
-    .admin-header {
+    
+    /* 加载状态 */
+    .loading {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-    }
-    .page-title {
-      font-size: 1.75rem;
-      color: var(--secondary-color);
-    }
-    .user-profile {
-      display: flex;
-      align-items: center;
-    }
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: var(--primary-color);
-      color: white;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      margin-left: 1rem;
-      font-weight: bold;
-    }
-    /* 卡片容器 */
-    .card {
-      background-color: var(--card-bg);
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      padding: 2rem;
-      margin-bottom: 2rem;
-    }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
-    }
-    .card-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-    /* 表格样式 */
-    .table-container {
-      overflow-x: auto;
-    }
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .table th, .table td {
-      padding: 1rem;
-      text-align: left;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    .table th {
-      font-weight: 600;
-      color: var(--secondary-color);
-      background-color: rgba(67, 97, 238, 0.05);
-    }
-    .table tr:hover td {
-      background-color: rgba(67, 97, 238, 0.03);
-    }
-    /* 标签样式 */
-    .badge {
-      display: inline-block;
-      padding: 0.35rem 0.75rem;
-      border-radius: 50px;
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-    .badge-primary {
-      background-color: rgba(67, 97, 238, 0.1);
-      color: var(--primary-color);
-    }
-    .badge-success {
-      background-color: rgba(76, 175, 80, 0.1);
-      color: var(--success-color);
-    }
-    .badge-warning {
-      background-color: rgba(255, 152, 0, 0.1);
-      color: var(--warning-color);
-    }
-    /* 按钮样式 */
-    .btn {
-      padding: 0.5rem 1rem;
-      border-radius: var(--border-radius);
-      border: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.9rem;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .btn-sm {
-      padding: 0.35rem 0.75rem;
-      font-size: 0.85rem;
-    }
-    .btn-primary {
-      background-color: var(--primary-color);
-      color: white;
-    }
-    .btn-primary:hover {
-      background-color: #3a56d8;
-    }
-    .btn-outline {
-      background-color: transparent;
-      border: 1px solid var(--primary-color);
-      color: var(--primary-color);
-    }
-    .btn-outline:hover {
-      background-color: rgba(67, 97, 238, 0.1);
-    }
-    .btn-success {
-      background-color: var(--success-color);
-      color: white;
-    }
-    .btn-success:hover {
-      background-color: #3d8b40;
-    }
-    .btn-danger {
-      background-color: var(--danger-color);
-      color: white;
-    }
-    .btn-danger:hover {
-      background-color: #d32f2f;
-    }
-    .btn i {
-      margin-right: 0.5rem;
-    }
-    .btn-group {
-      display: flex;
-      gap: 0.5rem;
-    }
-    /* 表单样式 */
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-    .form-label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-    .form-control {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid #ddd;
-      border-radius: var(--border-radius);
-      font-family: inherit;
-      font-size: 1rem;
-      transition: border-color 0.2s;
-    }
-    .form-control:focus {
-      outline: none;
-      border-color: var(--primary-color);
-    }
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
-    }
-    /* 模态框样式 */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s;
-    }
-    .modal.show {
-      opacity: 1;
-      visibility: visible;
-    }
-    .modal-dialog {
-      background-color: white;
-      border-radius: var(--border-radius);
-      width: 100%;
-      max-width: 800px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 5px 30px rgba(0,0,0,0.3);
-      transform: translateY(-20px);
-      transition: transform 0.3s;
-    }
-    .modal.show .modal-dialog {
-      transform: translateY(0);
-    }
-    .modal-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin: 0;
-    }
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
+      height: 200px;
       color: var(--light-text);
     }
-    .modal-body {
-      padding: 1.5rem;
-    }
-    .modal-footer {
-      padding: 1rem 1.5rem;
-      border-top: 1px solid rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-    }
-    /* 分页样式 */
-    .pagination-container {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      margin-top: 1.5rem;
-    }
-    .pagination-btn, .page-link {
-      padding: 0.5rem 1rem;
-      margin: 0 0.25rem;
-      border-radius: var(--border-radius);
-      border: 1px solid #ddd;
-      background-color: white;
-      color: var(--text-color);
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
-    }
-    .pagination-btn:hover, .page-link:hover {
-      background-color: #f1f1f1;
-      border-color: #ccc;
-    }
-    .page-link.active {
-      background-color: var(--primary-color);
-      color: white;
-      border-color: var(--primary-color);
-    }
-    .pagination-btn.disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-    }
-    /* Toast提示框样式 */
-    .toast-container {
-      position: fixed;
-      top: 2rem;
-      right: 2rem;
-      z-index: 1050;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-    }
-    .toast {
-      background-color: var(--sidebar-bg);
-      color: var(--sidebar-text);
-      padding: 1rem 1.5rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateX(100%);
-      transition: all 0.4s ease-in-out;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-    }
-    .toast.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(0);
-    }
-    .toast-icon {
-      margin-right: 0.75rem;
-      font-size: 1.2rem;
-    }
-    .toast.success { background-color: var(--success-color); color: white; }
-    .toast.danger { background-color: var(--danger-color); color: white; }
-    /* TBA切换按钮样式 */
-    .tba-toggle-container {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+    
+    .loading::after {
+      content: '';
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-color);
+      border-top: 2px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
     }
     
-    .tba-label {
-      font-weight: 500;
-      color: var(--text-color);
-      white-space: nowrap;
-    }
-    
-    .tba-buttons {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    
-    .tba-btn {
-      padding: 0.5rem 1rem;
-      border: 2px solid var(--primary-color);
-      background-color: transparent;
-      color: var(--primary-color);
-      border-radius: var(--border-radius);
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.9rem;
-    }
-    
-    .tba-btn:hover {
-      background-color: rgba(67, 97, 238, 0.1);
-      transform: translateY(-1px);
-    }
-    
-    .tba-btn.active {
-      background-color: var(--primary-color);
-      color: white;
-      box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
-    }
-    
-    .tba-btn i {
-      font-size: 0.85rem;
-    }
-    
-
-    
-    /* 响应式设计 */
-    @media (max-width: 992px) {
-      .admin-sidebar {
-        width: 220px;
-      }
-      
-      .tba-toggle-container {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-      }
-      
-      .tba-buttons {
-        width: 100%;
-        justify-content: flex-start;
-      }
-    }
-    @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-      }
-      .admin-sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
-      }
-      .admin-main {
-        padding: 1.5rem;
-      }
-      .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-      }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
+  
+  <!-- 非关键资源异步加载 -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap"></noscript>
+  
+  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 </head>
 <body>
   <!-- 管理侧边栏 -->
@@ -1132,17 +752,7 @@
           // 更新当前选中的类型
           currentTbaType = btn.dataset.type;
           
-          // 显示切换提示
-          const typeNames = {
-            'grammar': '语法',
-            'data_structure': '数据结构', 
-            'ai_programming': 'AI编程',
-            'project': '项目'
-          };
-          
-          showToast(`已切换到${typeNames[currentTbaType]}模式`);
-          
-          // 根据TBA类型加载对应的分类数据
+          // 所有TBA类型都加载对应的分类数据
           loadTbaCategoryData(currentTbaType);
         });
       });
