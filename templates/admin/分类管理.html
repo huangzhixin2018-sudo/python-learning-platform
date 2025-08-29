@@ -389,10 +389,72 @@
     }
     .toast.success { background-color: var(--success-color); color: white; }
     .toast.danger { background-color: var(--danger-color); color: white; }
+    /* TBA切换按钮样式 */
+    .tba-toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .tba-label {
+      font-weight: 500;
+      color: var(--text-color);
+      white-space: nowrap;
+    }
+    
+    .tba-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .tba-btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--primary-color);
+      background-color: transparent;
+      color: var(--primary-color);
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .tba-btn:hover {
+      background-color: rgba(67, 97, 238, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    .tba-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+      box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+    }
+    
+    .tba-btn i {
+      font-size: 0.85rem;
+    }
+    
+
+    
     /* 响应式设计 */
     @media (max-width: 992px) {
       .admin-sidebar {
         width: 220px;
+      }
+      
+      .tba-toggle-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+      
+      .tba-buttons {
+        width: 100%;
+        justify-content: flex-start;
       }
     }
     @media (max-width: 768px) {
@@ -452,6 +514,31 @@
         </a>
       </div>
     </header>
+    <!-- TBA切换卡片 -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">导航栏管理</h2>
+        <div class="tba-toggle-container">
+          <span class="tba-label">TBA切换:</span>
+          <div class="tba-buttons">
+            <button class="tba-btn active" data-type="grammar">
+              <i class="fas fa-code"></i> 语法
+            </button>
+            <button class="tba-btn" data-type="data_structure">
+              <i class="fas fa-sitemap"></i> 数据结构
+            </button>
+            <button class="tba-btn" data-type="ai_programming">
+              <i class="fas fa-robot"></i> AI编程
+            </button>
+            <button class="tba-btn" data-type="project">
+              <i class="fas fa-project-diagram"></i> 项目
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
     <!-- 主分类列表卡片 -->
     <div class="card">
       <div class="card-header">
@@ -962,10 +1049,185 @@
         }
     }
 
+    // ================= TBA切换功能 =================
+    let currentTbaType = 'grammar'; // 默认选中语法
+    
+    // 模拟不同TBA类型对应的分类数据
+    const tbaCategoryData = {
+      'grammar': {
+        mainCategories: [
+          { id: 1, name: '基础语法', slug: 'basic-grammar', order: 1, is_enabled: true },
+          { id: 2, name: '控制语句', slug: 'control-statements', order: 2, is_enabled: true },
+          { id: 3, name: '高级特性', slug: 'advanced-features', order: 3, is_enabled: true },
+          { id: 4, name: '函数编程', slug: 'functional-programming', order: 4, is_enabled: true }
+        ],
+        subCategories: [
+          { id: 1, parent_id: 1, parent_name: '基础语法', name: '变量和数据类型', slug: 'variables', is_enabled: true },
+          { id: 2, parent_id: 1, parent_name: '基础语法', name: '运算符', slug: 'operators', is_enabled: true },
+          { id: 3, parent_id: 1, parent_name: '基础语法', name: '字符串操作', slug: 'string-operations', is_enabled: true },
+          { id: 4, parent_id: 2, parent_name: '控制语句', name: '条件语句', slug: 'conditional-statements', is_enabled: true },
+          { id: 5, parent_id: 2, parent_name: '控制语句', name: '循环语句', slug: 'loop-statements', is_enabled: true },
+          { id: 6, parent_id: 2, parent_name: '控制语句', name: '异常处理', slug: 'exception-handling', is_enabled: true },
+          { id: 7, parent_id: 3, parent_name: '高级特性', name: '装饰器', slug: 'decorators', is_enabled: true },
+          { id: 8, parent_id: 3, parent_name: '高级特性', name: '生成器', slug: 'generators', is_enabled: true },
+          { id: 9, parent_id: 3, parent_name: '高级特性', name: '上下文管理器', slug: 'context-managers', is_enabled: true },
+          { id: 10, parent_id: 4, parent_name: '函数编程', name: 'Lambda函数', slug: 'lambda-functions', is_enabled: true },
+          { id: 11, parent_id: 4, parent_name: '函数编程', name: '高阶函数', slug: 'higher-order-functions', is_enabled: true },
+          { id: 12, parent_id: 4, parent_name: '函数编程', name: '闭包', slug: 'closures', is_enabled: true }
+        ]
+      },
+      'data_structure': {
+        mainCategories: [
+          { id: 4, name: '基础数据结构', slug: 'basic-data-structures', order: 1, is_enabled: true },
+          { id: 5, name: '高级数据结构', slug: 'advanced-data-structures', order: 2, is_enabled: true }
+        ],
+        subCategories: [
+          { id: 6, parent_id: 4, parent_name: '基础数据结构', name: '列表和元组', slug: 'lists-tuples', is_enabled: true },
+          { id: 7, parent_id: 4, parent_name: '基础数据结构', name: '字典和集合', slug: 'dicts-sets', is_enabled: true },
+          { id: 8, parent_id: 5, parent_name: '高级数据结构', name: '堆栈和队列', slug: 'stacks-queues', is_enabled: true },
+          { id: 9, parent_id: 5, parent_name: '高级数据结构', name: '树和图', slug: 'trees-graphs', is_enabled: true }
+        ]
+      },
+      'ai_programming': {
+        mainCategories: [
+          { id: 6, name: '机器学习基础', slug: 'ml-basics', order: 1, is_enabled: true },
+          { id: 7, name: '深度学习', slug: 'deep-learning', order: 2, is_enabled: true },
+          { id: 8, name: '自然语言处理', slug: 'nlp', order: 3, is_enabled: true }
+        ],
+        subCategories: [
+          { id: 10, parent_id: 6, parent_name: '机器学习基础', name: '数据预处理', slug: 'data-preprocessing', is_enabled: true },
+          { id: 11, parent_id: 6, parent_name: '机器学习基础', name: '模型训练', slug: 'model-training', is_enabled: true },
+          { id: 12, parent_id: 7, parent_name: '深度学习', name: '神经网络', slug: 'neural-networks', is_enabled: true },
+          { id: 13, parent_id: 7, parent_name: '深度学习', name: '卷积神经网络', slug: 'cnn', is_enabled: true },
+          { id: 14, parent_id: 8, parent_name: '自然语言处理', name: '文本分析', slug: 'text-analysis', is_enabled: true }
+        ]
+      },
+      'project': {
+        mainCategories: [
+          { id: 9, name: 'Web开发项目', slug: 'web-projects', order: 1, is_enabled: true },
+          { id: 10, name: '数据分析项目', slug: 'data-analysis-projects', order: 2, is_enabled: true },
+          { id: 11, name: 'AI应用项目', slug: 'ai-applications', order: 3, is_enabled: true }
+        ],
+        subCategories: [
+          { id: 15, parent_id: 9, parent_name: 'Web开发项目', name: 'Django网站', slug: 'django-website', is_enabled: true },
+          { id: 16, parent_id: 9, parent_name: 'Web开发项目', name: 'Flask API', slug: 'flask-api', is_enabled: true },
+          { id: 17, parent_id: 10, parent_name: '数据分析项目', name: '数据可视化', slug: 'data-visualization', is_enabled: true },
+          { id: 18, parent_id: 10, parent_name: '数据分析项目', name: '统计分析', slug: 'statistical-analysis', is_enabled: true },
+          { id: 19, parent_id: 11, parent_name: 'AI应用项目', name: '聊天机器人', slug: 'chatbot', is_enabled: true },
+          { id: 20, parent_id: 11, parent_name: 'AI应用项目', name: '图像识别', slug: 'image-recognition', is_enabled: true }
+        ]
+      }
+    };
+    
+    function setupTbaToggle() {
+      const tbaButtons = document.querySelectorAll('.tba-btn');
+      
+      tbaButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // 移除所有按钮的active状态
+          tbaButtons.forEach(b => b.classList.remove('active'));
+          // 添加当前按钮的active状态
+          btn.classList.add('active');
+          
+          // 更新当前选中的类型
+          currentTbaType = btn.dataset.type;
+          
+          // 显示切换提示
+          const typeNames = {
+            'grammar': '语法',
+            'data_structure': '数据结构', 
+            'ai_programming': 'AI编程',
+            'project': '项目'
+          };
+          
+          showToast(`已切换到${typeNames[currentTbaType]}模式`);
+          
+          // 根据TBA类型加载对应的分类数据
+          loadTbaCategoryData(currentTbaType);
+        });
+      });
+    }
+    
+    // 根据TBA类型加载对应的分类数据
+    function loadTbaCategoryData(tbaType) {
+      const data = tbaCategoryData[tbaType];
+      if (!data) return;
+      
+      // 更新主分类数据
+      updateMainCategoryTable(data.mainCategories);
+      
+      // 更新子分类数据
+      updateSubCategoryTable(data.subCategories);
+      
+      // 更新主分类缓存（用于子分类下拉选择）
+      mainCategoriesCache = data.mainCategories;
+    }
+    
+    // 更新主分类表格
+    function updateMainCategoryTable(categories) {
+      const tableBody = document.getElementById('mainCategoryTableBody');
+      tableBody.innerHTML = '';
+      
+      if (categories.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">暂无数据</td></tr>`;
+        return;
+      }
+      
+      categories.forEach(cat => {
+        const statusBadge = cat.is_enabled ? `<span class="badge badge-success">已启用</span>` : `<span class="badge badge-warning">未启用</span>`;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${cat.id}</td>
+          <td>${cat.name}</td>
+          <td>${cat.slug}</td>
+          <td>${cat.order}</td>
+          <td>${statusBadge}</td>
+          <td>
+            <div class="btn-group">
+              <button class="btn btn-outline btn-sm" onclick="editCategory(${cat.id})"><i class="fas fa-edit"></i> 编辑</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteCategory(${cat.id})"><i class="fas fa-trash-alt"></i> 删除</button>
+            </div>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+    
+    // 更新子分类表格
+    function updateSubCategoryTable(categories) {
+      const tableBody = document.getElementById('subCategoryTableBody');
+      tableBody.innerHTML = '';
+      
+      if (categories.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">暂无数据</td></tr>`;
+        return;
+      }
+      
+      categories.forEach(cat => {
+        const statusBadge = cat.is_enabled ? `<span class="badge badge-success">已启用</span>` : `<span class="badge badge-warning">未启用</span>`;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${cat.id}</td>
+          <td>${cat.parent_name}</td>
+          <td>${cat.name}</td>
+          <td>${cat.slug}</td>
+          <td>${statusBadge}</td>
+          <td>
+            <div class="btn-group">
+              <button class="btn btn-outline btn-sm" onclick="editSubCategory(${cat.id})"><i class="fas fa-edit"></i> 编辑</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteSubCategory(${cat.id})"><i class="fas fa-trash-alt"></i> 删除</button>
+            </div>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+    
     // ================= 初始加载 =================
     document.addEventListener('DOMContentLoaded', () => {
-      fetchMainCategories(1);
-      fetchSubCategories(1);
+      setupTbaToggle(); // 初始化TBA切换功能
+      // 加载默认的语法分类数据
+      loadTbaCategoryData('grammar');
     });
   </script>
 </body>

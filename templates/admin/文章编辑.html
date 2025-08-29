@@ -379,37 +379,7 @@
             color: var(--text-color);
             font-size: 0.85rem;
         }
-        /* 内容类型选择器 */
-        .content-type-tabs {
-            display: flex;
-            background: var(--bg-color);
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-        }
-        .content-type-tab {
-            flex: 1;
-            padding: 0.5rem 0.75rem;
-            border: none;
-            background: transparent;
-            color: var(--text-color);
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 0.8rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .content-type-tab.active {
-            background: var(--primary-color);
-            color: white;
-        }
-        .content-type-tab:not(.active):hover {
-            background: rgba(67, 97, 238, 0.05);
-            color: var(--primary-color);
-        }
+
                  /* 编辑器卡片 - 新的设计 */
          .editor-card {
              flex: 1;
@@ -915,23 +885,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">内容类型</label>
-                        <div class="content-type-tabs">
-                            <button class="content-type-tab active" data-type="grammar">
-                                <i class="fas fa-graduation-cap"></i>
-                                语法
-                            </button>
-                            <button class="content-type-tab" data-type="data-structure">
-                                <i class="fas fa-sitemap"></i>
-                                数据结构
-                            </button>
-                            <button class="content-type-tab" data-type="ai-programming">
-                                <i class="fas fa-robot"></i>
-                                AI编程
-                            </button>
-                        </div>
-                    </div>
+
                     <div class="form-group">
                         <label class="form-label">标签</label>
                         <div class="tag-input-container" id="tag-container">
@@ -1285,31 +1239,9 @@
                     document.getElementById('article-summary').value = data.summary || '';
                     // 阅读时间字段已移除，使用默认值
                     
-                    // 设置内容类型 - 如果是教程模式，强制设置为TUTORIAL
-                    document.querySelectorAll('.content-type-tab').forEach(tab => {
-                        tab.classList.remove('active');
-                    });
+
                     
-                    if (isCourse) {
-                        // 教程模式，强制设置为语法类型
-                        document.querySelector('[data-type="grammar"]').classList.add('active');
-                        // 同时隐藏内容类型选择，因为教程只能是语法类型
-                        document.querySelector('.content-type-tabs').style.display = 'none';
-                    } else {
-                        // 普通文章模式，根据实际内容类型设置
-                        document.querySelector('.content-type-tabs').style.display = 'flex';
-                        if (data.content_type) {
-                            const contentTypeMap = {
-                                'AI': 'ai-programming',      // 修复：AI -> ai-programming
-                                'DS': 'data-structure',      // 修复：DS -> data-structure
-                                'GR': 'grammar'              // 修复：GR -> grammar
-                            };
-                            const tabId = contentTypeMap[data.content_type] || 'grammar';
-                            document.querySelector(`[data-type="${tabId}"]`).classList.add('active');
-                        } else {
-                            document.querySelector('[data-type="grammar"]').classList.add('active');
-                        }
-                    }
+
                     
                     // 设置分类 - 确保分类数据正确加载
                     if (data.category_id) {
@@ -1428,7 +1360,7 @@
                                 <p><strong>调试信息：</strong></p>
                                 <ul style="text-align: left; margin-left: 20px;">
                                     <li>文章ID: ${articleId}</li>
-                                    <li>内容类型: ${isCourse ? '教程' : '文章'}</li>
+
                                     <li>API地址: ${apiUrl}</li>
                                 </ul>
                                 <p><strong>${errorDetails}</strong></p>
@@ -1761,13 +1693,7 @@
                     switchEditorTab(this.dataset.tab);
                 });
             });
-            // 内容类型标签页
-            document.querySelectorAll('.content-type-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    document.querySelectorAll('.content-type-tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
+
             // 标签输入
             const tagInput = document.getElementById('tag-input');
             tagInput.addEventListener('keypress', function(e) {
@@ -1846,25 +1772,7 @@
             const categoryId = document.getElementById('sub-category').value;
             const readTimeMinutes = EDITOR_CONFIG.DEFAULT_READ_TIME;
             
-            // 获取内容类型
-            const urlParams = new URLSearchParams(window.location.search);
-            const typeParam = urlParams.get('type');
-            let contentType = 'GR';  // 修复：默认值改为'GR'
-            
-            if (typeParam === 'course' || (isEditMode && window.location.href.includes('type=course'))) {
-                contentType = 'GR';  // 修复：教程类型改为'GR'
-            } else {
-                document.querySelectorAll('.content-type-tab').forEach(tab => {
-                    if (tab.classList.contains('active')) {
-                        const typeMap = {
-                            'grammar': 'GR',           // 修复：grammar -> GR
-                            'data-structure': 'DS',    // 修复：data-structure -> DS
-                            'ai-programming': 'AI'     // 修复：ai-programming -> AI
-                        };
-                        contentType = typeMap[tab.dataset.type] || 'GR';  // 修复：默认值改为'GR'
-                    }
-                });
-            }
+
             
             const contentHtml = isEditorReady('richText') ? tinymceEditor.getContent() : '';
             const contentCode = isEditorReady('code') ? monacoEditor.getValue() : '';
@@ -1874,7 +1782,6 @@
                 title: title,
                 subtitle: subtitle,
                 summary: summary,
-                content_type: contentType,
                 read_time_minutes: parseInt(readTimeMinutes),
                 category_id: categoryId || null,
                 content_html: contentHtml,
@@ -2257,27 +2164,7 @@
             const categoryId = document.getElementById('sub-category').value;
             const readTimeMinutes = EDITOR_CONFIG.DEFAULT_READ_TIME;
             
-            // 获取内容类型 - 根据编辑模式决定
-            const urlParams = new URLSearchParams(window.location.search);
-            const typeParam = urlParams.get('type');
-            let contentType = 'GR'; // 默认为语法
-            
-            // 如果是教程编辑模式，强制为语法类型
-            if (typeParam === 'course' || (isEditMode && window.location.href.includes('type=course'))) {
-                contentType = 'GR';
-            } else {
-                // 普通文章模式，根据选择的内容类型
-                document.querySelectorAll('.content-type-tab').forEach(tab => {
-                    if (tab.classList.contains('active')) {
-                        const typeMap = {
-                            'grammar': 'GR',
-                            'data-structure': 'DS',
-                            'ai-programming': 'AI'
-                        };
-                        contentType = typeMap[tab.dataset.type] || 'GR';
-                    }
-                });
-            }
+
             
             // 获取富文本内容
             const contentHtml = isEditorReady('richText') ? tinymceEditor.getContent() : '';
@@ -2291,7 +2178,6 @@
                 title: title,
                 subtitle: subtitle,
                 summary: summary,
-                content_type: contentType,
                 read_time_minutes: parseInt(readTimeMinutes),
                 category_id: categoryId || null,
                 content_html: contentHtml,
