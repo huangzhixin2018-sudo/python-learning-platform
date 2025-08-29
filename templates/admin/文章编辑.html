@@ -2048,7 +2048,7 @@
                 
                 const code = codeElement.textContent || '';
                 if (!code.trim()) {
-                    Swal.fire('提示', '没有可复制的代码内容', 'warning');
+                    // 静默处理，不显示弹窗
                     return;
                 }
                 
@@ -2066,7 +2066,7 @@
                 }
             } catch (error) {
                 console.error('复制代码失败:', error);
-                Swal.fire('错误', '复制代码失败: ' + error.message, 'error');
+                // 静默处理，不显示弹窗
             }
         }
         
@@ -2092,7 +2092,7 @@
                 }
             } catch (error) {
                 console.error('回退复制方法失败:', error);
-                Swal.fire('错误', '复制失败，请手动选择代码复制', 'error');
+                // 静默处理，不显示弹窗
             }
         }
         
@@ -2107,13 +2107,14 @@
                 button.style.color = '';
             }, 2000);
             
-            // 可选：显示成功提示
+            // 显示简洁的成功提示
             Swal.fire({
-                title: '复制成功！',
-                text: '代码已复制到剪贴板',
+                title: '复制成功',
                 icon: 'success',
-                timer: 1500,
-                showConfirmButton: false
+                timer: 1000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
             });
         }
 
@@ -2130,71 +2131,66 @@
                 // 验证必填字段
                 const validationErrors = [];
             
-            // 验证标题
-            const title = document.getElementById('title').value.trim();
-            if (!title) {
-                validationErrors.push('文章标题不能为空');
-            }
-            
-            // 验证摘要
-            const summary = document.getElementById('article-summary').value.trim();
-            if (!summary) {
-                validationErrors.push('文章摘要不能为空');
-            }
-            
-            // 验证分类选择
-            const categoryId = document.getElementById('sub-category').value;
-            if (!categoryId) {
-                validationErrors.push('请选择文章分类');
-            }
-            
-            // 验证内容
-            let hasContent = false;
-            let richTextContent = '';
-            let codeContent = '';
-            
-            if (isEditorReady('richText')) {
-                richTextContent = tinymceEditor.getContent().trim();
-                if (richTextContent) hasContent = true;
-            }
-            if (isEditorReady('code')) {
-                codeContent = monacoEditor.getValue().trim();
-                if (codeContent) hasContent = true;
-            }
-            
-            if (!hasContent) {
-                validationErrors.push('请至少添加一些内容（富文本或代码）');
-            }
-            
-            // 如果有验证错误，显示所有错误
-            if (validationErrors.length > 0) {
-                Swal.fire({
-                    title: '保存失败',
-                    html: '<div style="text-align: left;">' + 
-                          validationErrors.map(error => `• ${error}`).join('<br>') + 
-                          '</div>',
-                    icon: 'warning',
-                    confirmButtonText: '确定'
-                });
-                return;
-            }
-            
-            // 显示确认对话框
-            Swal.fire({
-                title: '确认保存',
-                text: '确定要保存这篇文章吗？',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: '保存',
-                cancelButtonText: '取消'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    saveArticle();
+                // 验证标题
+                const title = document.getElementById('title').value.trim();
+                if (!title) {
+                    validationErrors.push('文章标题不能为空');
                 }
-            });
+                
+                // 验证摘要
+                const summary = document.getElementById('article-summary').value.trim();
+                if (!summary) {
+                    validationErrors.push('文章摘要不能为空');
+                }
+                
+                // 验证分类选择
+                const categoryId = document.getElementById('sub-category').value;
+                if (!categoryId) {
+                    validationErrors.push('请选择文章分类');
+                }
+                
+                // 验证内容
+                let hasContent = false;
+                let richTextContent = '';
+                let codeContent = '';
+                
+                if (isEditorReady('richText')) {
+                    richTextContent = tinymceEditor.getContent().trim();
+                    if (richTextContent) hasContent = true;
+                }
+                if (isEditorReady('code')) {
+                    codeContent = monacoEditor.getValue().trim();
+                    if (codeContent) hasContent = true;
+                }
+                
+                if (!hasContent) {
+                    validationErrors.push('请至少添加一些内容（富文本或代码）');
+                }
+                
+                // 如果有验证错误，显示所有错误
+                if (validationErrors.length > 0) {
+                    Swal.fire({
+                        title: '保存失败',
+                        html: '<div style="text-align: left;">' + 
+                              validationErrors.map(error => `• ${error}`).join('<br>') + 
+                              '</div>',
+                        icon: 'warning',
+                        confirmButtonText: '确定'
+                    });
+                    return;
+                }
+                
+                // 直接保存，不显示确认对话框
+                saveArticle();
+                
             } catch (error) {
                 console.error('保存函数执行错误:', error);
-                alert(`保存函数执行错误: ${error.message}`);
+                Swal.fire({
+                    title: '保存失败',
+                    text: `保存函数执行错误: ${error.message}`,
+                    icon: 'error',
+                    confirmButtonText: '确定'
+                });
             }
         }
         
@@ -2350,13 +2346,15 @@
                         window.history.pushState({}, '', newUrl);
                     }
                     
-                    Swal.fire({
-                        title: '保存成功！',
-                        text: data.message || '文章已成功保存',
-                        icon: 'success',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
+                                         // 显示简洁的成功提示
+                     Swal.fire({
+                         title: '保存成功',
+                         icon: 'success',
+                         timer: 1500,
+                         showConfirmButton: false,
+                         toast: true,
+                         position: 'top-end'
+                     });
                     
                     // 可以选择跳转到列表页
                     // window.location.href = '/manage/course-management/';
@@ -2431,15 +2429,15 @@
                         console.log('代码格式化完成');
                     } else {
                         console.warn('格式化操作不可用');
-                        Swal.fire('提示', '代码格式化功能不可用', 'warning');
+                        // 静默处理，不显示弹窗
                     }
                 } else {
                     console.warn('代码编辑器未就绪');
-                    Swal.fire('提示', '代码编辑器未就绪，请稍后重试', 'warning');
+                    // 静默处理，不显示弹窗
                 }
             } catch (error) {
                 console.error('代码格式化失败:', error);
-                Swal.fire('错误', '代码格式化失败: ' + error.message, 'error');
+                // 静默处理，不显示弹窗
             }
         }
         
@@ -2448,28 +2446,18 @@
                 if (isEditorReady('code')) {
                     const code = monacoEditor.getValue() || '';
                     if (code.trim()) {
-                        Swal.fire({
-                            title: '代码运行',
-                            html: `
-                                <div style="text-align: left;">
-                                    <p><strong>代码内容：</strong></p>
-                                    <pre style="background: #f8f9fa; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem;">${escapeHtml(code)}</pre>
-                                    <p style="margin-top: 1rem; color: #666;">代码运行功能需要后端支持，目前仅作预览。</p>
-                                </div>
-                            `,
-                            icon: 'info',
-                            confirmButtonText: '确定'
-                        });
+                        // 静默处理，不显示弹窗
+                        console.log('代码运行功能需要后端支持，目前仅作预览');
                     } else {
-                        Swal.fire('提示', '请先输入代码内容', 'warning');
+                        // 静默处理，不显示弹窗
                     }
                 } else {
                     console.warn('代码编辑器未就绪');
-                    Swal.fire('提示', '代码编辑器未就绪，请稍后重试', 'warning');
+                    // 静默处理，不显示弹窗
                 }
             } catch (error) {
                 console.error('代码运行失败:', error);
-                Swal.fire('错误', '代码运行失败: ' + error.message, 'error');
+                // 静默处理，不显示弹窗
             }
         }
         function insertCodeBlock() {
@@ -2506,11 +2494,11 @@
                     console.log('代码块插入成功');
                 } else {
                     console.warn('富文本编辑器未就绪');
-                    Swal.fire('提示', '富文本编辑器未就绪，请稍后重试', 'warning');
+                    // 静默处理，不显示弹窗
                 }
             } catch (error) {
                 console.error('插入代码块失败:', error);
-                Swal.fire('错误', '插入代码块失败: ' + error.message, 'error');
+                // 静默处理，不显示弹窗
             }
         }
     </script>
