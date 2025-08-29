@@ -856,10 +856,6 @@
                     <i class="fas fa-save"></i>
                     保存文章
                 </button>
-                <button class="btn btn-outline" id="test-save-button" style="margin-left: 10px;">
-                    <i class="fas fa-bug"></i>
-                    测试保存
-                </button>
             </div>
         </nav>
         
@@ -1072,60 +1068,7 @@
             };
         }
         
-                // 测试保存功能
-        function testSave() {
-            console.log('=== testSave函数被调用 ===');
-            try {
-                console.log('1. 测试基本功能');
-                alert('测试保存功能被调用');
-                
-                console.log('2. 测试CSRF令牌');
-                const csrfToken = getCsrfToken();
-                console.log('CSRF令牌:', csrfToken);
-                
-                console.log('3. 测试基本数据获取');
-                const title = document.getElementById('title').value;
-                const summary = document.getElementById('article-summary').value;
-                console.log('标题:', title);
-                console.log('摘要:', summary);
-                
-                console.log('4. 测试API调用');
-                fetch('/api/articles/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
-                    },
-                    body: JSON.stringify({
-                        title: title || '测试标题',
-                        summary: summary || '测试摘要',
-                        category_id: 1,
-                        content_html: '<p>测试内容</p>',
-                        content_code: 'print("Hello World")',
-                        code_language: 'python',
-                        content_type: 'GR'
-                    })
-                })
-                .then(response => {
-                    console.log('API响应状态:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('API响应数据:', data);
-                    alert(`API测试完成\n状态: ${data.status}\n消息: ${data.message}`);
-                })
-                .catch(error => {
-                    console.error('API测试失败:', error);
-                    alert(`API测试失败: ${error.message}`);
-                });
-                
-                console.log('=== testSave函数执行完成 ===');
-            } catch (error) {
-                console.error('=== testSave函数执行错误 ===');
-                console.error('错误详情:', error);
-                alert(`testSave函数执行错误: ${error.message}`);
-            }
-        }
+        
         
         // 获取CSRF令牌
         function getCsrfToken() {
@@ -1159,9 +1102,34 @@
             console.error('错误消息:', e.message);
         });
         
+        // 检查SweetAlert2是否可用
+        function checkSweetAlert2() {
+            if (typeof Swal === 'undefined') {
+                console.error('SweetAlert2未加载，使用原生alert');
+                // 创建一个简单的alert替代函数
+                window.Swal = {
+                    fire: function(options) {
+                        alert(options.title + '\n' + (options.text || ''));
+                        return Promise.resolve({ isConfirmed: true });
+                    },
+                    close: function() {
+                        // 原生alert无法关闭，忽略
+                    },
+                    showLoading: function() {
+                        // 显示加载提示
+                    }
+                };
+            } else {
+                console.log('✓ SweetAlert2已加载');
+            }
+        }
+        
         // 初始化编辑器
         document.addEventListener('DOMContentLoaded', function() {
             console.log('=== DOMContentLoaded - 开始初始化编辑器 ===');
+            
+            // 检查SweetAlert2
+            checkSweetAlert2();
             
             // 添加错误处理确保编辑器初始化
             try {
@@ -1860,19 +1828,7 @@
                     console.error('未找到保存按钮');
                 }
                 
-                // 绑定测试按钮事件
-                const testButton = document.getElementById('test-save-button');
-                if (testButton) {
-                    console.log('找到测试按钮，绑定事件监听器');
-                    testButton.addEventListener('click', function(e) {
-                        console.log('测试按钮被点击（通过事件监听器）');
-                        e.preventDefault();
-                        e.stopPropagation();
-                        testSave();
-                    });
-                } else {
-                    console.error('未找到测试按钮');
-                }
+
         }
         
         // 自动保存功能
@@ -2168,7 +2124,7 @@
          }
         
         function saveToList() {
-            console.log('=== saveToList函数被调用 ===');
+            console.log('保存文章函数被调用');
             
             try {
                 // 验证必填字段
@@ -2237,8 +2193,7 @@
                 }
             });
             } catch (error) {
-                console.error('=== saveToList函数执行错误 ===');
-                console.error('错误详情:', error);
+                console.error('保存函数执行错误:', error);
                 alert(`保存函数执行错误: ${error.message}`);
             }
         }
@@ -2283,7 +2238,7 @@
         
         // 保存文章到后端
         function saveArticle() {
-            console.log('=== saveArticle函数被调用 ===');
+            console.log('开始保存文章到后端');
             
             try {
             
@@ -2361,9 +2316,7 @@
             // 发送请求
             console.log('发送请求到:', url);
             console.log('请求方法:', method);
-            console.log('请求数据:', articleData);
             console.log('CSRF令牌:', getCsrfToken());
-            console.log('=== 开始发送API请求 ===');
             
             fetch(url, {
                 method: method,
@@ -2457,8 +2410,7 @@
                 });
             });
             } catch (error) {
-                console.error('=== saveArticle函数执行错误 ===');
-                console.error('错误详情:', error);
+                console.error('保存文章函数执行错误:', error);
                 Swal.close();
                 Swal.fire({
                     title: '保存失败',
