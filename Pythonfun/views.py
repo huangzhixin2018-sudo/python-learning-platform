@@ -40,23 +40,30 @@ def index_view(request):
     main_categories = MainCategory.objects.filter(is_enabled=True).order_by('order')
     category_tree = []
     for main_category in main_categories:
-        sub_categories = SubCategory.objects.filter(
+        # 获取该主分类下有语法类型文章的子分类
+        sub_categories_with_articles = SubCategory.objects.filter(
             parent=main_category,
-            is_enabled=True
-        ).order_by('id')
-        sub_categories_with_count = []
-        for sub in sub_categories:
-            article_count = Article.objects.filter(
-                category=sub,
-                content_type=Article.ContentType.GRAMMAR,
-                is_published=True
-            ).count()
-            sub.article_count = article_count
-            sub_categories_with_count.append(sub)
-        category_tree.append({
-            'main_category': main_category,
-            'sub_categories': sub_categories_with_count
-        })
+            is_enabled=True,
+            article__content_type=Article.ContentType.GRAMMAR,
+            article__is_published=True
+        ).distinct().order_by('id')
+        
+        # 只有当主分类下有文章时，才添加到分类树中
+        if sub_categories_with_articles.exists():
+            sub_categories_with_count = []
+            for sub in sub_categories_with_articles:
+                article_count = Article.objects.filter(
+                    category=sub,
+                    content_type=Article.ContentType.GRAMMAR,
+                    is_published=True
+                ).count()
+                sub.article_count = article_count
+                sub_categories_with_count.append(sub)
+            
+            category_tree.append({
+                'main_category': main_category,
+                'sub_categories': sub_categories_with_count
+            })
     
     # 获取当前文章（用于显示默认文章）
     current_article = Article.objects.filter(
@@ -749,23 +756,30 @@ def data_structure_view(request):
     main_categories = MainCategory.objects.filter(is_enabled=True).order_by('order')
     category_tree = []
     for main_category in main_categories:
-        sub_categories = SubCategory.objects.filter(
+        # 获取该主分类下有数据结构类型文章的子分类
+        sub_categories_with_articles = SubCategory.objects.filter(
             parent=main_category,
-            is_enabled=True
-        ).order_by('id')
-        sub_categories_with_count = []
-        for sub in sub_categories:
-            article_count = Article.objects.filter(
-                category=sub,
-                content_type=Article.ContentType.DATA_STRUCTURE,
-                is_published=True
-            ).count()
-            sub.article_count = article_count
-            sub_categories_with_count.append(sub)
-        category_tree.append({
-            'main_category': main_category,
-            'sub_categories': sub_categories_with_count
-        })
+            is_enabled=True,
+            article__content_type=Article.ContentType.DATA_STRUCTURE,
+            article__is_published=True
+        ).distinct().order_by('id')
+        
+        # 只有当主分类下有文章时，才添加到分类树中
+        if sub_categories_with_articles.exists():
+            sub_categories_with_count = []
+            for sub in sub_categories_with_articles:
+                article_count = Article.objects.filter(
+                    category=sub,
+                    content_type=Article.ContentType.DATA_STRUCTURE,
+                    is_published=True
+                ).count()
+                sub.article_count = article_count
+                sub_categories_with_count.append(sub)
+            
+            category_tree.append({
+                'main_category': main_category,
+                'sub_categories': sub_categories_with_count
+            })
     
     # 获取当前文章（用于显示默认文章）
     current_article = Article.objects.filter(
@@ -800,23 +814,30 @@ def ai_programming_view(request):
     main_categories = MainCategory.objects.filter(is_enabled=True).order_by('order')
     category_tree = []
     for main_category in main_categories:
-        sub_categories = SubCategory.objects.filter(
+        # 获取该主分类下有AI编程类型文章的子分类
+        sub_categories_with_articles = SubCategory.objects.filter(
             parent=main_category,
-            is_enabled=True
-        ).order_by('id')
-        sub_categories_with_count = []
-        for sub in sub_categories:
-            article_count = Article.objects.filter(
-                category=sub,
-                content_type=Article.ContentType.AI_PROGRAMMING,
-                is_published=True
-            ).count()
-            sub.article_count = article_count
-            sub_categories_with_count.append(sub)
-        category_tree.append({
-            'main_category': main_category,
-            'sub_categories': sub_categories_with_count
-        })
+            is_enabled=True,
+            article__content_type=Article.ContentType.AI_PROGRAMMING,
+            article__is_published=True
+        ).distinct().order_by('id')
+        
+        # 只有当主分类下有文章时，才添加到分类树中
+        if sub_categories_with_articles.exists():
+            sub_categories_with_count = []
+            for sub in sub_categories_with_articles:
+                article_count = Article.objects.filter(
+                    category=sub,
+                    content_type=Article.ContentType.AI_PROGRAMMING,
+                    is_published=True
+                ).count()
+                sub.article_count = article_count
+                sub_categories_with_count.append(sub)
+            
+            category_tree.append({
+                'main_category': main_category,
+                'sub_categories': sub_categories_with_count
+            })
     
     # 获取当前文章（用于显示默认文章）
     current_article = Article.objects.filter(
