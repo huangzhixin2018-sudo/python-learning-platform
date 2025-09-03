@@ -504,6 +504,8 @@ def article_detail_api(request, pk):
             'content_code': article.content_code,
             'code_language': article.code_language,
             'category_id': article.category.id if article.category else None,
+            'category_name': article.category.name if article.category else None,
+            'content_type': article.content_type,
             'tags': [tag.name for tag in article.tags.all()],
         }
         return JsonResponse(data)
@@ -542,6 +544,10 @@ def article_detail_api(request, pk):
             article.content_html = content_html
             article.content_code = content_code
             article.code_language = data.get('code_language', article.code_language)
+            
+            # 更新内容类型
+            if data.get('content_type'):
+                article.content_type = data.get('content_type')
             
             # 设置分类
             if data.get('category_id'):
