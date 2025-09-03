@@ -2354,10 +2354,14 @@
                         icon: 'success',
                         timer: 2000,
                         showConfirmButton: false
+                    }).then(() => {
+                        // 如果是教程编辑模式，跳转回教程管理页面
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const typeParam = urlParams.get('type');
+                        if (typeParam === 'course') {
+                            window.location.href = '/manage/course-management/';
+                        }
                     });
-                    
-                    // 可以选择跳转到列表页
-                    // window.location.href = '/manage/course-management/';
                 } else {
                     // 处理服务器返回的错误信息
                     let errorMessage = data.message || '未知错误';

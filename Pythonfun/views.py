@@ -649,6 +649,7 @@ def course_detail_api(request, pk):
             'code_language': course.code_language,
             'category_id': course.category.id if course.category else None,
             'category_name': course.category.name if course.category else None,
+            'content_type': course.content_type,
             'tags': [tag.name for tag in course.tags.all()],
             'is_published': course.is_published,
         }
@@ -659,6 +660,10 @@ def course_detail_api(request, pk):
         course.subtitle = data.get('subtitle', course.subtitle)
         course.summary = data.get('summary', course.summary)
         course.read_time_minutes = data.get('read_time_minutes', course.read_time_minutes)
+        
+        # 更新内容类型
+        if data.get('content_type'):
+            course.content_type = data.get('content_type')
 
         course.content_html = data.get('content_html', course.content_html)
         course.content_code = data.get('content_code', course.content_code)
