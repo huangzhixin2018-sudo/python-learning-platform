@@ -257,10 +257,15 @@
             {% endfor %}
           {% endfor %}
         </ul>
+        {% if not category_tree|length %}
+          <div style="text-align: center; padding: 2rem 1rem; color: var(--light-text);">
+            <p>暂无AI编程相关的分类</p>
+          </div>
+        {% endif %}
       {% else %}
-        <ul class="article-list">
-          <li><a href="#" class="active">在喧嚣中寻找宁静</a></li>
-        </ul>
+        <div style="text-align: center; padding: 2rem 1rem; color: var(--light-text);">
+          <p>暂无AI编程相关的分类</p>
+        </div>
       {% endif %}
     </aside>
 
@@ -274,14 +279,18 @@
         </article>
       {% else %}
         <article class="post active">
-          <h1>在喧嚣中寻找宁静</h1>
-          <div class="date">2025年4月5日</div>
-          <p>在这个信息爆炸的时代，我们每天被无数的通知、消息和任务包围。手机震动、邮件提醒、社交媒体的红点……仿佛只要稍作停顿，就会被世界抛下。然而，正是在这样的节奏中，我们更需要学会"暂停"。</p>
-          <p>心理学家米哈里·契克森米哈赖提出的"心流"（Flow）状态，正是源于专注与宁静。当我们不再被外界干扰，而是全情投入于某件事时，时间仿佛静止，内心也获得极大的满足。</p>
-          <blockquote>宁静不是逃避，而是一种更深层的参与。</blockquote>
-          <p>我曾在京都的一座小庭院中度过一个清晨。没有手机，没有电脑，只有风吹过竹叶的声音，和茶杯上升起的热气。那一刻，我忽然明白：真正的自由，不是做更多事，而是有能力不做任何事。</p>
-          <p>现代科技本应服务于人，但很多时候，我们反而成了它的仆人。想要找回内心的平静，或许可以从最简单的习惯开始：每天留出15分钟"无屏幕时间"，在公园散步，写日记，或只是安静地坐着。</p>
-          <p>生活不必总是高效。有时候，发呆、放空、甚至"浪费时间"，才是滋养灵魂的养分。</p>
+          <div class="welcome-section" style="text-align: center; padding: 2rem 0;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-color);">AI编程教程</h1>
+            <p style="font-size: 1.2rem; color: var(--light-text); margin-bottom: 2rem;">
+              暂无AI编程相关的教程文章
+            </p>
+            <div class="article-summary" style="background: #f8fafc; padding: 1.25rem; border-radius: 8px; border: 1px solid #e5e7eb;">
+              <p style="margin: 0; color: var(--text-color); font-size: 0.95rem; line-height: 1.6;">
+                目前还没有发布AI编程相关的教程文章。<br>
+                请稍后再来查看，或者联系管理员添加相关内容。
+              </p>
+            </div>
+          </div>
         </article>
       {% endif %}
     </section>
