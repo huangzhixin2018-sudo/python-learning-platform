@@ -805,20 +805,29 @@
     }
 
     async function deleteCategory(id) {
-        if (!confirm('确定要删除这个主分类吗？此操作不可撤销。')) return;
+        if (!confirm('确定要删除这个主分类吗？\n\n⚠️ 注意：如果该主分类下有子分类或文章，删除操作将被阻止。\n此操作不可撤销！')) return;
 
         try {
             const response = await fetch(`${mainCategoryApiUrl}${id}/`, {
                 method: 'DELETE',
                 headers: { 'X-CSRFToken': csrftoken }
             });
-            if (response.status !== 204) throw new Error('删除失败');
-            showToast('主分类已删除');
-            fetchMainCategories(currentMainPage);
-            // 修复：删除主分类后同时刷新子分类列表，避免显示不存在的主分类
-            fetchSubCategories(currentSubPage);
+            
+            if (response.ok) {
+                showToast('主分类已删除');
+                fetchMainCategories(currentMainPage);
+                // 修复：删除主分类后同时刷新子分类列表，避免显示不存在的主分类
+                fetchSubCategories(currentSubPage);
+            } else {
+                const errorData = await response.json();
+                if (errorData.message) {
+                    showToast(errorData.message, 'danger');
+                } else {
+                    showToast('删除失败：未知错误', 'danger');
+                }
+            }
         } catch (error) {
-            showToast(error.message, 'danger');
+            showToast('删除失败：' + error.message, 'danger');
         }
     }
 
@@ -947,18 +956,27 @@
     }
 
     async function deleteSubCategory(id) {
-        if (!confirm('确定要删除这个子分类吗？')) return;
+        if (!confirm('确定要删除这个子分类吗？\n\n⚠️ 注意：如果该子分类下有文章，删除操作将被阻止。\n此操作不可撤销！')) return;
 
         try {
             const response = await fetch(`${subCategoryApiUrl}${id}/`, {
                 method: 'DELETE',
                 headers: { 'X-CSRFToken': csrftoken }
             });
-            if (response.status !== 204) throw new Error('删除失败');
-            showToast('子分类已删除');
-            fetchSubCategories(currentSubPage);
+            
+            if (response.ok) {
+                showToast('子分类已删除');
+                fetchSubCategories(currentSubPage);
+            } else {
+                const errorData = await response.json();
+                if (errorData.message) {
+                    showToast(errorData.message, 'danger');
+                } else {
+                    showToast('删除失败：未知错误', 'danger');
+                }
+            }
         } catch (error) {
-            showToast(error.message, 'danger');
+            showToast('删除失败：' + error.message, 'danger');
         }
     }
 

@@ -291,6 +291,20 @@ def main_category_detail_api(request, pk):
         main_category.save()
         return JsonResponse({'status': 'success', 'message': 'Main category updated successfully'})
     elif request.method == 'DELETE':
+        # 检查是否有子分类
+        if main_category.subcategories.exists():
+            return JsonResponse({
+                'status': 'error', 
+                'message': '无法删除主分类：该主分类下还有子分类，请先删除所有子分类'
+            }, status=400)
+        
+        # 检查是否有相关文章
+        if Article.objects.filter(category__parent=main_category).exists():
+            return JsonResponse({
+                'status': 'error', 
+                'message': '无法删除主分类：该主分类下还有文章，请先删除所有文章'
+            }, status=400)
+        
         main_category.delete()
         return JsonResponse({'status': 'success', 'message': 'Main category deleted successfully'})
 
@@ -366,6 +380,13 @@ def sub_category_detail_api(request, pk):
         sub_category.save()
         return JsonResponse({'status': 'success', 'message': 'Sub category updated successfully'})
     elif request.method == 'DELETE':
+        # 检查是否有相关文章
+        if Article.objects.filter(category=sub_category).exists():
+            return JsonResponse({
+                'status': 'error', 
+                'message': '无法删除子分类：该子分类下还有文章，请先删除所有文章'
+            }, status=400)
+        
         sub_category.delete()
         return JsonResponse({'status': 'success', 'message': 'Sub category deleted successfully'})
 
