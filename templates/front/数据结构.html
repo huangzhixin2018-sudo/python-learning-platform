@@ -323,7 +323,8 @@
               {% if sub_category.slug %}
             <li class="menu-item">
               <a href="{% url 'Pythonfun:category' sub_category.slug %}?type=data-structure" 
-                 title="文章数量: {{ sub_category.article_count }}">
+                 title="文章数量: {{ sub_category.article_count }}"
+                 data-slug="{{ sub_category.slug }}">
                 {{ sub_category.name }}
               </a>
             </li>
@@ -403,5 +404,24 @@
       {% endif %}
     </main>
   </div>
+
+  <script>
+    // 侧边栏选中状态管理
+    document.addEventListener('DOMContentLoaded', function() {
+      // 获取当前URL中的分类slug
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentSlug = window.location.pathname.split('/').pop();
+      
+      if (currentSlug && currentSlug !== 'data-structure') {
+        // 查找对应的侧边栏链接并添加选中状态
+        const sidebarLinks = document.querySelectorAll('.sidebar-menu a[data-slug]');
+        sidebarLinks.forEach(link => {
+          if (link.getAttribute('data-slug') === currentSlug) {
+            link.parentElement.classList.add('active');
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>
