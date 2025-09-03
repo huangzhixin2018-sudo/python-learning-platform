@@ -1189,16 +1189,10 @@
             console.log('文章ID:', articleId);
             console.log('类型参数:', typeParam);
             
-            // 确保内容类型选择器正确显示
+            // 确保内容类型选择器始终显示
             const contentTypeTabs = document.querySelector('.content-type-tabs');
             if (contentTypeTabs) {
-                if (typeParam === 'course') {
-                    // 教程模式，隐藏内容类型选择器
-                    contentTypeTabs.style.display = 'none';
-                } else {
-                    // 普通文章模式，显示内容类型选择器
-                    contentTypeTabs.style.display = 'flex';
-                }
+                contentTypeTabs.style.display = 'flex';
             }
             
             if (articleId) {
@@ -1302,14 +1296,14 @@
                         tab.classList.remove('active');
                     });
                     
+                    // 确保内容类型选择器始终显示
+                    document.querySelector('.content-type-tabs').style.display = 'flex';
+                    
                     if (isCourse) {
                         // 教程模式，强制设置为语法类型
                         document.querySelector('[data-type="grammar"]').classList.add('active');
-                        // 同时隐藏内容类型选择，因为教程只能是语法类型
-                        document.querySelector('.content-type-tabs').style.display = 'none';
                     } else {
                         // 普通文章模式，根据实际内容类型设置
-                        document.querySelector('.content-type-tabs').style.display = 'flex';
                         if (data.content_type) {
                             const contentTypeMap = {
                                 'AI': 'ai-programming',      // 修复：AI -> ai-programming
