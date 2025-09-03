@@ -1189,6 +1189,18 @@
             console.log('文章ID:', articleId);
             console.log('类型参数:', typeParam);
             
+            // 确保内容类型选择器正确显示
+            const contentTypeTabs = document.querySelector('.content-type-tabs');
+            if (contentTypeTabs) {
+                if (typeParam === 'course') {
+                    // 教程模式，隐藏内容类型选择器
+                    contentTypeTabs.style.display = 'none';
+                } else {
+                    // 普通文章模式，显示内容类型选择器
+                    contentTypeTabs.style.display = 'flex';
+                }
+            }
+            
             if (articleId) {
                 currentArticleId = articleId;
                 isEditMode = true;
